@@ -6,7 +6,20 @@ class projectmodel {
   List<ProjectInstance> instances;
   int projectid;
 
-  projectmodel({required this.projectlogo, required this.projectname, required this.instances, required this.projectid});
+  projectmodel(
+      {required this.projectlogo,
+      required this.projectname,
+      required this.instances,
+      required this.projectid});
+
+  factory projectmodel.fromJson(Map<String, dynamic> json) {
+    return projectmodel(
+      projectlogo: json['projectlogo'],
+      projectname: json['projectname'],
+      instances: json['instances'],
+      projectid: json['projectid'],
+    );
+  }
 }
 
 class ProjectInstance {

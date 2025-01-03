@@ -13,6 +13,7 @@ import 'package:hrms/changepassword.dart';
 import 'package:hrms/custom_dialog.dart';
 import 'package:hrms/security_questions.dart';
 import 'package:hrms/security_screen.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -188,10 +189,10 @@ class _LoginPageState extends State<LoginPage> {
           // } else {
           employeeId = decodedToken['EmployeeId'];
           SharedPreferences emplyid = await SharedPreferences.getInstance();
-          await emplyid.setString("employeeId", employeeId!);
+          await emplyid.setString(SharedKeys.employeeId, employeeId!);
 
           SharedPreferences userId = await SharedPreferences.getInstance();
-          await userId.setString("UserId", userid!);
+          await userId.setString(SharedKeys.userId, userid!);
           print('EmployeeIdsaved');
 
           print('AccessToken: $accessToken');
@@ -249,7 +250,8 @@ class _LoginPageState extends State<LoginPage> {
     // });
     try {
       final url = Uri.parse(baseUrl + getselfempolyee + empolyeid);
-      print('SelfEmpolyeeUrl: $url');
+      print(
+          'xyz: $url'); // http://182.18.157.215/HRMS/API/hrmsapi/Employee/GetSelfEmployeeData/131
 
       final response = await http.get(
         url,
@@ -298,7 +300,7 @@ class _LoginPageState extends State<LoginPage> {
               DateFormat('yyyy-MM-dd HH:mm:ss').format(loginTime);
           print('formattedTimelogin:$formattedTime');
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('loginTime', formattedTime);
+          await prefs.setString(SharedKeys.loginTime, formattedTime);
           SharedPreferencesHelper.putBool(Constants.IS_LOGIN, true);
           setState(() {
             //      _isLoading = false;

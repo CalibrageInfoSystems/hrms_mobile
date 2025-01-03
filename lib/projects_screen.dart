@@ -97,29 +97,14 @@ class _ProjectsScreenState extends State<projects_screen> {
 
 // Check if project["projectLogo"] is not null
             if (project["projectLogo"] != null) {
-              // Get the value of project["projectLogo"]
               String? logoString = project["projectLogo"];
 
-              // Check if logoString is not null
               if (logoString != null) {
-                // Split logoString using ',' as the delimiter
                 List<String> parts = logoString.split(',');
 
-                // Check if parts has at least two elements
                 if (parts.length > 1) {
-                  // Assign the second part to base64Image
                   base64Image = parts[1];
                   bytes = Uint8List.fromList(base64.decode(base64Image));
-                  // setState(() {
-                  //   _isLoading = false;
-                  // });
-                  // if (base64Image != null) {
-                  //   base64Image = parts[1];
-                  //   bytes = Uint8List.fromList(base64.decode(base64Image));
-                  // } else {
-                  //   base64Image = '';
-                  //   bytes = Uint8List.fromList(base64.decode(""));
-                  // }
                 }
               }
             }

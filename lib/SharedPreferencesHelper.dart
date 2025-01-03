@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:hrms/shared_keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesHelper {
@@ -24,13 +25,13 @@ class SharedPreferencesHelper {
   static Future<void> saveCategories(Map<String, dynamic> jsonResponse) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final jsonString = jsonEncode(jsonResponse);
-    await prefs.setString('response_key', jsonString);
+    await prefs.setString(SharedKeys.responseKey, jsonString);
     print('Response saved to SharedPreferences: $jsonString');
   }
 
   static Future<Map<String, dynamic>?> getCategories() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('response_key');
+    final jsonString = prefs.getString(SharedKeys.responseKey);
     if (jsonString != null && jsonString.isNotEmpty) {
       final jsonMap = jsonDecode(jsonString);
       print('Get the Response: $jsonString');

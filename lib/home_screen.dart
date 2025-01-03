@@ -10,6 +10,7 @@ import 'package:hrms/apply_leave.dart';
 import 'package:hrms/personal_details.dart';
 import 'package:hrms/projects_screen.dart';
 import 'package:hrms/test_apply_leave.dart';
+import 'package:hrms/test_projects.dart';
 import 'package:ntp/ntp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -360,6 +361,29 @@ class _home_screenState extends State<home_screen>
                           context,
                           MaterialPageRoute(
                               builder: (context) => TestApplyLeave()),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: SvgPicture.asset(
+                        'assets/atten.svg',
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        'Test Projects',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'hind_semibold',
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => TestProjectsScreen()),
                         );
                       },
                     ),

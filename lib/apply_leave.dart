@@ -3400,6 +3400,67 @@ class _apply_leaveeState extends State<apply_leave> {
                             },
                             child: Container(
                               width: MediaQuery.of(context).size.width,
+                              clipBehavior: Clip.antiAliasWithSaveLayer,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: const Color(0xFFf15f22), width: 1.5),
+                                borderRadius: BorderRadius.circular(5.0),
+                                color:
+                                    Colors.white, // Add white background color
+                              ),
+                              child: AbsorbPointer(
+                                child: SizedBox(
+                                  child: TextFormField(
+                                    controller: _todateController,
+                                    enabled: !isChecked && fromDateSelected,
+                                    style: const TextStyle(
+                                      fontFamily: 'Calibri',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'To Date',
+                                      hintStyle: const TextStyle(
+                                        color: Colors.black54,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Calibri',
+                                      ),
+                                      // contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 16.0, vertical: 15.0),
+                                      // Adjust padding as needed
+                                      suffixIcon: const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Icon(
+                                          Icons.calendar_today,
+                                          // Replace with your desired icon
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                      /*  border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
+                                      ), */
+                                      filled: true,
+                                      fillColor: !isChecked && fromDateSelected
+                                          ? Colors.white
+                                          : Colors.grey[
+                                              300], // Add this line to change background color
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            /* 
+                             Container(
+                              width: MediaQuery.of(context).size.width,
+                              clipBehavior: Clip.antiAlias,
                               decoration: BoxDecoration(
                                 border: Border.all(
                                     color: Color(0xFFf15f22), width: 1.5),
@@ -3418,6 +3479,18 @@ class _apply_leaveeState extends State<apply_leave> {
                                       fontWeight: FontWeight.w300,
                                     ),
                                     decoration: InputDecoration(
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
+                                      ),
+                                      errorBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
+                                      ),
                                       hintText: 'To Date',
                                       hintStyle: TextStyle(
                                         color: Colors.black54,
@@ -3448,6 +3521,7 @@ class _apply_leaveeState extends State<apply_leave> {
                                 ),
                               ),
                             ),
+                       */
                           ),
                         ),
                       ),
