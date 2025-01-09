@@ -2,24 +2,27 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/styles.dart';
+import 'package:intl/intl.dart';
 
 class Commonutils {
   static Future<void> launchDatePicker(
     BuildContext context, {
     DateTime? initialDate,
+    required DateTime firstDate,
     Function(DateTime? pickedDay)? onDateSelected,
     bool Function(DateTime)? selectableDayPredicate,
   }) async {
     final DateTime currentDate = DateTime.now();
-    final DateTime firstDate = DateTime(currentDate.year - 2);
-    final DateTime lastDate = DateTime(currentDate.year + 2);
+    // final DateTime firstDate = DateTime(currentDate.year - 2);
+    final DateTime lastDate = DateTime(DateTime.now().year + 10);
     final DateTime? pickedDay = await showDatePicker(
       context: context,
-      initialDate: initialDate ?? currentDate,
-      initialEntryMode: DatePickerEntryMode.calendarOnly,
+      initialDate: initialDate,
+      // initialDate: initialDate ?? currentDate,
       firstDate: firstDate,
       lastDate: lastDate,
       initialDatePickerMode: DatePickerMode.day,
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
       confirmText: 'OK',
       cancelText: 'CANCEL',
       selectableDayPredicate: selectableDayPredicate,
@@ -99,6 +102,14 @@ class Commonutils {
       return true; // Connected to the internet
     } else {
       return false; // Not connected to the internet
+    }
+  }
+
+  static String formatDisplayDate(DateTime? date) {
+    if (date == null) {
+      return 'Invalid';
+    } else {
+      return DateFormat("dd-MM-yyyy").format(date);
     }
   }
 }

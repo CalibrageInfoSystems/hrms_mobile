@@ -666,6 +666,43 @@ class _apply_leaveeState extends State<apply_leave> {
   bool disableDaysPredicateForFromDate(
       DateTime date, DateTime initialDateForPl) {
     print('disableDaysPredicateForFromDate: $initialDateForPl');
+
+    // Check if date is a holiday based on fetched holidayList
+    for (final holiday in holidayList) {
+      if (holiday.isActive) {
+        final fromDate = holiday.fromDate;
+        final toDate = holiday.toDate;
+
+        // Case 1: Single-day holiday
+        if (fromDate.year == date.year &&
+            fromDate.month == date.month &&
+            fromDate.day == date.day) {
+          return false; // Disable this date (holiday)
+        }
+
+        // Case 2: Range of holidays
+        if (date.isAfter(fromDate.subtract(const Duration(days: 1))) &&
+            date.isBefore(toDate!.add(const Duration(days: 1)))) {
+          return false; // Disable this date (holiday within range)
+        }
+      }
+    }
+
+    // Additional checks (e.g., disable weekends or earlier dates)
+    if (date.weekday == DateTime.saturday || date.weekday == DateTime.sunday) {
+      return false;
+    }
+    if (date.isBefore(initialDateForPl)) {
+      return false;
+    }
+
+    return true;
+  }
+
+/* 
+  bool disableDaysPredicateForFromDate(
+      DateTime date, DateTime initialDateForPl) {
+    print('disableDaysPredicateForFromDate: $initialDateForPl');
     // Check if date is a holiday based on fetched holidayList
     for (final holiday in holidayList) {
       if (holiday.fromDate.year == date.year &&
@@ -685,7 +722,7 @@ class _apply_leaveeState extends State<apply_leave> {
 
     return true;
   }
-
+   */
   bool _isHoliday(DateTime date) {
     // Check if date is a holiday based on fetched holidayList
     for (final holiday in holidayList) {
@@ -2669,6 +2706,7 @@ class _apply_leaveeState extends State<apply_leave> {
     //  }
   }
 
+//MARK: Pending cl status
   void ShowforCLdialog(BuildContext context, String formattedMonth,
       String formattedDate, DateTime clFromDate, Function(bool) _callback) {
     showDialog(
@@ -3322,6 +3360,7 @@ class _apply_leaveeState extends State<apply_leave> {
                             ],
                           ),
                         ),
+                      //MARK: From Date
                       Padding(
                         padding: EdgeInsets.only(left: 0, top: 10.0, right: 0),
                         child: GestureDetector(
@@ -4396,13 +4435,14 @@ class _apply_leaveeState extends State<apply_leave> {
       int currentYear = DateTime.now().year;
 
       final url = Uri.parse(baseUrl + GetHolidayList + '$currentYear');
-      print('fetchHoliday: $url');
       Map<String, String> headers = {
         'Content-Type': 'application/json',
         'Authorization': '$accessToken',
       };
       final response = await http.get(url, headers: headers);
 
+      print('fetchHolidayList: $url');
+      print('fetchHolidayList: ${response.body}');
       if (response.statusCode == 200) {
         List<dynamic> jsonData = jsonDecode(response.body);
         print('jsonData: $jsonData');

@@ -79,10 +79,8 @@ class _LoginPageState extends State<LoginPage> {
     });
     // requestPhonePermission();
     _usernamecontroller.text = 'CIS00033';
+    // _usernamecontroller.text = 'CIS00167';
     _passwordcontroller.text = 'Ranjith@469';
-
-/*     _usernamecontroller.text = 'Test0003'; //'CIS00167';
-    _passwordcontroller.text = 'Test@1234'; //'Ranjith@469'; */
   }
 
   Future<void> validate() async {
