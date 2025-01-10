@@ -112,6 +112,12 @@ class Commonutils {
       return DateFormat("dd-MM-yyyy").format(date);
     }
   }
+
+  static String? formatApiDate(DateTime? date) {
+    if (date == null) return null;
+    final DateFormat formatter = DateFormat('yyyy-MM-dd');
+    return formatter.format(date);
+  }
 }
 
 class ProgressDialog {

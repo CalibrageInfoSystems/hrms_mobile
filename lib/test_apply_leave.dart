@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'package:hrms/api%20config.dart';
 import 'package:hrms/holiday_model.dart';
 import 'package:hrms/styles.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TestApplyLeave extends StatefulWidget {
@@ -43,7 +45,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
 
   bool dropDownValidator = false;
 
-  bool? isHalfDay = false;
+  bool? isHalfDayLeave = false;
 
   TextStyle txStyFS15FFc = const TextStyle(fontFamily: 'Calibri');
 
@@ -52,20 +54,21 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   late Future<List<LeaveDescriptionModel>> futreLeaveDescription;
   late List<Holiday_Model> holidayList;
   late LeaveValidationsModel leaveValidationsModel;
+  // late Future<List<EmployeeSelfLeaves>> empSelfLeaves;
+  late List<EmployeeSelfLeaves> empSelfLeaves;
 
   @override
   void initState() {
     super.initState();
     futreLeaveTypes = getLeaveTypes();
+    // empSelfLeaves = getEmpLeaves();
 
     initializeData();
   }
 
   Future<void> initializeData() async {
-/*     SharedPreferences prefs = await SharedPreferences.getInstance();
-    accessToken = prefs.getString('accessToken') ?? ''; */
     holidayList = await getLeaves();
-    leaveValidationsModel = await getLeaveValidations();
+    empSelfLeaves = await getEmpLeaves();
   }
 
 //MARK: Dropdown API
@@ -185,42 +188,27 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     }
   }
 
-  /* 
-  Future<void> getLeaveTypes(
-      // int leaveReasonLookupId, int lookupDetailId,
-      ) async {
-    bool isConnected = await Commonutils.checkInternetConnectivity();
-    if (!isConnected) {
-      Commonutils.showCustomToastMessageLong(
-          'Please Check the Internet Connection', context, 1, 4);
-      FocusScope.of(context).unfocus();
-      return;
-    }
-
-    final url =
-        Uri.parse('$baseUrl$getdropdown$leaveReasonLookupId/$lookupDetailId');
-    print('leave reason $url');
-    final response = await http.get(
-      url,
+//MARK: Emp Leaves
+  Future<List<EmployeeSelfLeaves>> getEmpLeaves() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final employeeId = prefs.getString("employeeId") ?? "";
+    int currentYear = DateTime.now().year;
+    final apiUrl = Uri.parse('$baseUrl$getleavesapi$employeeId/$currentYear');
+    final jsonResponse = await http.get(
+      apiUrl,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': '$accessToken',
+        'Authorization': accessToken,
       },
     );
-    if (response.statusCode == 200) {
-      final dynamic responseData = jsonDecode(response.body);
-      if (responseData is List<dynamic>) {
-        /*  setState(() {
-          dropdownItems = responseData; // Assign parsed data to dropdownItems
-        }); */
-      } else {
-        print('Response is not in expected format');
-      }
+    print('getEmpLeaves: ${jsonResponse.body}');
+    if (jsonResponse.statusCode == 200) {
+      return employeeSelfLeavesFromJson(jsonResponse.body);
     } else {
-      print('Failed to fetch data');
+      throw Exception('Failed to load data: ${jsonResponse.statusCode}');
     }
   }
- */
 
 //MARK: Build Method
   @override
@@ -263,8 +251,13 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                       const SizedBox(height: 10),
                       fromDateField(),
                       const SizedBox(height: 10),
-                      toDateField(),
-                      const SizedBox(height: 10),
+                      if (selectedDropdownLookupDetailId != 102)
+                        Column(
+                          children: [
+                            toDateField(),
+                            const SizedBox(height: 10),
+                          ],
+                        ),
                       leaveDescription(),
                       const SizedBox(height: 20),
                       addLeaveBtn()
@@ -661,7 +654,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           DateTime endDate = holiday.toDate ?? holiday.fromDate;
           if (date.isAfter(
                   holiday.fromDate.subtract(const Duration(days: 1))) &&
-              date.isBefore(endDate.add(Duration(days: 1)))) {
+              date.isBefore(endDate.add(const Duration(days: 1)))) {
             return true;
           }
         }
@@ -671,7 +664,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
 
     // Find the next available date not on a holiday
     while (isHoliday(initialDate)) {
-      initialDate = initialDate.add(Duration(days: 1));
+      initialDate = initialDate.add(const Duration(days: 1));
     }
 
     return initialDate;
@@ -680,7 +673,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   DateTime calculateInitialDateWith3WorkingDays(List<Holiday_Model> leaves) {
     // Step 1: Get the current date and initialize variables
     DateTime now = DateTime.now();
-    DateTime initialDate = now.add(Duration(days: 1)); // Start from tomorrow
+    DateTime initialDate =
+        now.add(const Duration(days: 1)); // Start from tomorrow
     int workingDaysCount = 0;
 
     // Step 2: Create a set of all leave dates from the Holiday_Model list
@@ -690,8 +684,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         DateTime fromDate = leave.fromDate;
         DateTime toDate = leave.toDate ?? leave.fromDate;
         for (var date = fromDate;
-            date.isBefore(toDate.add(Duration(days: 1)));
-            date = date.add(Duration(days: 1))) {
+            date.isBefore(toDate.add(const Duration(days: 1)));
+            date = date.add(const Duration(days: 1))) {
           leaveDates.add(DateTime(date.year, date.month, date.day));
         }
       }
@@ -708,7 +702,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       }
       // Move to the next day
       if (workingDaysCount < 3) {
-        initialDate = initialDate.add(Duration(days: 1));
+        initialDate = initialDate.add(const Duration(days: 1));
       }
     }
 
@@ -773,7 +767,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
             print('_formKey selectedTypeCdId: $selectedDropdownId');
             print('_formKey selectedValue: $selectedValue');
             print('_formKey selectedName: $selectedName');
-            print('_formKey isHalfDay: $isHalfDay');
+            print('_formKey isHalfDay: $isHalfDayLeave');
             print('_formKey From Date: ${_fromDateController.text}');
             print('_formKey To Date: ${_toDateController.text}');
             print('_formKey Leave Reason: ${_leaveReasonController.text}');
@@ -787,6 +781,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
               dropDownValidator = false;
             }
           });
+
+          applyLeave();
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Styles.primaryColor,
@@ -819,30 +815,172 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     }
   }
 
+  //MARK: Cl Validation
+  void checkCLLeave(DateTime fromDateObj) async {
+    /*  bool hasAppliedCLLeaveInMonth = empSelfLeaves.any((leave) {
+      if (leave.leaveType == 'CL' &&
+          (leave.status == 'Pending' ||
+              leave.status == 'Approved' ||
+              leave.status == 'Accepted')) {
+        // Check if the month and year match
+        return leave.fromDate != null &&
+            leave.fromDate!.year == fromDateObj.year &&
+            leave.fromDate!.month == fromDateObj.month;
+      }
+      return false;
+    }); */
+
+    final hasAppliedCLLeaveInMonth =
+        getAppliedCLLeaveDateInMonth(empSelfLeaves, fromDateObj);
+
+    if (hasAppliedCLLeaveInMonth != null) {
+      showCustomDialog(context, hasAppliedCLLeaveInMonth);
+      print(
+          "checkCLLeave: Employee has already applied for a leave in this month'CL'  with status 'Approved' or 'Pending'. Multiple CL leaves are not allowed in the same month.");
+    } else {
+      print("checkCLLeave: Employee can apply for 'CL' leave in this month.");
+    }
+  }
+
+  DateTime? getAppliedCLLeaveDateInMonth(
+      List<EmployeeSelfLeaves> empSelfLeaves, DateTime fromDateObj) {
+    for (var leave in empSelfLeaves) {
+      if (leave.leaveType == 'CL' &&
+          (leave.status == 'Pending' ||
+              leave.status == 'Approved' ||
+              leave.status == 'Accepted')) {
+        // Check if the month and year match
+        if (leave.fromDate != null &&
+            leave.fromDate!.year == fromDateObj.year &&
+            leave.fromDate!.month == fromDateObj.month) {
+          return leave.fromDate;
+        }
+      }
+    }
+    return null;
+  }
+
+  String getMonthName(DateTime date) {
+    return DateFormat('MMMM').format(date);
+  }
+
+  String formatStringDate(DateTime date) {
+    return DateFormat('d MMM yyyy').format(date);
+  }
+
+  void showCustomDialog(BuildContext context, DateTime? selectedFromDate) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text(
+            'Confirmation',
+            style: TextStyle(
+              color: Styles.primaryColor,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${getMonthName(selectedFromDate!)} on this '${formatStringDate(selectedFromDate!)}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.",
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Add your submit logic here
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Styles.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    child: const Text('Confirm',
+                        style: TextStyle(color: Colors.white)),
+                    /* style: ElevatedButton.styleFrom(
+                      backgroundColor: Styles.primaryColor,
+                    ), */
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Add your submit logic here
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Styles.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    child: const Text('Cancel',
+                        style: TextStyle(color: Colors.white)),
+                    /* style: ElevatedButton.styleFrom(
+                      backgroundColor: Styles.primaryColor,
+                    ), */
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> getLeaveStatistics({int? leaveStatasticsYear}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final employeeId = prefs.getString("employeeId");
+    leaveStatasticsYear ??= DateTime.now().year;
+
+    final apiUrl = Uri.parse(
+        '$baseUrl$getleaveStatistics$leaveStatasticsYear/$employeeId');
+    // final apiUrl = 'http://182.18.157.215/HRMS/API/hrmsapi/Attendance/GetLeaveStatistics/2025/131';
+    final jsonResponse = await http.get(
+      apiUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': accessToken,
+      },
+    );
+  }
+
   Future<void> applyLeave() async {
+    if (selectedDropdownLookupDetailId == 102) {
+      print('applyLeave: CL');
+      checkCLLeave(selectedFromDate!);
+    }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final employeeId = prefs.getString("employeeId");
+    final employeeName = prefs.getString("employeeName");
+    final accessToken = prefs.getString("accessToken") ?? '';
     final apiUrl = Uri.parse(baseUrl + applyleaveapi);
 
     final requestBody = jsonEncode({
-      "employeeId": 0,
-      "fromDate": "2025-01-09T12:41:05.981Z",
-      "toDate": "2025-01-09T12:41:05.981Z",
-      "leaveTypeId": 0,
-      "note": "string",
-      "acceptedBy": 0,
-      "acceptedAt": "2025-01-09T12:41:05.981Z",
-      "approvedBy": 0,
-      "approvedAt": "2025-01-09T12:41:05.981Z",
-      "rejected": true,
-      "comments": "string",
-      "isApprovalEscalated": true,
+      "employeeId": employeeId,
+      "fromDate": Commonutils.formatApiDate(selectedFromDate),
+      "toDate": Commonutils.formatApiDate(selectedToDate) ??
+          Commonutils.formatApiDate(selectedFromDate),
+      "leaveTypeId": selectedDropdownLookupDetailId,
+      "note": _leaveReasonController.text,
       "url": "string",
-      "employeeName": "string",
-      "getLeaveType": "string",
-      "isHalfDayLeave": true,
-      "isDeleted": true,
-      "leaveReasonId": 0,
-      "isFromAttendance": true,
-      "confirmedToSplitWFH": true
+      "employeeName": employeeName,
+      "getLeaveType": getLeaveType(selectedDropdownLookupDetailId!),
+      "isHalfDayLeave": isHalfDayLeave,
+      "leaveReasonId": selectedDropdownLookupDetailId,
+      "isFromAttendance": false,
     });
 
     final jsonResponse = await http.post(
@@ -850,9 +988,36 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       body: requestBody,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'accessToken',
+        'Authorization': accessToken,
       },
     );
+
+    if (jsonResponse.statusCode == 200) {
+      print('lol: Leave applied successfully');
+    } else {
+      print('lol: Failed to apply leave');
+    }
+  }
+
+  String getLeaveType(int leaveCode) {
+    switch (leaveCode) {
+      case 100:
+        return 'PT | PRESENT';
+      case 101:
+        return 'AT | ABSENT';
+      case 102:
+        return 'CL | CASUAL LEAVE';
+      case 103:
+        return 'PL | PRIVILEGE LEAVE';
+      case 104:
+        return 'LWP | LEAVE WITHOUT PAY';
+      case 160:
+        return 'WFH | WORK FROM HOME';
+      case 179:
+        return 'LL | LONG LEAVE';
+      default:
+        return 'Unknown Leave Type';
+    }
   }
 
   Row halfDayCheckBox() {
@@ -870,10 +1035,10 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         SizedBox(
           height: 20,
           child: Checkbox(
-            value: isHalfDay,
+            value: isHalfDayLeave,
             onChanged: (bool? value) {
               setState(() {
-                isHalfDay = value;
+                isHalfDayLeave = value;
               });
             },
             activeColor: Styles.primaryColor,
@@ -1588,8 +1753,8 @@ class EmployeeSelfLeaves {
   final String? employeeName;
   final String? code;
   final int? employeeLeaveId;
-  final int? usedCLsInMonth;
-  final int? usedPLsInMonth;
+  final double? usedCLsInMonth;
+  final double? usedPLsInMonth;
   final String? leaveType;
   final DateTime? fromDate;
   final DateTime? toDate;
@@ -1646,8 +1811,8 @@ class EmployeeSelfLeaves {
         employeeName: json["employeeName"],
         code: json["code"],
         employeeLeaveId: json["employeeLeaveId"],
-        usedCLsInMonth: json["usedCLsInMonth"],
-        usedPLsInMonth: json["usedPLsInMonth"],
+        usedCLsInMonth: json["usedCLsInMonth"]?.toDouble(),
+        usedPLsInMonth: json["usedPLsInMonth"]?.toDouble(),
         leaveType: json["leaveType"],
         fromDate:
             json["fromDate"] == null ? null : DateTime.parse(json["fromDate"]),
