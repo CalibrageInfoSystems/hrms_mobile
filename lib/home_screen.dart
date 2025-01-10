@@ -341,7 +341,7 @@ class _home_screenState extends State<home_screen>
                     ),
 
                     //MARK: Test Apply Leave
-                    ListTile(
+/*                     ListTile(
                       leading: SvgPicture.asset(
                         'assets/atten.svg',
                         width: 20,
@@ -386,7 +386,7 @@ class _home_screenState extends State<home_screen>
                               builder: (context) => TestProjectsScreen()),
                         );
                       },
-                    ),
+                    ), */
                   ],
                 ),
               ),

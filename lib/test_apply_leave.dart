@@ -367,7 +367,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           print('checkLeaveTypeAndLaunchDatePicker cl: $initialDate');
           Commonutils.launchDatePicker(
             context,
-            initialDate: initialDate,
+            // initialDate: initialDate,
             firstDate: today,
             selectableDayPredicate: (DateTime date) => selectableDayPredicate(
                 date,
@@ -394,7 +394,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           // DateTime? initialDate = calculatePLInitialDate(holidayList);
           Commonutils.launchDatePicker(
             context,
-            initialDate: initialDate,
+            // initialDate: initialDate,
             firstDate: today,
             selectableDayPredicate: (DateTime date) => selectableDayPredicate(
                 date,
@@ -541,7 +541,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     // Step 3: Add three working days.
     int workingDaysAdded = 0;
 
-    while (workingDaysAdded < 4) {
+    while (workingDaysAdded < 3) {
+      // while (workingDaysAdded < 4) {
       initialDate = initialDate.add(const Duration(days: 1));
       if (initialDate.weekday != DateTime.saturday &&
           initialDate.weekday != DateTime.sunday &&
@@ -577,7 +578,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     // Step 3: Add three working days.
     int workingDaysAdded = 0;
 
-    while (workingDaysAdded < 2) {
+    while (workingDaysAdded < 1) {
+      // while (workingDaysAdded < 2) {
       initialDate = initialDate.add(const Duration(days: 1));
       if (initialDate.weekday != DateTime.saturday &&
           initialDate.weekday != DateTime.sunday &&
@@ -1570,5 +1572,139 @@ class LeaveValidationsModel {
         "useHierarchicalMailForLeaveApproval":
             useHierarchicalMailForLeaveApproval,
         "mininumDaysToConsiderAsLongLeave": mininumDaysToConsiderAsLongLeave,
+      };
+}
+
+//MARK: Emp Self Leaves
+List<EmployeeSelfLeaves> employeeSelfLeavesFromJson(String str) =>
+    List<EmployeeSelfLeaves>.from(
+        json.decode(str).map((x) => EmployeeSelfLeaves.fromJson(x)));
+
+String employeeSelfLeavesToJson(List<EmployeeSelfLeaves> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
+class EmployeeSelfLeaves {
+  final int? employeeId;
+  final String? employeeName;
+  final String? code;
+  final int? employeeLeaveId;
+  final int? usedCLsInMonth;
+  final int? usedPLsInMonth;
+  final String? leaveType;
+  final DateTime? fromDate;
+  final DateTime? toDate;
+  final int? leaveTypeId;
+  final bool? rejected;
+  final DateTime? acceptedAt;
+  final String? acceptedBy;
+  final DateTime? approvedAt;
+  final String? approvedBy;
+  final String? note;
+  final String? status;
+  final bool? isApprovalEscalated;
+  final bool? isHalfDayLeave;
+  final String? comments;
+  final DateTime? createdAt;
+  final String? createdBy;
+  final bool? isLeaveUsed;
+  final bool? isDeleted;
+  final DateTime? rejectedAt;
+  final String? rejectedBy;
+
+  EmployeeSelfLeaves({
+    this.employeeId,
+    this.employeeName,
+    this.code,
+    this.employeeLeaveId,
+    this.usedCLsInMonth,
+    this.usedPLsInMonth,
+    this.leaveType,
+    this.fromDate,
+    this.toDate,
+    this.leaveTypeId,
+    this.rejected,
+    this.acceptedAt,
+    this.acceptedBy,
+    this.approvedAt,
+    this.approvedBy,
+    this.note,
+    this.status,
+    this.isApprovalEscalated,
+    this.isHalfDayLeave,
+    this.comments,
+    this.createdAt,
+    this.createdBy,
+    this.isLeaveUsed,
+    this.isDeleted,
+    this.rejectedAt,
+    this.rejectedBy,
+  });
+
+  factory EmployeeSelfLeaves.fromJson(Map<String, dynamic> json) =>
+      EmployeeSelfLeaves(
+        employeeId: json["employeeId"],
+        employeeName: json["employeeName"],
+        code: json["code"],
+        employeeLeaveId: json["employeeLeaveId"],
+        usedCLsInMonth: json["usedCLsInMonth"],
+        usedPLsInMonth: json["usedPLsInMonth"],
+        leaveType: json["leaveType"],
+        fromDate:
+            json["fromDate"] == null ? null : DateTime.parse(json["fromDate"]),
+        toDate: json["toDate"] == null ? null : DateTime.parse(json["toDate"]),
+        leaveTypeId: json["leaveTypeId"],
+        rejected: json["rejected"],
+        acceptedAt: json["acceptedAt"] == null
+            ? null
+            : DateTime.parse(json["acceptedAt"]),
+        acceptedBy: json["acceptedBy"],
+        approvedAt: json["approvedAt"] == null
+            ? null
+            : DateTime.parse(json["approvedAt"]),
+        approvedBy: json["approvedBy"],
+        note: json["note"],
+        status: json["status"],
+        isApprovalEscalated: json["isApprovalEscalated"],
+        isHalfDayLeave: json["isHalfDayLeave"],
+        comments: json["comments"],
+        createdAt: json["createdAt"] == null
+            ? null
+            : DateTime.parse(json["createdAt"]),
+        createdBy: json["createdBy"],
+        isLeaveUsed: json["isLeaveUsed"],
+        isDeleted: json["isDeleted"],
+        rejectedAt: json["rejectedAt"] == null
+            ? null
+            : DateTime.parse(json["rejectedAt"]),
+        rejectedBy: json["rejectedBy"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "employeeId": employeeId,
+        "employeeName": employeeName,
+        "code": code,
+        "employeeLeaveId": employeeLeaveId,
+        "usedCLsInMonth": usedCLsInMonth,
+        "usedPLsInMonth": usedPLsInMonth,
+        "leaveType": leaveType,
+        "fromDate": fromDate?.toIso8601String(),
+        "toDate": toDate?.toIso8601String(),
+        "leaveTypeId": leaveTypeId,
+        "rejected": rejected,
+        "acceptedAt": acceptedAt?.toIso8601String(),
+        "acceptedBy": acceptedBy,
+        "approvedAt": approvedAt?.toIso8601String(),
+        "approvedBy": approvedBy,
+        "note": note,
+        "status": status,
+        "isApprovalEscalated": isApprovalEscalated,
+        "isHalfDayLeave": isHalfDayLeave,
+        "comments": comments,
+        "createdAt": createdAt?.toIso8601String(),
+        "createdBy": createdBy,
+        "isLeaveUsed": isLeaveUsed,
+        "isDeleted": isDeleted,
+        "rejectedAt": rejectedAt?.toIso8601String(),
+        "rejectedBy": rejectedBy,
       };
 }
