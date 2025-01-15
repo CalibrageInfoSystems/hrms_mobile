@@ -38,3 +38,8 @@ var WithdrawResignation = '/hrmsapi/Resignation/RejectResignationRequest';
 var uploadimage = '/hrmsapi/Employee/UpdateEmployeeBasicDetails';
 var getemployedata = '/hrmsapi/Employee/GetEmployeeBasedOnId/';
 var getleaveStatistics = '/hrmsapi/Attendance/GetLeaveStatistics/';
+const leaveApplyURL = 'http://182.18.157.215:/';
+// const leaveApplyURL = 'https://hrms.calibrage.in:/';
+
+/* const testLeaveApplyURL = 'http://182.18.157.215:/';
+const uatLeaveApplyURL = 'https://hrms.calibrage.in:/'; */

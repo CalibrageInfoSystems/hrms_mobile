@@ -141,12 +141,16 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                   },
                   child: Text(
                     'Ok',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFf15f22), // Change to your desired background color
+                    backgroundColor: Color(
+                        0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Set border radius
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
                     ),
                   ),
                 ),
@@ -160,11 +164,12 @@ class _leaves_screen_screenState extends State<leaves_screen> {
 
   void onConfirmLogout(BuildContext context) {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
-    Commonutils.showCustomToastMessageLong("Logout Successfully", context, 0, 3);
+    Commonutils.showCustomToastMessageLong(
+        "Logout Successfully", context, 0, 3);
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => LoginPage()),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -203,7 +208,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
       final usedprivilegeleavesinyear = loadedData['usedPrivilegeLeavesInYear'];
       final allotedprivilegeleaves = loadedData['allottedPrivilegeLeaves'];
       final usedcausalleavesinmonth = loadedData['usedCasualLeavesInMonth'];
-      final usedPrivilegeLeavesInMonth = loadedData['usedPrivilegeLeavesInMonth'];
+      final usedPrivilegeLeavesInMonth =
+          loadedData['usedPrivilegeLeavesInMonth'];
       final usedcasualleavesinyear = loadedData['usedCasualLeavesInYear'];
       final usdl = loadedData['allottedCasualLeaves'];
       // final mobilenum = loadedData['mobileNumber'];
@@ -229,11 +235,13 @@ class _leaves_screen_screenState extends State<leaves_screen> {
         usedCasualLeavesInYear = usedcasualleavesinyear.toDouble();
         // allottedPriviegeLeaves = allotedpls;
         //  usedCasualLeavesInYear = usedcasualleavesinyear;
-        availablepls = allottedPrivilegeLeaves.toDouble() - usedPrivilegeLeavesInYear.toDouble();
+        availablepls = allottedPrivilegeLeaves.toDouble() -
+            usedPrivilegeLeavesInYear.toDouble();
 
         print("Available Privilege Leaves: $availablepls");
 
-        availablecls = allotcausalleaves.toDouble() - usedCasualLeavesInYear.toDouble();
+        availablecls =
+            allotcausalleaves.toDouble() - usedCasualLeavesInYear.toDouble();
 
         print('Available Causal Leaves: $availablecls');
         DateTime now = DateTime.now();
@@ -258,8 +266,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
     if (ismatchedlogin) {
       Future.microtask(() => _showtimeoutdialog(context));
     }
-    return
-      WillPopScope(
+    return WillPopScope(
         onWillPop: () async {
           // Handle back button press here
           // Navigator.of(context).pushReplacement(
@@ -268,8 +275,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
           // You can add any custom logic before closing the app
           return true; // Return true to allow back button press and close the app
         },
-        child:
-        MaterialApp(
+        child: MaterialApp(
           debugShowCheckedModeBanner: false,
           home: Scaffold(
             body: Stack(
@@ -285,7 +291,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                 Container(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,
-                  padding: EdgeInsets.only(top: 15.0, left: 15.0, right: 15.0, bottom: 20.0),
+                  padding: EdgeInsets.only(
+                      top: 15.0, left: 15.0, right: 15.0, bottom: 20.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -338,11 +345,14 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                               ElevatedButton(
                                 onPressed: () {
                                   DateTime currentTime = DateTime.now();
-                                  DateTime formattedlogintime = DateTime.parse(logintime!);
-                                  DateTime loginTime = formattedlogintime /* Replace with your login time */;
+                                  DateTime formattedlogintime =
+                                      DateTime.parse(logintime!);
+                                  DateTime loginTime =
+                                      formattedlogintime /* Replace with your login time */;
 
                                   // Calculate the time difference
-                                  Duration timeDifference = currentTime.difference(loginTime);
+                                  Duration timeDifference =
+                                      currentTime.difference(loginTime);
 
                                   // Check if the time difference is less than or equal to 1 hour (3600 seconds)
                                   if (timeDifference.inSeconds <= 3600) {
@@ -350,18 +360,22 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                     Navigator.of(context).pushReplacement(
                                       MaterialPageRoute(
                                         builder: (context) => apply_leave(
-                                          buttonName: "test", // Example button name
+                                          buttonName:
+                                              "test", // Example button name
                                           lookupDetailId: -3,
-                                          employename: '${EmployeName}', // Pass the lookupDetailId
+                                          employename:
+                                              '${EmployeName}', // Pass the lookupDetailId
                                         ),
                                       ),
                                     );
 
-                                    print("Login is within 1 hour of current time.");
+                                    print(
+                                        "Login is within 1 hour of current time.");
                                   } else {
                                     // Login is outside the allowed window
                                     _showtimeoutdialog(context);
-                                    print("Login is more than 1 hour from current time.");
+                                    print(
+                                        "Login is more than 1 hour from current time.");
                                   }
 
                                   // Handle the apply button click event
@@ -388,7 +402,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                             children: [
                               Container(
                                 width: MediaQuery.of(context).size.width / 3.5,
-                                height: 90,
+                                height: 95,
                                 decoration: BoxDecoration(
                                   color: Colors.blue,
                                   borderRadius: BorderRadius.circular(6.0),
@@ -409,18 +423,27 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                       // Adjust the padding as needed
                                       child: Text(
                                         "PL's",
-                                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Calibri'),
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            fontFamily: 'Calibri'),
                                       ),
                                     ),
                                     SizedBox(
                                       height: 10.0,
                                     ),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           "$usedPrivilegeLeavesInYear",
-                                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Calibri'),
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              fontFamily: 'Calibri'),
                                         ),
                                         SizedBox(
                                           width: 2.0,
@@ -438,7 +461,11 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                         ),
                                         Text(
                                           "$allottedPrivilegeLeaves",
-                                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Calibri'),
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              fontFamily: 'Calibri'),
                                         ),
                                       ],
                                     )
@@ -447,7 +474,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                               ),
                               Container(
                                 width: MediaQuery.of(context).size.width / 3.5,
-                                height: 90,
+                                height: 95,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(6.0),
@@ -455,7 +482,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                   border: Border.all(
                                     color: Color(0xFF7F7FE1),
                                     // Specify the border color
-                                    width: 2.0, // Adjust the border width as needed
+                                    width:
+                                        2.0, // Adjust the border width as needed
                                   ),
                                 ),
                                 child: Column(
@@ -465,7 +493,11 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                       // Adjust the padding as needed
                                       child: Text(
                                         "Monthly PL's",
-                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFFf15f22), fontFamily: 'Calibri'),
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFFf15f22),
+                                            fontFamily: 'Calibri'),
                                       ),
                                     ),
                                     Row(
@@ -474,7 +506,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                           width: width / 6,
                                           height: 30.0,
                                           child: IconButton(
-                                            padding: EdgeInsets.only(right: 0.0),
+                                            padding:
+                                                EdgeInsets.only(right: 0.0),
                                             onPressed: () {
                                               _selectPreviousMonthPL();
                                             },
@@ -500,7 +533,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                         // ),
                                         GestureDetector(
                                           onTap: () async {
-                                            final selected = await showMonthPicker(
+                                            final selected =
+                                                await showMonthPicker(
                                               context: context,
                                               initialDate: DateTime.now(),
                                               firstDate: DateTime(2000),
@@ -508,12 +542,14 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                             );
                                             if (selected != null) {
                                               // Print the selected month and year
-                                              print('Selected month: ${selected.month}, year: ${selected.year}');
+                                              print(
+                                                  'Selected month: ${selected.month}, year: ${selected.year}');
 
                                               // Optionally, update the UI with the selected month and year
                                               setState(() {
                                                 _selectedMonthPL = selected;
-                                                montlyleavesPl(selected.month, selected.year);
+                                                montlyleavesPl(selected.month,
+                                                    selected.year);
                                               });
                                             }
                                             // showmonthpickerforpl();
@@ -523,7 +559,10 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                             child: Text(
                                               '${_selectedMonthPL.month}/${_selectedMonthPL.year}',
                                               style: TextStyle(
-                                                  fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Calibri', color: Color(0xFF746cdf)),
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontFamily: 'Calibri',
+                                                  color: Color(0xFF746cdf)),
                                               textAlign: TextAlign.center,
                                             ),
                                           ),
@@ -566,7 +605,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                           ? Container(
                                               width: 15,
                                               height: 15,
-                                              child: CircularProgressIndicator.adaptive(),
+                                              child: CircularProgressIndicator
+                                                  .adaptive(),
                                             ) // Show circular loading indicator
                                           : Text(
                                               "${noOfleavesinPLs ?? 0.0}",
@@ -583,7 +623,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                               ),
                               Container(
                                 width: MediaQuery.of(context).size.width / 3.5,
-                                height: 90,
+                                height: 95,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(6.0),
@@ -591,7 +631,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                   border: Border.all(
                                     color: Color(0xFF7F7FE1),
                                     // Specify the border color
-                                    width: 2.0, // Adjust the border width as needed
+                                    width:
+                                        2.0, // Adjust the border width as needed
                                   ),
                                 ),
                                 child: Column(children: [
@@ -618,27 +659,37 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                         //  printLookupDetailId('PL');
 
                                         DateTime currentTime = DateTime.now();
-                                        DateTime formattedlogintime = DateTime.parse(logintime!);
+                                        DateTime formattedlogintime =
+                                            DateTime.parse(logintime!);
                                         // Replace this with your actual login time
-                                        DateTime loginTime = formattedlogintime /* Replace with your login time */;
+                                        DateTime loginTime =
+                                            formattedlogintime /* Replace with your login time */;
 
                                         // Calculate the time difference
-                                        Duration timeDifference = currentTime.difference(loginTime);
+                                        Duration timeDifference =
+                                            currentTime.difference(loginTime);
 
                                         // Check if the time difference is less than or equal to 1 hour (3600 seconds)
                                         if (timeDifference.inSeconds <= 3600) {
                                           // Login is within the allowed window
                                           if (availablepls <= 0) {
                                             // Show a toast message
-                                            Commonutils.showCustomToastMessageLong('No PLs Available!', context, 1, 3);
+                                            Commonutils
+                                                .showCustomToastMessageLong(
+                                                    'No PLs Available!',
+                                                    context,
+                                                    1,
+                                                    3);
                                           } else {
                                             printLookupDetailId('PL');
                                           }
-                                          print("Login is within 1 hour of current time.");
+                                          print(
+                                              "Login is within 1 hour of current time.");
                                         } else {
                                           // Login is outside the allowed window
                                           _showtimeoutdialog(context);
-                                          print("Login is more than 1 hour from current time.");
+                                          print(
+                                              "Login is more than 1 hour from current time.");
                                         }
 
                                         // Navigator.of(context).pushReplacement(
@@ -647,7 +698,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                         // );
                                       },
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Text(
                                             "$availablepls",
@@ -690,7 +742,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                             children: [
                               Container(
                                 width: MediaQuery.of(context).size.width / 3.5,
-                                height: 90,
+                                height: 95,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(6.0),
                                   gradient: LinearGradient(
@@ -722,7 +774,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                       height: 10.0,
                                     ),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           "$usedCasualLeavesInYear",
@@ -763,7 +816,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                               ),
                               Container(
                                 width: MediaQuery.of(context).size.width / 3.5,
-                                height: 90,
+                                height: 95,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(6.0),
@@ -771,7 +824,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                   border: Border.all(
                                     color: Color(0xFF7F7FE1),
                                     // Specify the border color
-                                    width: 2.0, // Adjust the border width as needed
+                                    width:
+                                        2.0, // Adjust the border width as needed
                                   ),
                                 ),
                                 child: Column(
@@ -795,7 +849,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                           width: width / 6,
                                           height: 30.0,
                                           child: IconButton(
-                                            padding: EdgeInsets.only(right: 0.0),
+                                            padding:
+                                                EdgeInsets.only(right: 0.0),
                                             onPressed: () {
                                               _selectPreviousMonthCL();
                                               //       ///_calender();
@@ -822,7 +877,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                         // ),
                                         GestureDetector(
                                           onTap: () async {
-                                            final selected = await showMonthPicker(
+                                            final selected =
+                                                await showMonthPicker(
                                               context: context,
                                               initialDate: DateTime.now(),
                                               firstDate: DateTime(2000),
@@ -830,12 +886,14 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                             );
                                             if (selected != null) {
                                               // Print the selected month and year
-                                              print('Selected month: ${selected.month}, year: ${selected.year}');
+                                              print(
+                                                  'Selected month: ${selected.month}, year: ${selected.year}');
 
                                               // Optionally, update the UI with the selected month and year
                                               setState(() {
                                                 _selectedMonthCL = selected;
-                                                montlyleavesCL(selected.month, selected.year);
+                                                montlyleavesCL(selected.month,
+                                                    selected.year);
                                               });
                                             }
                                           },
@@ -844,7 +902,10 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                             child: Text(
                                               '${_selectedMonthCL.month}/${_selectedMonthCL.year}',
                                               style: TextStyle(
-                                                  fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Calibri', color: Color(0xFF746cdf)),
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontFamily: 'Calibri',
+                                                  color: Color(0xFF746cdf)),
                                               textAlign: TextAlign.center,
                                             ),
                                           ),
@@ -887,7 +948,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                           ? Container(
                                               width: 15,
                                               height: 15,
-                                              child: CircularProgressIndicator.adaptive(),
+                                              child: CircularProgressIndicator
+                                                  .adaptive(),
                                             ) // Show circular loading indicator
                                           : Text(
                                               "${noOfleavesinCLs ?? 0.0}",
@@ -907,7 +969,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
 
                               Container(
                                 width: MediaQuery.of(context).size.width / 3.5,
-                                height: 90,
+                                height: 95,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(6.0),
@@ -919,27 +981,33 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                 child: InkWell(
                                   onTap: () {
                                     DateTime currentTime = DateTime.now();
-                                    DateTime formattedlogintime = DateTime.parse(logintime!);
+                                    DateTime formattedlogintime =
+                                        DateTime.parse(logintime!);
                                     // Replace this with your actual login time
-                                    DateTime loginTime = formattedlogintime /* Replace with your login time */;
+                                    DateTime loginTime =
+                                        formattedlogintime /* Replace with your login time */;
 
                                     // Calculate the time difference
-                                    Duration timeDifference = currentTime.difference(loginTime);
+                                    Duration timeDifference =
+                                        currentTime.difference(loginTime);
 
                                     // Check if the time difference is less than or equal to 1 hour (3600 seconds)
                                     if (timeDifference.inSeconds <= 3600) {
                                       // Login is within the allowed window
                                       if (availablecls <= 0) {
                                         // Show a toast message
-                                        Commonutils.showCustomToastMessageLong('No CLs Available!', context, 1, 3);
+                                        Commonutils.showCustomToastMessageLong(
+                                            'No CLs Available!', context, 1, 3);
                                       } else {
                                         printLookupDetailId('CL');
                                       }
-                                      print("Login is within 1 hour of current time.");
+                                      print(
+                                          "Login is within 1 hour of current time.");
                                     } else {
                                       // Login is outside the allowed window
                                       _showtimeoutdialog(context);
-                                      print("Login is more than 1 hour from current time.");
+                                      print(
+                                          "Login is more than 1 hour from current time.");
                                     }
                                     //  printLookupDetailId('CL');
                                   },
@@ -960,7 +1028,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                       Container(
                                         padding: EdgeInsets.only(top: 4.0),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
                                           children: [
                                             Text(
                                               "$availablecls",
@@ -1182,8 +1251,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
               ],
             ),
           ),
-        )
-     );
+        ));
   }
 
   // Future<List<dynamic>> fetchHolidayList() async {
@@ -1388,7 +1456,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
   Future<void> fetchDataleavetype(int dayWorkStatus) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       return;
     }
@@ -1419,7 +1488,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
     if (jsonData is List<dynamic>) {
       // If it's a list, process it as usual
       setState(() {
-        lookupDetails = jsonData.map((data) => LookupDetail.fromJson(data)).toList();
+        lookupDetails =
+            jsonData.map((data) => LookupDetail.fromJson(data)).toList();
       });
     } else {
       // If it's not a list, handle the single string case
@@ -1440,7 +1510,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
   // }
   void _selectPreviousMonthPL() {
     setState(() {
-      _selectedMonthPL = DateTime(_selectedMonthPL.year, _selectedMonthPL.month - 1);
+      _selectedMonthPL =
+          DateTime(_selectedMonthPL.year, _selectedMonthPL.month - 1);
       print(' ${_selectedMonthPL.month}');
 
       // Print year
@@ -1461,7 +1532,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
   // }
   void _selectNextMonthPL() {
     setState(() {
-      _selectedMonthPL = DateTime(_selectedMonthPL.year, _selectedMonthPL.month + 1);
+      _selectedMonthPL =
+          DateTime(_selectedMonthPL.year, _selectedMonthPL.month + 1);
 
       // Print month name and number
       print(' ${_selectedMonthPL.month}');
@@ -1474,7 +1546,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
 
   void _selectPreviousMonthCL() {
     setState(() {
-      _selectedMonthCL = DateTime(_selectedMonthCL.year, _selectedMonthCL.month - 1);
+      _selectedMonthCL =
+          DateTime(_selectedMonthCL.year, _selectedMonthCL.month - 1);
       print(' ${_selectedMonthCL.month}');
 
       // Print year
@@ -1492,7 +1565,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
 
   void _selectNextMonthCL() {
     setState(() {
-      _selectedMonthCL = DateTime(_selectedMonthCL.year, _selectedMonthCL.month + 1);
+      _selectedMonthCL =
+          DateTime(_selectedMonthCL.year, _selectedMonthCL.month + 1);
 
       // Print month name and number
       print(' ${_selectedMonthCL.month}');
@@ -1534,7 +1608,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
   Future<void> montlyleavesPl(int monthId, int year) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       return;
     }
@@ -1549,7 +1624,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
     // Print the current year
     //  print('Current Year: $currentYear');
     try {
-      final url = Uri.parse(baseUrl + getmontlyleaves + '/$monthId' + '/$employeid' + '/$year');
+      final url = Uri.parse(
+          baseUrl + getmontlyleaves + '/$monthId' + '/$employeid' + '/$year');
       print('monthlyleavesPlsapi: $url');
       Map<String, String> headers = {
         'Content-Type': 'application/json',
@@ -1571,7 +1647,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
           });
         } else {
           print('response data : ${data}');
-          List<leave_model> leaveInfos = data.map((json) => leave_model.fromJson(json)).toList();
+          List<leave_model> leaveInfos =
+              data.map((json) => leave_model.fromJson(json)).toList();
 
           // Now you have a List of LeaveInfo objects
           for (var leaveInfo in leaveInfos) {
@@ -1606,7 +1683,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
   Future<void> montlyleavesCL(int monthId, int year) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       return;
     }
@@ -1621,7 +1699,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
     // // Print the current year
     // print('Current Year: $currentYear');
     try {
-      final url = Uri.parse(baseUrl + getmontlyleaves + '/$monthId' + '/$employeid' + '/$year');
+      final url = Uri.parse(
+          baseUrl + getmontlyleaves + '/$monthId' + '/$employeid' + '/$year');
       print('monthlyleavesClsapi: $url');
       Map<String, String> headers = {
         'Content-Type': 'application/json',
@@ -1643,7 +1722,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
           });
         } else {
           print('response data : ${data}');
-          List<leave_model> leaveInfos = data.map((json) => leave_model.fromJson(json)).toList();
+          List<leave_model> leaveInfos =
+              data.map((json) => leave_model.fromJson(json)).toList();
 
           // Now you have a List of LeaveInfo objects
           for (var leaveInfoCl in leaveInfos) {
@@ -1679,7 +1759,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
   Future<void> montlyleaveslwp(int monthId) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       return;
     }
@@ -1691,7 +1772,11 @@ class _leaves_screen_screenState extends State<leaves_screen> {
     // Print the current year
     print('Current Year: $currentYear');
     try {
-      final url = Uri.parse(baseUrl + getmontlyleaves + '/$monthId' + '/$employeid' + '/$currentYear');
+      final url = Uri.parse(baseUrl +
+          getmontlyleaves +
+          '/$monthId' +
+          '/$employeid' +
+          '/$currentYear');
       print('monthlyleaveslwpapi: $url');
       Map<String, String> headers = {
         'Content-Type': 'application/json',
@@ -1708,7 +1793,8 @@ class _leaves_screen_screenState extends State<leaves_screen> {
         final List<dynamic> data = json.decode(response.body);
 
         print('response data : ${data}');
-        List<leave_model> leaveInfos = data.map((json) => leave_model.fromJson(json)).toList();
+        List<leave_model> leaveInfos =
+            data.map((json) => leave_model.fromJson(json)).toList();
 
         // Now you have a List of LeaveInfo objects
         for (var leaveInfoLWP in leaveInfos) {
@@ -1808,12 +1894,16 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                   },
                   child: Text(
                     'Cancel',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFf15f22), // Change to your desired background color
+                    backgroundColor: Color(
+                        0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Set border radius
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
                     ),
                   ),
                 ),
@@ -1823,12 +1913,16 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                   },
                   child: Text(
                     'Confirm',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFf15f22), // Change to your desired background color
+                    backgroundColor: Color(
+                        0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Set border radius
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
                     ),
                   ),
                 ),

@@ -8,6 +8,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:hrms/Commonutils.dart';
 import 'package:hrms/Model%20Class/LookupDetail.dart';
+import 'package:hrms/SharedPreferencesHelper.dart';
 import 'package:hrms/api%20config.dart';
 import 'package:hrms/holiday_model.dart';
 import 'package:hrms/styles.dart';
@@ -360,7 +361,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           print('checkLeaveTypeAndLaunchDatePicker cl: $initialDate');
           Commonutils.launchDatePicker(
             context,
-            // initialDate: initialDate,
+            // initialDate: selectedFromDate,
             firstDate: today,
             selectableDayPredicate: (DateTime date) => selectableDayPredicate(
                 date,
@@ -782,7 +783,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
             }
           });
 
-          applyLeave();
+          leaveValidation(selectedDropdownLookupDetailId);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Styles.primaryColor,
@@ -816,39 +817,77 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   }
 
   //MARK: Cl Validation
-  void checkCLLeave(DateTime fromDateObj) async {
-    /*  bool hasAppliedCLLeaveInMonth = empSelfLeaves.any((leave) {
-      if (leave.leaveType == 'CL' &&
-          (leave.status == 'Pending' ||
-              leave.status == 'Approved' ||
-              leave.status == 'Accepted')) {
-        // Check if the month and year match
-        return leave.fromDate != null &&
-            leave.fromDate!.year == fromDateObj.year &&
-            leave.fromDate!.month == fromDateObj.month;
-      }
-      return false;
-    }); */
-
+  void checkCLLeave(DateTime fromDateObj) {
     final hasAppliedCLLeaveInMonth =
         getAppliedCLLeaveDateInMonth(empSelfLeaves, fromDateObj);
+    final hasApprovedCLLeaveInMonth =
+        checkApprovedCLLeaveDateInMonth(empSelfLeaves, fromDateObj);
 
     if (hasAppliedCLLeaveInMonth != null) {
-      showCustomDialog(context, hasAppliedCLLeaveInMonth);
+      final message =
+          "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${getMonthName(selectedFromDate!)} on this '${formatStringDate(selectedFromDate!)}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.";
+      showCustomDialog(context, hasAppliedCLLeaveInMonth,
+          title: 'Confirmation', message: message);
       print(
           "checkCLLeave: Employee has already applied for a leave in this month'CL'  with status 'Approved' or 'Pending'. Multiple CL leaves are not allowed in the same month.");
+    } else if (hasApprovedCLLeaveInMonth != null) {
+      const message =
+          '''Employee has already applied for a leave in this month. 'CL' with status 'Approved'. Multiple CL leaves are not allowed in the same month.''';
+      showCustomDialog(context, hasAppliedCLLeaveInMonth,
+          isActions: false, title: 'Warning', message: message);
+      /* ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message,
+          ),
+        ),
+      ); */
     } else {
       print("checkCLLeave: Employee can apply for 'CL' leave in this month.");
+      applyLeave();
     }
   }
 
+  DateTime? checkApprovedCLLeaveDateInMonth(
+      List<EmployeeSelfLeaves> empSelfLeaves, DateTime fromDateObj) {
+    for (var leave in empSelfLeaves) {
+      if (leave.leaveType == 'CL' && leave.status == 'Approved') {
+        // Check if the month and year match
+        if (leave.fromDate != null &&
+            leave.fromDate!.year == fromDateObj.year &&
+            leave.fromDate!.month == fromDateObj.month) {
+          return leave.fromDate;
+        }
+      }
+    }
+    return null;
+  }
+
+  void leaveValidation(int? leaveTypeId) {
+    switch (leaveTypeId) {
+      case 102:
+        // CL Validation
+        checkCLLeave(selectedFromDate!);
+        break;
+      case 103:
+        // PL Validation
+        break;
+      case 104:
+        // LWP Validation
+        break;
+      case 160:
+      // WFH Validation
+      case 179:
+        // LL Validation
+        break;
+    }
+  }
+
+  // leave.status == 'Approved'
   DateTime? getAppliedCLLeaveDateInMonth(
       List<EmployeeSelfLeaves> empSelfLeaves, DateTime fromDateObj) {
     for (var leave in empSelfLeaves) {
       if (leave.leaveType == 'CL' &&
-          (leave.status == 'Pending' ||
-              leave.status == 'Approved' ||
-              leave.status == 'Accepted')) {
+          (leave.status == 'Pending' || leave.status == 'Accepted')) {
         // Check if the month and year match
         if (leave.fromDate != null &&
             leave.fromDate!.year == fromDateObj.year &&
@@ -868,14 +907,21 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     return DateFormat('d MMM yyyy').format(date);
   }
 
-  void showCustomDialog(BuildContext context, DateTime? selectedFromDate) {
+  void showCustomDialog(
+    BuildContext context,
+    DateTime? selectedFromDate, {
+    required String title,
+    required String message,
+    bool isActions = true,
+  }) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: const Text(
-            'Confirmation',
+          title: Text(
+            // 'Confirmation',
+            title,
             style: TextStyle(
               color: Styles.primaryColor,
             ),
@@ -884,58 +930,64 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${getMonthName(selectedFromDate!)} on this '${formatStringDate(selectedFromDate!)}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.",
+                // "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${getMonthName(selectedFromDate!)} on this '${formatStringDate(selectedFromDate!)}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.",
+                message,
               ),
             ],
           ),
-          actions: <Widget>[
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Add your submit logic here
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Styles.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
-                    child: const Text('Confirm',
-                        style: TextStyle(color: Colors.white)),
-                    /* style: ElevatedButton.styleFrom(
-                      backgroundColor: Styles.primaryColor,
-                    ), */
-                  ),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Add your submit logic here
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Styles.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
-                    child: const Text('Cancel',
-                        style: TextStyle(color: Colors.white)),
-                    /* style: ElevatedButton.styleFrom(
-                      backgroundColor: Styles.primaryColor,
-                    ), */
-                  ),
-                ),
-              ],
-            ),
-          ],
+          actions: isActions ? actions(context) : null,
         );
       },
     );
+  }
+
+  List<Widget> actions(BuildContext context) {
+    return [
+      Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                applyLeave().whenComplete(() {
+                  Navigator.of(context).pop();
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Styles.primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              child:
+                  const Text('Confirm', style: TextStyle(color: Colors.white)),
+              /* style: ElevatedButton.styleFrom(
+                    backgroundColor: Styles.primaryColor,
+                  ), */
+            ),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                // Add your submit logic here
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Styles.primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              child:
+                  const Text('Cancel', style: TextStyle(color: Colors.white)),
+              /* style: ElevatedButton.styleFrom(
+                    backgroundColor: Styles.primaryColor,
+                  ), */
+            ),
+          ),
+        ],
+      )
+    ];
   }
 
   Future<void> getLeaveStatistics({int? leaveStatasticsYear}) async {
@@ -957,16 +1009,22 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   }
 
   Future<void> applyLeave() async {
-    if (selectedDropdownLookupDetailId == 102) {
-      print('applyLeave: CL');
-      checkCLLeave(selectedFromDate!);
+    bool isConnected = await Commonutils.checkInternetConnectivity();
+    if (!isConnected) {
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 3);
+      FocusScope.of(context).unfocus();
+      return;
     }
+
+    // check token validation
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final employeeId = prefs.getString("employeeId");
-    final employeeName = prefs.getString("employeeName");
     final accessToken = prefs.getString("accessToken") ?? '';
     final apiUrl = Uri.parse(baseUrl + applyleaveapi);
+    final loadedData = await SharedPreferencesHelper.getCategories();
+    final employeeName = loadedData?['employeeName'];
 
     final requestBody = jsonEncode({
       "employeeId": employeeId,
@@ -975,7 +1033,14 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           Commonutils.formatApiDate(selectedFromDate),
       "leaveTypeId": selectedDropdownLookupDetailId,
       "note": _leaveReasonController.text,
-      "url": "string",
+      "acceptedBy": null,
+      "acceptedAt": null,
+      "approvedBy": null,
+      "approvedAt": null,
+      "rejected": null,
+      "comments": null,
+      "isApprovalEscalated": null,
+      "url": leaveApplyURL,
       "employeeName": employeeName,
       "getLeaveType": getLeaveType(selectedDropdownLookupDetailId!),
       "isHalfDayLeave": isHalfDayLeave,
@@ -994,27 +1059,36 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
 
     if (jsonResponse.statusCode == 200) {
       print('lol: Leave applied successfully');
+      Map<String, dynamic> response = jsonDecode(jsonResponse.body);
+      if (response['isSuccess'] == true) {
+        Commonutils.showCustomToastMessageLong(
+            'Leave Applied Successfully', context, 0, 3);
+        Navigator.of(context).pop();
+      }
     } else {
       print('lol: Failed to apply leave');
+
+      Commonutils.showCustomToastMessageLong(
+          'Something went wrong, please try again later', context, 1, 3);
     }
   }
 
   String getLeaveType(int leaveCode) {
     switch (leaveCode) {
       case 100:
-        return 'PT | PRESENT';
+        return 'PT';
       case 101:
-        return 'AT | ABSENT';
+        return 'AT';
       case 102:
-        return 'CL | CASUAL LEAVE';
+        return 'CL';
       case 103:
-        return 'PL | PRIVILEGE LEAVE';
+        return 'PL';
       case 104:
-        return 'LWP | LEAVE WITHOUT PAY';
+        return 'LWP';
       case 160:
-        return 'WFH | WORK FROM HOME';
+        return 'WFH';
       case 179:
-        return 'LL | LONG LEAVE';
+        return 'LL';
       default:
         return 'Unknown Leave Type';
     }
