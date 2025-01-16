@@ -6,11 +6,14 @@ import 'dart:math';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Commonutils.dart';
+import 'package:hrms/Constants.dart';
 import 'package:hrms/Model%20Class/LookupDetail.dart';
 import 'package:hrms/SharedPreferencesHelper.dart';
 import 'package:hrms/api%20config.dart';
 import 'package:hrms/holiday_model.dart';
+import 'package:hrms/main.dart';
 import 'package:hrms/styles.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -32,7 +35,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   final TextEditingController _fromDateController = TextEditingController();
   final TextEditingController _toDateController = TextEditingController();
   final TextEditingController _leaveReasonController = TextEditingController();
-  int? selectedDropdownId;
+  int? selectedleaveTypeDropdownId;
   int? selectedDropdownLookupDetailId;
   int? selectedLeaveDescriptionId;
   // String? selectedValue;
@@ -44,7 +47,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   DateTime? selectedFromDate;
   DateTime? selectedToDate;
 
-  bool dropDownValidator = false;
+  bool leaveTypeValidator = false;
+  bool leaveDescriptionValidator = false;
 
   bool? isHalfDayLeave = false;
 
@@ -80,7 +84,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
       Commonutils.showCustomToastMessageLong(
-          'Please Check the Internet Connection', context, 1, 4);
+          'Please Check the Internet Connection', context, 1, 5);
       FocusScope.of(context).unfocus();
       throw Exception(''); // 'Please Check the Internet Connection'
     }
@@ -231,13 +235,28 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                       leaveRequestText(),
                       const SizedBox(height: 10),
                       leaveTypeDropdown(),
-                      if (dropDownValidator) leaveTypeValidation(),
+                      if (leaveTypeValidator)
+                        Column(
+                          children: [
+                            leaveTypeValidation(),
+                            // const SizedBox(height: 10),
+                          ],
+                        ),
                       const SizedBox(height: 10),
                       if (selectedDropdownLookupDetailId == 102 ||
                           selectedDropdownLookupDetailId == 103)
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             leaveDescriptionDropdown(),
+                            if (leaveDescriptionValidator)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  leaveDescriptionValidation(),
+                                  // const SizedBox(height: 10),
+                                ],
+                              ),
                             const SizedBox(height: 10),
                           ],
                         ),
@@ -249,7 +268,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                             const SizedBox(height: 10),
                           ],
                         ),
-                      const SizedBox(height: 10),
                       fromDateField(),
                       const SizedBox(height: 10),
                       if (selectedDropdownLookupDetailId != 102)
@@ -261,7 +279,15 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                         ),
                       leaveDescription(),
                       const SizedBox(height: 20),
-                      addLeaveBtn()
+                      addLeaveBtn(),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          checkLeaveStatus(
+                              empSelfLeaves, selectedFromDate, selectedToDate);
+                        },
+                        child: const Text('test btn'),
+                      ),
                     ],
                   ),
                 ),
@@ -384,16 +410,17 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         break;
       case 103: // PL | 103 // PRIVILEGE LEAVE
         {
-          DateTime? initialDate = calculatePLInitialDate(holidayList);
+          // DateTime? initialDate = calculatePLInitialDate(holidayList);
           // DateTime? initialDate = calculatePLInitialDate(holidayList);
           Commonutils.launchDatePicker(
             context,
             // initialDate: initialDate,
             firstDate: today,
             selectableDayPredicate: (DateTime date) => selectableDayPredicate(
-                date,
-                leaves: holidayList,
-                initialDate: initialDate),
+              date,
+              leaves: holidayList,
+              // initialDate: initialDate,
+            ),
             onDateSelected: onDateSelectedForFromDate,
 
             /* (pickedDay) {
@@ -754,18 +781,29 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     );
   }
 
+  Container leaveDescriptionValidation() {
+    return Container(
+      padding: const EdgeInsets.only(left: 15, top: 8),
+      child: const Text(
+        'Please select Leave Description',
+        style: TextStyle(fontSize: 12, color: Colors.red),
+      ),
+    );
+  }
+
 //MARK: Add Leave Btn
   SizedBox addLeaveBtn() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
+          validateFields();
           // _fromDateController.text = '2022-01-01';
-          print(
+          /*  print(
               'selectedDropdownLookupDetailId: $selectedDropdownLookupDetailId');
 
           if (_formKey.currentState!.validate()) {
-            print('_formKey selectedTypeCdId: $selectedDropdownId');
+            print('_formKey selectedTypeCdId: $selectedleaveTypeDropdownId');
             print('_formKey selectedValue: $selectedValue');
             print('_formKey selectedName: $selectedName');
             print('_formKey isHalfDay: $isHalfDayLeave');
@@ -776,14 +814,15 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           }
 
           setState(() {
-            if (selectedDropdownId == null || selectedDropdownId == -1) {
-              dropDownValidator = true;
+            if (selectedleaveTypeDropdownId == null ||
+                selectedleaveTypeDropdownId == -1) {
+              leaveTypeValidator = true;
             } else {
-              dropDownValidator = false;
+              leaveTypeValidator = false;
             }
           });
 
-          leaveValidation(selectedDropdownLookupDetailId);
+          leaveValidation(selectedDropdownLookupDetailId); */
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Styles.primaryColor,
@@ -802,6 +841,43 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     );
   }
 
+  void validateFields() {
+    print('selectedDropdownLookupDetailId: $selectedDropdownLookupDetailId');
+
+    if (!_formKey.currentState!.validate()) {
+      print('_formKey selectedTypeCdId: $selectedleaveTypeDropdownId');
+      print('_formKey selectedValue: $selectedValue');
+      print('_formKey selectedName: $selectedName');
+      print('_formKey isHalfDay: $isHalfDayLeave');
+      print('_formKey From Date: ${_fromDateController.text}');
+      print('_formKey To Date: ${_toDateController.text}');
+      print('_formKey Leave Reason: ${_leaveReasonController.text}');
+    }
+    // validationForLL();
+    setState(() {
+      if (selectedleaveTypeDropdownId == null ||
+          selectedleaveTypeDropdownId == -1) {
+        leaveTypeValidator = true;
+      } else {
+        leaveTypeValidator = false;
+      }
+      print('_formKey selectedLeaveDescriptionId: $selectedLeaveDescriptionId');
+      if (selectedLeaveDescriptionId == null ||
+          selectedLeaveDescriptionId == -1) {
+        leaveDescriptionValidator = true;
+      } else {
+        leaveDescriptionValidator = false;
+      }
+
+      if (_formKey.currentState!.validate() &&
+          !leaveTypeValidator &&
+          !leaveDescriptionValidator) {
+        print('Form Validated succussfully');
+        leaveValidation(selectedDropdownLookupDetailId);
+      }
+    });
+  }
+
   void validationForLL() {
     if (selectedDropdownLookupDetailId == 179) {
       // LL Validation
@@ -809,7 +885,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         final difference = selectedToDate?.difference(selectedFromDate!).inDays;
         if (difference! < 7) {
           Commonutils.showCustomToastMessageLong(
-              'Long Leave must be apply minimum 7 days', context, 1, 4);
+              'Long Leave must be apply minimum 7 days', context, 1, 5);
           return;
         }
       }
@@ -822,35 +898,173 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         getAppliedCLLeaveDateInMonth(empSelfLeaves, fromDateObj);
     final hasApprovedCLLeaveInMonth =
         checkApprovedCLLeaveDateInMonth(empSelfLeaves, fromDateObj);
-
+    print('hasAppliedCLLeaveInMonth: $hasAppliedCLLeaveInMonth');
     if (hasAppliedCLLeaveInMonth != null) {
       final message =
           "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${getMonthName(selectedFromDate!)} on this '${formatStringDate(selectedFromDate!)}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.";
       showCustomDialog(context, hasAppliedCLLeaveInMonth,
           title: 'Confirmation', message: message);
-      print(
-          "checkCLLeave: Employee has already applied for a leave in this month'CL'  with status 'Approved' or 'Pending'. Multiple CL leaves are not allowed in the same month.");
     } else if (hasApprovedCLLeaveInMonth != null) {
       const message =
           '''Employee has already applied for a leave in this month. 'CL' with status 'Approved'. Multiple CL leaves are not allowed in the same month.''';
-      showCustomDialog(context, hasAppliedCLLeaveInMonth,
-          isActions: false, title: 'Warning', message: message);
-      /* ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message,
-          ),
-        ),
-      ); */
+      /*   showCustomDialog(context, hasAppliedCLLeaveInMonth,
+          isActions: false, title: 'Warning', message: message); */
+      Commonutils.showCustomToastMessageLong(message, context, 1, 5);
     } else {
       print("checkCLLeave: Employee can apply for 'CL' leave in this month.");
       applyLeave();
     }
   }
 
+  bool checkLeaveDates(List<EmployeeSelfLeaves> empSelfLeaves,
+      DateTime selectedFromDate, DateTime? selectedToDate) {
+    for (var leave in empSelfLeaves) {
+      if ((leave.status == 'Pending' || leave.status == 'Accepted') &&
+          leave.isDeleted == false) {
+        if (leave.fromDate != null && leave.toDate != null) {
+          if ((selectedFromDate.isAtSameMomentAs(leave.fromDate!) ||
+                  (selectedToDate != null &&
+                      selectedToDate.isAtSameMomentAs(leave.toDate!))) ||
+              (selectedFromDate.isAfter(leave.fromDate!) &&
+                  selectedFromDate.isBefore(leave.toDate!)) ||
+              (selectedToDate != null &&
+                  selectedToDate.isAfter(leave.fromDate!) &&
+                  selectedToDate.isBefore(leave.toDate!))) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+/*   void checkLeaveisWithinLeaveRange(List<EmployeeSelfLeaves> empSelfLeaves,
+      DateTime? selectedFromDate, DateTime? selectedToDate) {
+    // Loop through the list of EmployeeSelfLeaves
+    print('Selected dates: $selectedFromDate | $selectedToDate');
+    for (var leave in empSelfLeaves) {
+      // Ensure the entry is not deleted
+      if (leave.isDeleted != true) {
+        // Get the leave date range
+        DateTime? leaveFromDate = leave.fromDate;
+        DateTime? leaveToDate = leave.toDate;
+        bool? isWithinRange;
+        // Check if the selected dates fall within the leave range
+        if (leaveFromDate != null && leaveToDate != null) {
+          isWithinRange = selectedFromDate!
+                  .isAfter(leaveFromDate.subtract(const Duration(days: 1))) &&
+              selectedFromDate
+                  .isBefore(leaveToDate.add(const Duration(days: 1))) &&
+              (selectedToDate == null ||
+                  (selectedToDate.isAfter(
+                          leaveFromDate.subtract(const Duration(days: 1))) &&
+                      selectedToDate
+                          .isBefore(leaveToDate.add(const Duration(days: 1)))));
+        }
+        if (isWithinRange!) {
+          print(
+              'Selected dates fall within the leave range of ${leave.fromDate} to ${leave.toDate}.');
+        } else {
+          print(
+              'Selected dates do not fall within the leave range of ${leave.fromDate} to ${leave.toDate}.');
+        }
+      }
+    }
+  }
+ */
+  bool checkLeaveStatus(List<EmployeeSelfLeaves> empSelfLeaves,
+      DateTime? selectedFromDate, DateTime? selectedToDate) {
+    // Loop through the list of EmployeeSelfLeaves
+    print('Selected dates: $selectedFromDate | $selectedToDate');
+    for (var leave in empSelfLeaves) {
+      // Ensure the entry is not deleted
+      if (leave.isDeleted != true &&
+          leave.status == 'Pending' &&
+          leave.status == 'Accepted') {
+        // Get the leave date range
+        DateTime? leaveFromDate = leave.fromDate;
+        DateTime? leaveToDate = leave.toDate;
+
+        // Ensure leave dates are not null
+        if (leaveFromDate != null && leaveToDate != null) {
+          // Check for overlap
+          bool isWithinRange = selectedFromDate!
+                  .isBefore(leaveToDate.add(const Duration(days: 1))) &&
+              (selectedToDate == null ||
+                  selectedToDate.isAfter(
+                      leaveFromDate.subtract(const Duration(days: 1))));
+
+          if (isWithinRange) {
+            print(
+                'Error: Selected dates overlap with an existing leave range of ${leave.fromDate} to ${leave.toDate}.');
+            return false; // Exit as the leave cannot be applied
+          }
+        }
+      }
+    }
+
+    print(
+        'Success: Selected dates do not overlap with any existing leave ranges.');
+    return true;
+  }
+
+  bool checkLeaveisApprovedStatus(List<EmployeeSelfLeaves> empSelfLeaves,
+      DateTime? selectedFromDate, DateTime? selectedToDate) {
+    // Loop through the list of EmployeeSelfLeaves
+    print('Selected dates: $selectedFromDate | $selectedToDate');
+    for (var leave in empSelfLeaves) {
+      // Ensure the entry is not deleted
+      if (leave.isDeleted != true &&
+          leave.status == 'Pending' &&
+          leave.status == 'Accepted') {
+        // Get the leave date range
+        DateTime? leaveFromDate = leave.fromDate;
+        DateTime? leaveToDate = leave.toDate;
+
+        // Ensure leave dates are not null
+        if (leaveFromDate != null && leaveToDate != null) {
+          // Check for overlap
+          bool isWithinRange = selectedFromDate!
+                  .isBefore(leaveToDate.add(const Duration(days: 1))) &&
+              (selectedToDate == null ||
+                  selectedToDate.isAfter(
+                      leaveFromDate.subtract(const Duration(days: 1))));
+
+          if (isWithinRange) {
+            print(
+                'Error: Selected dates overlap with an existing leave range of ${leave.fromDate} to ${leave.toDate}.');
+            return false; // Exit as the leave cannot be applied
+          }
+        }
+      }
+    }
+
+    print(
+        'Success: Selected dates do not overlap with any existing leave ranges.');
+    return true;
+  }
+
+  /* 
+  void checkPLLeave(DateTime selectedFromDate, DateTime? selectedToDate) {
+    // check pl leaves on date is already present or not and leave status pending, accepted or approved and isDeleted is not true
+    final hasAppliedPLLeaveInMonth =
+        getAppliedPLLeaveDateInMonth(empSelfLeaves, dateTime);
+    if (hasAppliedPLLeaveInMonth != null) {
+      const message =
+          """Employee has already applied for a leave in this month. 'PL' with status 'Pending', 'Accepted' or 'Approved'. Multiple PL leaves are not allowed in the same month.""";
+      Commonutils.showCustomToastMessageLong(message, context, 1, 5);
+    } else {
+      print("checkPLLeave: Employee can apply for 'PL' leave in this month.");
+      applyLeave();
+    }
+  } */
+
   DateTime? checkApprovedCLLeaveDateInMonth(
       List<EmployeeSelfLeaves> empSelfLeaves, DateTime fromDateObj) {
     for (var leave in empSelfLeaves) {
-      if (leave.leaveType == 'CL' && leave.status == 'Approved') {
+      if (leave.leaveType == 'CL' &&
+          leave.status == 'Approved' &&
+          leave.isDeleted != true) {
         // Check if the month and year match
         if (leave.fromDate != null &&
             leave.fromDate!.year == fromDateObj.year &&
@@ -870,6 +1084,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         break;
       case 103:
         // PL Validation
+        // checkPLLeave(selectedFromDate!, selectedToDate);
         break;
       case 104:
         // LWP Validation
@@ -887,7 +1102,27 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       List<EmployeeSelfLeaves> empSelfLeaves, DateTime fromDateObj) {
     for (var leave in empSelfLeaves) {
       if (leave.leaveType == 'CL' &&
-          (leave.status == 'Pending' || leave.status == 'Accepted')) {
+          ((leave.status == 'Pending' || leave.status == 'Accepted') &&
+              leave.isDeleted != true)) {
+        // Check if the month and year match
+        if (leave.fromDate != null &&
+            leave.fromDate!.year == fromDateObj.year &&
+            leave.fromDate!.month == fromDateObj.month) {
+          print('test22: ${leave.isDeleted}');
+          print('test22: ${leave.fromDate}');
+          return leave.fromDate;
+        }
+      }
+    }
+    return null;
+  }
+
+  /*  DateTime? getAppliedCLLeaveDateInMonth(
+      List<EmployeeSelfLeaves> empSelfLeaves, DateTime fromDateObj) {
+    for (var leave in empSelfLeaves) {
+      if (leave.leaveType == 'CL' &&
+          (leave.status == 'Pending' || leave.status == 'Accepted') &&
+          leave.isDeleted == false) {
         // Check if the month and year match
         if (leave.fromDate != null &&
             leave.fromDate!.year == fromDateObj.year &&
@@ -897,7 +1132,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       }
     }
     return null;
-  }
+  } */
 
   String getMonthName(DateTime date) {
     return DateFormat('MMMM').format(date);
@@ -922,7 +1157,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           title: Text(
             // 'Confirmation',
             title,
-            style: TextStyle(
+            style: const TextStyle(
               color: Styles.primaryColor,
             ),
           ),
@@ -948,9 +1183,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                applyLeave().whenComplete(() {
-                  Navigator.of(context).pop();
-                });
+                applyLeave();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Styles.primaryColor,
@@ -1012,13 +1245,15 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
       Commonutils.showCustomToastMessageLong(
-          'Please Check the Internet Connection', context, 1, 3);
+          'Please Check the Internet Connection', context, 1, 5);
       FocusScope.of(context).unfocus();
       return;
     }
-
+    final tokenStatus = await Commonutils.checkTokenStatus();
+    if (!tokenStatus) {
+      return;
+    }
     // check token validation
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final employeeId = prefs.getString("employeeId");
     final accessToken = prefs.getString("accessToken") ?? '';
@@ -1060,16 +1295,18 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     if (jsonResponse.statusCode == 200) {
       print('lol: Leave applied successfully');
       Map<String, dynamic> response = jsonDecode(jsonResponse.body);
-      if (response['isSuccess'] == true) {
+      if (response['isSuccess']) {
         Commonutils.showCustomToastMessageLong(
             'Leave Applied Successfully', context, 0, 3);
         Navigator.of(context).pop();
+      } else {
+        print('lol: error: ${response['message']}');
+        Commonutils.showCustomToastMessageLong(
+            response['message'] as String, context, 1, 3);
       }
     } else {
-      print('lol: Failed to apply leave');
-
       Commonutils.showCustomToastMessageLong(
-          'Something went wrong, please try again later', context, 1, 3);
+          'Something went wrong, please try again later', context, 1, 5);
     }
   }
 
@@ -1189,7 +1426,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                     ),
                   ),
                   isExpanded: true,
-                  value: selectedDropdownId,
+                  value: selectedleaveTypeDropdownId,
                   items: leaveTypes.asMap().entries.map((entry) {
                     final index = entry.key;
                     final item = entry.value;
@@ -1205,14 +1442,15 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                   }).toList(),
                   onChanged: (int? value) {
                     setState(() {
-                      selectedDropdownId = value!;
+                      selectedleaveTypeDropdownId = value!;
                       final selectedItem = leaveTypes.firstWhere((item) =>
                           item.lookupDetailId ==
-                          leaveTypes[selectedDropdownId!].lookupDetailId);
+                          leaveTypes[selectedleaveTypeDropdownId!]
+                              .lookupDetailId);
                       selectedDropdownLookupDetailId =
                           selectedItem.lookupDetailId;
                       print(
-                          'selectedDropdownLookupDetailId: ${leaveTypes[selectedDropdownId!].name} | $selectedDropdownLookupDetailId');
+                          'selectedDropdownLookupDetailId: ${leaveTypes[selectedleaveTypeDropdownId!].name} | $selectedDropdownLookupDetailId');
 
                       if (selectedDropdownLookupDetailId == 102 ||
                           selectedDropdownLookupDetailId == 103) {
@@ -1313,31 +1551,11 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                       ),
                     );
                   }).toList(),
-                  /* items: leaveDescriptions.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final item = entry.value;
-                    return DropdownMenuItem<int>(
-                      value: index,
-                      child: Text(
-                        item['description']!,
-                        style: txStyFS15FFc,
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    );
-                  }).toList(), */
                   onChanged: (int? value) {
                     print('Selected description: $value');
                     setState(() {
                       selectedLeaveDescriptionId = value!;
                     });
-                    /*  setState(() {
-                      selectedDescriptionId = value!;
-                      final selectedItem =
-                          leaveDescriptions[selectedDescriptionId!];
-                      print(
-                          'Selected description: ${selectedItem['description']}');
-                    }); */
                   },
                   dropdownStyleData: DropdownStyleData(
                     decoration: const BoxDecoration(
@@ -1364,167 +1582,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           }),
     );
   }
-
-  /* 
-  Widget buildDropdown() {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 45,
-      alignment: Alignment.centerLeft,
-      decoration: BoxDecoration(
-        border: Border.all(color: Styles.primaryColor, width: 1.5),
-        borderRadius: BorderRadius.circular(5.0),
-        color: Colors.white,
-      ),
-      child: FutureBuilder(
-          future: futreLeaveTypes,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Padding(
-                padding: EdgeInsets.only(left: 14),
-                child: Text('Loading Leaves..'),
-              );
-            } else if (snapshot.hasError) {
-              return const Text('Error fetching data');
-            } else {
-              final List<LookupDetail> leaveTypes = snapshot.data ?? [];
-
-              if (leaveTypes.isNotEmpty) {
-                return DropdownButtonHideUnderline(
-                  child: DropdownButton2<int>(
-                    hint: Text(
-                      'Select Leave Type',
-                      style: txStyFS15FFc,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    iconStyleData: const IconStyleData(
-                      icon: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: Colors.black54,
-                      ),
-                    ),
-                    isExpanded: true,
-                    value: selectedDropdownId,
-                    items: leaveTypes.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final item = entry.value;
-                      return DropdownMenuItem<int>(
-                        value: index,
-                        child: Text(
-                          item.name,
-                          style: txStyFS15FFc,
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (int? value) {
-                      print('xxx: $value');
-                      setState(() {
-                        selectedDropdownId = value!;
-                      });
-                    },
-                    dropdownStyleData: DropdownStyleData(
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(12),
-                          bottomLeft: Radius.circular(12),
-                        ),
-                        color: Colors.white,
-                      ),
-                      offset: const Offset(0, 0),
-                      scrollbarTheme: ScrollbarThemeData(
-                        radius: const Radius.circular(40),
-                        thickness: MaterialStateProperty.all<double>(6),
-                        thumbVisibility: MaterialStateProperty.all<bool>(true),
-                      ),
-                    ),
-                    menuItemStyleData: const MenuItemStyleData(
-                      height: 40,
-                      padding: EdgeInsets.only(left: 14, right: 20),
-                    ),
-                  ),
-                );
-              } else {
-                return const Text('No data found');
-              }
-            }
-/* 
-        return DropdownButtonHideUnderline(
-          child: DropdownButton2<int>(
-            hint: Text(
-              'Select Leave Type',
-              style: txStyFS15FFc,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
-            iconStyleData: const IconStyleData(
-              icon: Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: Colors.black54,
-              ),
-            ),
-            isExpanded: true,
-            items: testdropdownItems.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              return DropdownMenuItem<int>(
-                value: index,
-                child: Text(
-                  item['item'] as String,
-                  style: txStyFS15FFc,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              );
-            }).toList(),
-            value: selectedDropdownId,
-            onChanged: (int? value) {
-              setState(() {
-                selectedDropdownId = value!;
-                print('selectedTypeCdId==$selectedDropdownId');
-                if (selectedDropdownId != -1) {
-                  selectedValue = selectedDropdownId != null
-                      ? testdropdownItems[selectedDropdownId!]['value'] as String
-                      : '';
-                  selectedName =
-                      testdropdownItems[selectedDropdownId!]['item'] as String;
-                  print("selectedValue: $selectedValue");
-                  print("selectedName: $selectedName");
-                } else {
-                  print("==========");
-                  print(selectedValue);
-                  print(selectedName);
-                }
-              });
-            },
-            dropdownStyleData: DropdownStyleData(
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
-                ),
-                color: Colors.white,
-              ),
-              offset: const Offset(0, 0),
-              scrollbarTheme: ScrollbarThemeData(
-                radius: const Radius.circular(40),
-                thickness: MaterialStateProperty.all<double>(6),
-                thumbVisibility: MaterialStateProperty.all<bool>(true),
-              ),
-            ),
-            menuItemStyleData: const MenuItemStyleData(
-              height: 40,
-              padding: EdgeInsets.only(left: 14, right: 20),
-            ),
-          ),
-        );
-      */
-          }),
-    );
-  }
- */
 
   Container backgroundImage() {
     return Container(
@@ -1565,6 +1622,97 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     _fromDateController.clear();
     _toDateController.clear();
     _leaveReasonController.clear();
+  }
+
+  void showtimeoutdialog(BuildContext context) {
+    showDialog(
+      // barrierDismissible: false,
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              title: Column(
+                //mainAxisAlignment: MainAxisAlignment.,
+                children: [
+                  SizedBox(
+                    height: 50.0,
+                    width: 60.0,
+                    child: SvgPicture.asset(
+                      'assets/cislogo-new.svg',
+                      height: 120.0,
+                      width: 55.0,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 7.0,
+                  ),
+                  const Text(
+                    "Session Time Out",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Calibri',
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 3.0,
+                  ),
+                  const Text(
+                    "Please Login Again",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Calibri',
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    deleteLoginTime();
+                    onConfirmLogout(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(
+                        0xFFf15f22), // Change to your desired background color
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
+                    ),
+                  ),
+                  child: const Text(
+                    'Ok',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> deleteLoginTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('loginTime');
+  }
+
+  void onConfirmLogout(BuildContext context) {
+    SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
+    Commonutils.showCustomToastMessageLong(
+        "Logout Successfully", context, 0, 3);
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginPage()),
+      (route) => false,
+    );
   }
 
   onDateSelectedForFromDate(DateTime? pickedDay) {

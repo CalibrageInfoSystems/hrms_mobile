@@ -488,27 +488,6 @@ class _apply_leaveeState extends State<apply_leave> {
     return nextDate;
   }
 
-  bool disableDaysPredicateForCl(DateTime date, DateTime initialDate) {
-    // Check if date is a holiday based on fetched holidayList
-/*     for (final holiday in holidayList) {
-      if (holiday.fromDate.year == date.year &&
-          holiday.fromDate.month == date.month &&
-          holiday.fromDate.day == date.day) {
-        return false;
-      }
-    }
-
-    if (date.weekday == DateTime.saturday || date.weekday == DateTime.sunday) {
-      return false;
-    } */
-
-    if (date.isBefore(initialDate)) {
-      return false;
-    }
-
-    return true;
-  }
-
   Future<void> _selectDate(bool isTodayHoliday) async {
     setState(() {
       _isTodayHoliday = isTodayHoliday;
@@ -519,12 +498,13 @@ class _apply_leaveeState extends State<apply_leave> {
       Commonutils.showCustomToastMessageLong(
           "Please Select Leave Type To Select From Date", context, 1, 5);
     } else {
-      DateTime lastDate = DateTime(DateTime.now().year + 10);
       if (widget.buttonName == "CL" || selectedleaveName == "CL") {
-        DateTime today = DateTime.now();
+        //selectedDate = DateTime.now().add(Duration(days: 0));
+
+        // DateTime initialDate = selectedDate!;
         DateTime initialDate = DateTime.now();
 
-/*         initialDate = _getNextSelectableDate(initialDate, 3);
+        initialDate = _getNextSelectableDate(initialDate, 3);
         // Adjust the initial date if it doesn't satisfy the selectableDayPredicate
         if (_isTodayHoliday && initialDate.isBefore(DateTime.now())) {
           initialDate = _getNextSelectableDate(DateTime.now(), 1);
@@ -537,28 +517,34 @@ class _apply_leaveeState extends State<apply_leave> {
           initialDate = initialDate.add(const Duration(days: 1));
         }
         DateTime endDate = initialDate.add(Duration(days: 7));
-       
+        // DateTime tempEndDate = endDate; // Store the original end date
+
+        // Check for holidays within the 7-day range and adjust the end date accordingly
+        // for (int i = 0; i < 7; i++) {
+        //   if (_isHoliday(endDate)) {
+        //     endDate = endDate.add(const Duration(days: 1));
+        //   }
+        // }
         if (_isHoliday(endDate)) {
           endDate = endDate.add(const Duration(days: 1));
-        } */
+        }
 
-        initialDate = calculateCLInitialDate(holidayList);
         final DateTime? pickedDate = await showDatePicker(
           context: context,
           initialEntryMode: DatePickerEntryMode.calendarOnly,
           initialDate: initialDate,
-          firstDate: today,
-          lastDate: lastDate,
+          firstDate: DateTime.now().add(Duration(days: 1)),
+          lastDate: DateTime(2125),
           selectableDayPredicate: selectableDayPredicate,
-          /* selectableDayPredicate: (DateTime date) =>
-              disableDaysPredicateForFromDate(date, initialDate), */
           builder: (BuildContext context, Widget? child) {
             return Theme(
               data: ThemeData.light().copyWith(
                 colorScheme: ColorScheme.light(
-                  primary: Color(0xFFf15f22),
+                  primary: Color(0xFFf15f22), // header background color
+                  // onPrimary: Colors.white, // header text color
+                  // onSurface: Colors.black, // body text color
                 ),
-                dialogBackgroundColor: Colors.white,
+                dialogBackgroundColor: Colors.white, // background color
               ),
               child: child!,
             );
@@ -609,40 +595,48 @@ class _apply_leaveeState extends State<apply_leave> {
           });
         }
       } else {
-        DateTime initialDate = DateTime.now();
-        DateTime today = DateTime.now();
-/* 
+        selectedDate = DateTime.now();
+
+        DateTime initialDate = selectedDate!;
+
+        // Adjust the initial date if it doesn't satisfy the selectableDayPredicate
         if (_isTodayHoliday && initialDate.isBefore(DateTime.now())) {
           initialDate = DateTime.now().add(const Duration(days: 1));
         }
 
+        // Find the next selectable date after the initialDate
         while (!selectableDayPredicate(initialDate)) {
           initialDate = initialDate.add(const Duration(days: 1));
         }
         DateTime endDate = initialDate.add(Duration(days: 7));
+        // DateTime tempEndDate = endDate; // Store the original end date
 
+        // Check for holidays within the 7-day range and adjust the end date accordingly
+        // for (int i = 0; i < 7; i++) {
+        //   if (_isHoliday(endDate)) {
+        //     endDate = endDate.add(const Duration(days: 1));
+        //   }
+        // }
         if (_isHoliday(endDate)) {
           endDate = endDate.add(const Duration(days: 1));
-        } */
-        DateTime initialDateForPl = today.add(const Duration(days: 1));
+        }
 
-        initialDate = calculatePLInitialDate(holidayList);
-        print('xxx: $initialDate');
         final DateTime? pickedDate = await showDatePicker(
           context: context,
           initialEntryMode: DatePickerEntryMode.calendarOnly,
           initialDate: initialDate,
-          firstDate: today,
-          lastDate: lastDate,
-          selectableDayPredicate: (DateTime date) =>
-              disableDaysPredicateForFromDate(date, initialDateForPl),
+          firstDate: DateTime.now(),
+          lastDate: DateTime(2125),
+          selectableDayPredicate: selectableDayPredicate,
           builder: (BuildContext context, Widget? child) {
             return Theme(
               data: ThemeData.light().copyWith(
-                colorScheme: const ColorScheme.light(
-                  primary: Color(0xFFf15f22),
+                colorScheme: ColorScheme.light(
+                  primary: Color(0xFFf15f22), // header background color
+                  // onPrimary: Colors.white, // header text color
+                  // onSurface: Colors.black, // body text color
                 ),
-                dialogBackgroundColor: Colors.white,
+                dialogBackgroundColor: Colors.white, // background color
               ),
               child: child!,
             );
@@ -651,78 +645,51 @@ class _apply_leaveeState extends State<apply_leave> {
 
         if (pickedDate != null) {
           setState(() {
-            print('open todate picker: fromdate: $pickedDate');
+            // if (selectedleaveName == 'PL') {
+            //   selectedDate = pickedDate;
+            //   _fromdateController.text = DateFormat('dd-MM-yyyy').format(selectedDate);
+            //   selectedToDate = pickedDate.add(Duration(days: 7));
+            // } else {
+            //   selectedDate = pickedDate;
+            //   _fromdateController.text = DateFormat('dd-MM-yyyy').format(selectedDate);
+            // }
+            // if (selectedleaveName == 'LL') {
+            //   selectedDate = pickedDate;
+            //   _fromdateController.text = DateFormat('dd-MM-yyyy').format(selectedDate);
+            //
+            //   // Check if the original end date was a holiday and adjust the selectedToDate accordingly
+            //   if (_isHoliday(tempEndDate)) {
+            //     selectedToDate = tempEndDate.add(Duration(days: 1));
+            //   } else {
+            //     selectedToDate = tempEndDate;
+            //   }
+            // } else {
+            //   selectedDate = pickedDate;
+            //   _fromdateController.text = DateFormat('dd-MM-yyyy').format(selectedDate);
+            // }
             selectedDate = pickedDate;
-            _todateController.clear();
             _fromdateController.text =
                 DateFormat('dd-MM-yyyy').format(selectedDate!);
             fromDateSelected = true;
+            // if (selectedleaveName == 'LL') {
+            //   selectedDate = pickedDate;
+            //   _fromdateController.text = DateFormat('dd-MM-yyyy').format(selectedDate);
+            //   selectedToDate = pickedDate.add(Duration(days: 7)); // Adjust the end date accordingly
+            //
+            //   // Check if the adjusted end date is a holiday and adjust it accordingly
+            //   if (_isHoliday(selectedToDate!)) {
+            //     selectedToDate = selectedToDate!.add(const Duration(days: 1));
+            //   }
+            // } else {
+            //   selectedDate = pickedDate;
+            //   _fromdateController.text = DateFormat('dd-MM-yyyy').format(selectedDate);
+            // }
           });
         }
       }
     }
   }
 
-  bool disableDaysPredicateForFromDate(
-      DateTime date, DateTime initialDateForPl) {
-    print('disableDaysPredicateForFromDate: $initialDateForPl');
-
-    // Check if date is a holiday based on fetched holidayList
-    for (final holiday in holidayList) {
-      if (holiday.isActive) {
-        final fromDate = holiday.fromDate;
-        final toDate = holiday.toDate;
-
-        // Case 1: Single-day holiday
-        if (fromDate.year == date.year &&
-            fromDate.month == date.month &&
-            fromDate.day == date.day) {
-          return false; // Disable this date (holiday)
-        }
-
-        // Case 2: Range of holidays
-        if (date.isAfter(fromDate.subtract(const Duration(days: 1))) &&
-            date.isBefore(toDate!.add(const Duration(days: 1)))) {
-          return false; // Disable this date (holiday within range)
-        }
-      }
-    }
-
-    // Additional checks (e.g., disable weekends or earlier dates)
-    if (date.weekday == DateTime.saturday || date.weekday == DateTime.sunday) {
-      return false;
-    }
-    if (date.isBefore(initialDateForPl)) {
-      return false;
-    }
-
-    return true;
-  }
-
-/* 
-  bool disableDaysPredicateForFromDate(
-      DateTime date, DateTime initialDateForPl) {
-    print('disableDaysPredicateForFromDate: $initialDateForPl');
-    // Check if date is a holiday based on fetched holidayList
-    for (final holiday in holidayList) {
-      if (holiday.fromDate.year == date.year &&
-          holiday.fromDate.month == date.month &&
-          holiday.fromDate.day == date.day) {
-        return false;
-      }
-    }
-
-    if (date.weekday == DateTime.saturday || date.weekday == DateTime.sunday) {
-      return false;
-    }
-
-    if (date.isBefore(initialDateForPl)) {
-      return false;
-    }
-
-    return true;
-  }
-   */
   bool _isHoliday(DateTime date) {
     // Check if date is a holiday based on fetched holidayList
     for (final holiday in holidayList) {
@@ -735,68 +702,6 @@ class _apply_leaveeState extends State<apply_leave> {
     return false; // Date is not a holiday
   }
 
-  DateTime calculatePLInitialDate(List<Holiday_Model> leaves) {
-    // Step 1: Initialize the initialDate to the next day from the current date.
-    DateTime now = DateTime.now();
-    DateTime initialDate = now.add(Duration(days: 1));
-
-    // Step 2: Create a set of all leave dates from the Holiday_Model list.
-    Set<DateTime> leaveDates = {};
-    for (var leave in leaves) {
-      DateTime fromDate = leave.fromDate;
-      DateTime toDate = leave.toDate ?? leave.fromDate;
-      for (var date = fromDate;
-          date.isBefore(toDate.add(Duration(days: 1)));
-          date = date.add(Duration(days: 1))) {
-        leaveDates.add(DateTime(date.year, date.month, date.day));
-      }
-    }
-
-    // Step 3: Loop until initialDate is neither a Saturday, Sunday, nor a leave day.
-    while (initialDate.weekday == DateTime.saturday ||
-        initialDate.weekday == DateTime.sunday ||
-        leaveDates.contains(
-            DateTime(initialDate.year, initialDate.month, initialDate.day))) {
-      initialDate = initialDate.add(Duration(days: 1));
-    }
-
-    return initialDate;
-  }
-
-  DateTime calculateCLInitialDate(List<Holiday_Model> leaves) {
-    // Step 1: Initialize the initialDate to the current date.
-    DateTime now = DateTime.now();
-    DateTime initialDate = now;
-
-    // Step 2: Create a set of all leave dates from the Holiday_Model list.
-    Set<DateTime> leaveDates = {};
-    for (var leave in leaves) {
-      DateTime fromDate = leave.fromDate;
-      DateTime toDate = leave.toDate ??
-          leave.fromDate; // Handle null `toDate` as single-day leave.
-      for (var date = fromDate;
-          date.isBefore(toDate.add(Duration(days: 1)));
-          date = date.add(Duration(days: 1))) {
-        leaveDates.add(DateTime(date.year, date.month, date.day));
-      }
-    }
-
-    // Step 3: Add three working days.
-    int workingDaysAdded = 0;
-
-    while (workingDaysAdded < 3) {
-      initialDate = initialDate.add(Duration(days: 1));
-      if (initialDate.weekday != DateTime.saturday &&
-          initialDate.weekday != DateTime.sunday &&
-          !leaveDates.contains(
-              DateTime(initialDate.year, initialDate.month, initialDate.day))) {
-        workingDaysAdded++;
-      }
-    }
-
-    return initialDate;
-  }
-
   // bool selectableDayPredicate(DateTime date) {
   //   final saturday = date.weekday == DateTime.saturday;
   //   final sunday = date.weekday == DateTime.sunday;
@@ -807,6 +712,7 @@ class _apply_leaveeState extends State<apply_leave> {
   //   // Return true if it's not Saturday, not Sunday, not a holiday, and not before today
   //   return !saturday && !sunday && !isHoliday && date.isAfter(DateTime.now().subtract(Duration(days: 1)));
   // }
+
   // bool selectableToDayPredicate(DateTime date) {
   //   final fromDate = selectedDate ?? DateTime.now();
   //
@@ -974,12 +880,11 @@ class _apply_leaveeState extends State<apply_leave> {
   // }
 
   Future<void> _selectToDate() async {
-    print('open todate picker: $selectedDate');
     setState(() {
       _isTodayHoliday = isTodayHoliday;
     });
 
-    DateTime initialDate = selectedDate ?? DateTime.now();
+    DateTime initialDate = selectedToDate ?? selectedDate!;
 
     if (_isTodayHoliday && initialDate.isBefore(DateTime.now())) {
       initialDate = DateTime.now().add(const Duration(days: 1));
@@ -992,9 +897,9 @@ class _apply_leaveeState extends State<apply_leave> {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialEntryMode: DatePickerEntryMode.calendarOnly,
-      initialDate: selectedDate ?? initialDate,
-      firstDate: selectedDate ?? initialDate,
-      lastDate: DateTime(DateTime.now().year + 10),
+      initialDate: initialDate,
+      firstDate: selectedDate!,
+      lastDate: DateTime(2125),
       selectableDayPredicate: selectableDayPredicate,
       builder: (BuildContext context, Widget? child) {
         return Theme(
@@ -2167,9 +2072,7 @@ class _apply_leaveeState extends State<apply_leave> {
           "IsApprovalEscalated": null,
           "URL":
               "http://182.18.157.215:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
-          // "URL": "http://hrms.calibrage.in:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
-          // "URL": "https://hrms.calibrage.in:/", // Live
-          // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
+          //    "URL": "https://hrms.calibrage.in:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
           "EmployeeName": "${widget.employename}",
           // "getLeaveType": null,
           if (widget.buttonName == "test") ...{
@@ -2197,8 +2100,7 @@ class _apply_leaveeState extends State<apply_leave> {
         // };
         // String at = accessToken;
         // print('Request Headers: $_header');
-        print('ApplyLeaveUrl: $url');
-        print('ApplyLeaveUrl: ${json.encode(request)}');
+        print('Request Body: ${json.encode(request)}');
 
         final response = await http.post(
           url,
@@ -2398,8 +2300,7 @@ class _apply_leaveeState extends State<apply_leave> {
         "IsApprovalEscalated": null,
         "URL":
             "http://182.18.157.215:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
-        //"URL": "http://hrms.calibrage.in:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
-        // "URL": "https://hrms.calibrage.in:/", // Live
+        // "URL": "https://hrms.calibrage.in:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
         "EmployeeName": "${widget.employename}",
         // "getLeaveType": null,
         if (widget.buttonName == "test") ...{
@@ -2558,8 +2459,7 @@ class _apply_leaveeState extends State<apply_leave> {
         "Rejected": null,
         "Comments": null,
         "IsApprovalEscalated": null,
-        //"URL": "http://hrms.calibrage.in:/", // In development stage change url to this http://182.18.157.215:/
-        // "URL": "https://hrms.calibrage.in:/", // Live
+        //  "URL": "https://hrms.calibrage.in:/", // In development stage change url to this http://182.18.157.215:/
         "URL":
             "http://182.18.157.215:/", // In development stage change url to this http://182.18.157.215:/
         "EmployeeName": "${widget.employename}",
@@ -2707,7 +2607,6 @@ class _apply_leaveeState extends State<apply_leave> {
     //  }
   }
 
-//MARK: Pending cl status
   void ShowforCLdialog(BuildContext context, String formattedMonth,
       String formattedDate, DateTime clFromDate, Function(bool) _callback) {
     showDialog(
@@ -3064,6 +2963,7 @@ class _apply_leaveeState extends State<apply_leave> {
           ),
           body: Stack(
             children: [
+              // Background Image
               Container(
                 decoration: BoxDecoration(
                   image: DecorationImage(
@@ -3238,11 +3138,10 @@ class _apply_leaveeState extends State<apply_leave> {
                                                     availablecls != 0.0) ||
                                                 (item.name == 'PL' &&
                                                     availablepls != 0.0))
-                                              leaveTypeDropdown(item),
-                                          /*  DropdownMenuItem<int>(
+                                              DropdownMenuItem<int>(
                                                 value: item.lookupDetailId,
                                                 child: Text(item.name),
-                                              ), */
+                                              ),
                                         ],
                                       ),
                               ),
@@ -3361,7 +3260,6 @@ class _apply_leaveeState extends State<apply_leave> {
                             ],
                           ),
                         ),
-                      //MARK: From Date
                       Padding(
                         padding: EdgeInsets.only(left: 0, top: 10.0, right: 0),
                         child: GestureDetector(
@@ -3440,67 +3338,6 @@ class _apply_leaveeState extends State<apply_leave> {
                             },
                             child: Container(
                               width: MediaQuery.of(context).size.width,
-                              clipBehavior: Clip.antiAliasWithSaveLayer,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: const Color(0xFFf15f22), width: 1.5),
-                                borderRadius: BorderRadius.circular(5.0),
-                                color:
-                                    Colors.white, // Add white background color
-                              ),
-                              child: AbsorbPointer(
-                                child: SizedBox(
-                                  child: TextFormField(
-                                    controller: _todateController,
-                                    enabled: !isChecked && fromDateSelected,
-                                    style: const TextStyle(
-                                      fontFamily: 'Calibri',
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText: 'To Date',
-                                      hintStyle: const TextStyle(
-                                        color: Colors.black54,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Calibri',
-                                      ),
-                                      // contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 16.0, vertical: 15.0),
-                                      // Adjust padding as needed
-                                      suffixIcon: const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Icon(
-                                          Icons.calendar_today,
-                                          // Replace with your desired icon
-                                          color: Colors.black54,
-                                        ),
-                                      ),
-                                      /*  border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ), */
-                                      filled: true,
-                                      fillColor: !isChecked && fromDateSelected
-                                          ? Colors.white
-                                          : Colors.grey[
-                                              300], // Add this line to change background color
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            /* 
-                             Container(
-                              width: MediaQuery.of(context).size.width,
-                              clipBehavior: Clip.antiAlias,
                               decoration: BoxDecoration(
                                 border: Border.all(
                                     color: Color(0xFFf15f22), width: 1.5),
@@ -3519,18 +3356,6 @@ class _apply_leaveeState extends State<apply_leave> {
                                       fontWeight: FontWeight.w300,
                                     ),
                                     decoration: InputDecoration(
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ),
                                       hintText: 'To Date',
                                       hintStyle: TextStyle(
                                         color: Colors.black54,
@@ -3561,7 +3386,6 @@ class _apply_leaveeState extends State<apply_leave> {
                                 ),
                               ),
                             ),
-                       */
                           ),
                         ),
                       ),
@@ -3671,71 +3495,27 @@ class _apply_leaveeState extends State<apply_leave> {
                                       isLoading = true;
                                     });
                                     if (Validations()) {
-                                      checkLeavesAllocation(
-                                              _fromdateController.text.trim(),
-                                              selectedleaveValue)
-                                          .then((int value) {
-                                        /*  if (value) {
-                                          applyleave();
-                                        } else {
-                                          Commonutils
-                                              .showCustomToastMessageLong(
-                                                  Constants.plErrorMessage,
-                                                  context,
-                                                  1,
-                                                  3);
-                                        } */
-                                        print('statusCode: $value');
-
-                                        switch (value) {
-                                          case 102:
-                                            Commonutils.showCustomToastMessageLong(
-                                                'Please ensure the start and end dates fall within the same year',
-                                                // 'Years must be same while applying a leave',
-                                                context,
-                                                1,
-                                                3);
-                                            break;
-                                          case 200:
-                                            applyleave();
-                                            break;
-                                          case 400:
-                                            Commonutils
-                                                .showCustomToastMessageLong(
-                                                    Constants
-                                                        .plErrorMessage, // Constants.plErrorMessage
-                                                    context,
-                                                    1,
-                                                    3);
-                                            break;
-                                          case 500:
-                                            Commonutils.showCustomToastMessageLong(
-                                                'Something went wrong, please try again', // Constants.plErrorMessage
-                                                context,
-                                                1,
-                                                3);
-                                            break;
-                                        }
-                                      });
+                                      await applyleave();
                                     }
 
                                     setState(() {
                                       isLoading = false;
+                                      //fromDateSelected = false;
                                     });
                                   },
+                            child: Text(
+                              'Add Leave',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontFamily: 'Calibri'),
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4.0),
                               ),
-                            ),
-                            child: const Text(
-                              'Add Leave',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontFamily: 'Calibri'),
                             ),
                           ),
                         ),
@@ -4436,14 +4216,13 @@ class _apply_leaveeState extends State<apply_leave> {
       int currentYear = DateTime.now().year;
 
       final url = Uri.parse(baseUrl + GetHolidayList + '$currentYear');
+      print('fetchHoliday: $url');
       Map<String, String> headers = {
         'Content-Type': 'application/json',
         'Authorization': '$accessToken',
       };
       final response = await http.get(url, headers: headers);
 
-      print('fetchHolidayList: $url');
-      print('fetchHolidayList: ${response.body}');
       if (response.statusCode == 200) {
         List<dynamic> jsonData = jsonDecode(response.body);
         print('jsonData: $jsonData');
@@ -4857,7 +4636,7 @@ class _apply_leaveeState extends State<apply_leave> {
       return;
     }
     final url = Uri.parse(baseUrl + getdropdown + '$dayWorkStatus');
-    print('leave reason 2:${url}');
+    print('fetchDataleavetype :${url}');
     final response = await http.get(
       url,
       headers: {
@@ -4970,89 +4749,6 @@ class _apply_leaveeState extends State<apply_leave> {
           ],
         );
       },
-    );
-  }
-
-  Future<int> checkLeavesAllocation(String fromDate, int leaveTypeId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final empId = prefs.getString("employeeId") ?? "";
-
-    final apiUrl =
-        '$baseUrl$getleaveStatistics${fromDate.split('-')[2]}/$empId';
-    // 'http://182.18.157.215/HRMS/API/hrmsapi/Attendance/GetLeaveStatistics/2025/176';
-
-    Map<String, String> headers = {
-      'Content-Type': 'application/json',
-      'Authorization': accessToken,
-    };
-
-    final jsonResponse = await http.get(
-      Uri.parse(apiUrl),
-      headers: headers,
-    );
-
-    print('checkLeaves: $apiUrl');
-    print('checkLeaves: $jsonResponse');
-
-    if (selectedDate != null && selectedToDate != null) {
-      if (selectedDate!.year != selectedToDate!.year) {
-        return 102; // years different
-      }
-      /* else {
-        return 200; // years same
-      } */
-    }
-
-    if (jsonResponse.statusCode == 200) {
-      final Map<String, dynamic> response = jsonDecode(jsonResponse.body);
-
-      if (checkForLeavesAvailability(leaveTypeId, response) > 0) {
-        // return true;
-        return 200;
-      }
-      // return false;
-      return 400; // no leaves
-    }
-    // return false;
-    return 500; // api failed
-  }
-
-  double checkForLeavesAvailability(
-      int leaveTypeId, Map<String, dynamic> response) {
-    late double allocatedLeaves;
-    late double usedLeaves;
-    switch (leaveTypeId) {
-      case 102: // CL
-        allocatedLeaves = response['allottedCasualLeaves'] ?? 0.0;
-        usedLeaves = response['usedCasualLeavesInYear'] ?? 0.0;
-        break;
-      case 103: // PL
-        allocatedLeaves = response['allottedPrivilegeLeaves'] ?? 0.0;
-        usedLeaves = response['usedPrivilegeLeavesInYear'] ?? 0.0;
-        break;
-      case 104: // LWP
-        return 1;
-      case 160: // WFH
-        return 1;
-      case 179: // LL
-        return 1;
-    }
-    return allocatedLeaves.toDouble() - usedLeaves.toDouble();
-  }
-
-  DropdownMenuItem<int> leaveTypeDropdown(LookupDetail item) {
-    // final bool isDisabled = (item.name == 'PL' || item.name == 'CL');
-    return DropdownMenuItem<int>(
-      value: item.lookupDetailId,
-      // enabled: !isDisabled,
-      child: Text(
-        item.name,
-        style: TextStyle(
-          fontSize: 14,
-          fontFamily: 'Calibri',
-          // color: isDisabled ? Colors.grey : null,
-        ),
-      ),
     );
   }
 }

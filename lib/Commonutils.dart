@@ -1,8 +1,12 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hrms/Constants.dart';
+import 'package:hrms/SharedPreferencesHelper.dart';
+import 'package:hrms/main.dart';
 import 'package:hrms/styles.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Commonutils {
   static Future<void> launchDatePicker(
@@ -117,6 +121,19 @@ class Commonutils {
     if (date == null) return null;
     final DateFormat formatter = DateFormat('yyyy-MM-dd');
     return formatter.format(date);
+  }
+
+  static Future<bool> checkTokenStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final logintime = prefs.getString('loginTime') ?? 'Unknown';
+    DateTime formattedlogintime = DateTime.parse(logintime);
+    DateTime currentTime = DateTime.now();
+    Duration timeDifference = currentTime.difference(formattedlogintime);
+
+    if (timeDifference.inSeconds > 3600) {
+      return false;
+    }
+    return true;
   }
 }
 
