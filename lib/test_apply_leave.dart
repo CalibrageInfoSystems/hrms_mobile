@@ -285,6 +285,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                         onPressed: () {
                           checkLeaveStatus(
                               empSelfLeaves, selectedFromDate, selectedToDate);
+                          checkLeaveisApprovedStatus(
+                              empSelfLeaves, selectedFromDate, selectedToDate);
                         },
                         child: const Text('test btn'),
                       ),
@@ -979,8 +981,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     for (var leave in empSelfLeaves) {
       // Ensure the entry is not deleted
       if (leave.isDeleted != true &&
-          leave.status == 'Pending' &&
-          leave.status == 'Accepted') {
+          (leave.status == 'Pending' || leave.status == 'Accepted')) {
         // Get the leave date range
         DateTime? leaveFromDate = leave.fromDate;
         DateTime? leaveToDate = leave.toDate;
@@ -996,7 +997,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
 
           if (isWithinRange) {
             print(
-                'Error: Selected dates overlap with an existing leave range of ${leave.fromDate} to ${leave.toDate}.');
+                '''Error 1: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
             return false; // Exit as the leave cannot be applied
           }
         }
@@ -1004,7 +1005,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     }
 
     print(
-        'Success: Selected dates do not overlap with any existing leave ranges.');
+        'Success 1: Selected dates do not overlap with any existing leave ranges.');
     return true;
   }
 
@@ -1014,9 +1015,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     print('Selected dates: $selectedFromDate | $selectedToDate');
     for (var leave in empSelfLeaves) {
       // Ensure the entry is not deleted
-      if (leave.isDeleted != true &&
-          leave.status == 'Pending' &&
-          leave.status == 'Accepted') {
+      if (leave.isDeleted != true && leave.status == 'Approved') {
         // Get the leave date range
         DateTime? leaveFromDate = leave.fromDate;
         DateTime? leaveToDate = leave.toDate;
@@ -1032,7 +1031,52 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
 
           if (isWithinRange) {
             print(
-                'Error: Selected dates overlap with an existing leave range of ${leave.fromDate} to ${leave.toDate}.');
+                '''Error 2: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
+            return false; // Exit as the leave cannot be applied
+          }
+        }
+      }
+    }
+
+    print(
+        'Success 2: Selected dates do not overlap with any existing leave ranges.');
+    return true;
+  }
+
+/* bool isLeaveValid = checkLeaveStatus(
+  empSelfLeaves,
+  selectedFromDate,
+  selectedToDate,
+  ['Pending', 'Accepted'],
+  ['Approved'],
+);
+ */
+  bool checkLeaveStatus22(
+      List<EmployeeSelfLeaves> empSelfLeaves,
+      DateTime? selectedFromDate,
+      DateTime? selectedToDate,
+      List<String> statusesToCheck) {
+    // Loop through the list of EmployeeSelfLeaves
+    print('Selected dates: $selectedFromDate | $selectedToDate');
+    for (var leave in empSelfLeaves) {
+      // Ensure the entry is not deleted and status matches the statuses to check
+      if (leave.isDeleted != true && statusesToCheck.contains(leave.status)) {
+        // Get the leave date range
+        DateTime? leaveFromDate = leave.fromDate;
+        DateTime? leaveToDate = leave.toDate;
+
+        // Ensure leave dates are not null
+        if (leaveFromDate != null && leaveToDate != null) {
+          // Check for overlap
+          bool isWithinRange = selectedFromDate!
+                  .isBefore(leaveToDate.add(const Duration(days: 1))) &&
+              (selectedToDate == null ||
+                  selectedToDate.isAfter(
+                      leaveFromDate.subtract(const Duration(days: 1))));
+
+          if (isWithinRange) {
+            print(
+                '''Error: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
             return false; // Exit as the leave cannot be applied
           }
         }
@@ -2095,3 +2139,235 @@ class EmployeeSelfLeaves {
         "rejectedBy": rejectedBy,
       };
 }
+
+/* 
+[
+    {
+        "employeeId": 85,
+        "employeeName": "Suman D",
+        "code": "CIS00054",
+        "employeeLeaveId": 2710,
+        "usedCLsInMonth": 0.0,
+        "usedPLsInMonth": 0.0,
+        "leaveType": "PL",
+        "fromDate": "2025-02-12T00:00:00",
+        "toDate": "2025-02-13T00:00:00",
+        "leaveTypeId": 103,
+        "rejected": null,
+        "acceptedAt": null,
+        "acceptedBy": "",
+        "approvedAt": null,
+        "approvedBy": "",
+        "note": "test",
+        "status": "Pending",
+        "isApprovalEscalated": null,
+        "isHalfDayLeave": false,
+        "comments": null,
+        "createdAt": "2025-01-16T16:01:36.933",
+        "createdBy": "Suman",
+        "isLeaveUsed": false,
+        "isDeleted": null,
+        "rejectedAt": null,
+        "rejectedBy": null
+    },
+    {
+        "employeeId": 85,
+        "employeeName": "Suman D",
+        "code": "CIS00054",
+        "employeeLeaveId": 2709,
+        "usedCLsInMonth": 0.0,
+        "usedPLsInMonth": 0.0,
+        "leaveType": "CL",
+        "fromDate": "2025-12-01T00:00:00",
+        "toDate": "2025-12-01T00:00:00",
+        "leaveTypeId": 102,
+        "rejected": false,
+        "acceptedAt": "2025-01-16T14:55:54",
+        "acceptedBy": "Nikhitha Yathamshetty",
+        "approvedAt": "2025-01-16T14:56:03",
+        "approvedBy": "Nikhitha Yathamshetty",
+        "note": "dec 1st",
+        "status": "Approved",
+        "isApprovalEscalated": true,
+        "isHalfDayLeave": false,
+        "comments": "thrtrthrt",
+        "createdAt": "2025-01-16T14:52:18.593",
+        "createdBy": "Suman",
+        "isLeaveUsed": false,
+        "isDeleted": null,
+        "rejectedAt": null,
+        "rejectedBy": null
+    },
+    {
+        "employeeId": 85,
+        "employeeName": "Suman D",
+        "code": "CIS00054",
+        "employeeLeaveId": 2708,
+        "usedCLsInMonth": 0.0,
+        "usedPLsInMonth": 0.0,
+        "leaveType": "LL",
+        "fromDate": "2025-04-08T00:00:00",
+        "toDate": "2025-04-15T00:00:00",
+        "leaveTypeId": 179,
+        "rejected": null,
+        "acceptedAt": null,
+        "acceptedBy": "",
+        "approvedAt": null,
+        "approvedBy": "",
+        "note": "test",
+        "status": "Pending",
+        "isApprovalEscalated": null,
+        "isHalfDayLeave": false,
+        "comments": null,
+        "createdAt": "2025-01-16T11:56:08.953",
+        "createdBy": "Suman",
+        "isLeaveUsed": false,
+        "isDeleted": null,
+        "rejectedAt": null,
+        "rejectedBy": null
+    },
+    {
+        "employeeId": 85,
+        "employeeName": "Suman D",
+        "code": "CIS00054",
+        "employeeLeaveId": 2707,
+        "usedCLsInMonth": 0.0,
+        "usedPLsInMonth": 0.0,
+        "leaveType": "LWP",
+        "fromDate": "2025-02-03T00:00:00",
+        "toDate": "2025-02-04T00:00:00",
+        "leaveTypeId": 104,
+        "rejected": null,
+        "acceptedAt": null,
+        "acceptedBy": "",
+        "approvedAt": null,
+        "approvedBy": "",
+        "note": "test",
+        "status": "Pending",
+        "isApprovalEscalated": null,
+        "isHalfDayLeave": false,
+        "comments": null,
+        "createdAt": "2025-01-16T11:55:35.55",
+        "createdBy": "Suman",
+        "isLeaveUsed": false,
+        "isDeleted": null,
+        "rejectedAt": null,
+        "rejectedBy": null
+    },
+    {
+        "employeeId": 85,
+        "employeeName": "Suman D",
+        "code": "CIS00054",
+        "employeeLeaveId": 2706,
+        "usedCLsInMonth": 0.0,
+        "usedPLsInMonth": 0.0,
+        "leaveType": "PL",
+        "fromDate": "2025-01-16T00:00:00",
+        "toDate": "2025-01-16T00:00:00",
+        "leaveTypeId": 103,
+        "rejected": null,
+        "acceptedAt": null,
+        "acceptedBy": "",
+        "approvedAt": null,
+        "approvedBy": "",
+        "note": "test",
+        "status": "Pending",
+        "isApprovalEscalated": null,
+        "isHalfDayLeave": false,
+        "comments": null,
+        "createdAt": "2025-01-16T11:35:31.413",
+        "createdBy": "Suman",
+        "isLeaveUsed": false,
+        "isDeleted": null,
+        "rejectedAt": null,
+        "rejectedBy": null
+    },
+    {
+        "employeeId": 85,
+        "employeeName": "Suman D",
+        "code": "CIS00054",
+        "employeeLeaveId": 2705,
+        "usedCLsInMonth": 0.0,
+        "usedPLsInMonth": 0.0,
+        "leaveType": "PL",
+        "fromDate": "2025-02-16T00:00:00",
+        "toDate": "2025-02-16T00:00:00",
+        "leaveTypeId": 103,
+        "rejected": null,
+        "acceptedAt": null,
+        "acceptedBy": "",
+        "approvedAt": null,
+        "approvedBy": "",
+        "note": "test",
+        "status": "Pending",
+        "isApprovalEscalated": null,
+        "isHalfDayLeave": false,
+        "comments": null,
+        "createdAt": "2025-01-16T11:34:10.34",
+        "createdBy": "Suman",
+        "isLeaveUsed": false,
+        "isDeleted": null,
+        "rejectedAt": null,
+        "rejectedBy": null
+    }
+]
+
+
+
+bool checkLeaveStatus(List<EmployeeSelfLeaves> empSelfLeaves,
+DateTime? selectedFromDate, DateTime? selectedToDate) {
+// Loop through the list of EmployeeSelfLeaves
+print('Selected dates: $selectedFromDate | $selectedToDate');
+for (var leave in empSelfLeaves) {
+// Ensure the entry is not deleted
+if (leave.isDeleted != true &&
+    (leave.status == 'Pending' || leave.status == 'Accepted')) {
+  // Get the leave date range
+  DateTime? leaveFromDate = leave.fromDate;
+  DateTime? leaveToDate = leave.toDate;
+
+  // Ensure leave dates are not null
+  if (leaveFromDate != null && leaveToDate != null) {
+    // Check for overlap
+    bool isWithinRange = selectedFromDate!
+            .isBefore(leaveToDate.add(const Duration(days: 1))) &&
+        (selectedToDate == null ||
+            selectedToDate.isAfter(
+                leaveFromDate.subtract(const Duration(days: 1))));
+
+    if (isWithinRange) {
+      print(
+          '''Error 1: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
+      return false; // Exit as the leave cannot be applied
+    }
+  }
+}
+
+if (leave.isDeleted != true && leave.status == 'Approved') {
+  // Get the leave date range
+  DateTime? leaveFromDate = leave.fromDate;
+  DateTime? leaveToDate = leave.toDate;
+
+  // Ensure leave dates are not null
+  if (leaveFromDate != null && leaveToDate != null) {
+    // Check for overlap
+    bool isWithinRange = selectedFromDate!
+            .isBefore(leaveToDate.add(const Duration(days: 1))) &&
+        (selectedToDate == null ||
+            selectedToDate.isAfter(
+                leaveFromDate.subtract(const Duration(days: 1))));
+
+    if (isWithinRange) {
+      print(
+          '''Error 2: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
+      return false; // Exit as the leave cannot be applied
+    }
+  }
+}
+}
+
+print(
+  'Success 1: Selected dates do not overlap with any existing leave ranges.');
+return true;
+}
+ */
