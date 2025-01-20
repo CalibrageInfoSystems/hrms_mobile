@@ -61,7 +61,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   late LeaveValidationsModel leaveValidationsModel;
   // late Future<List<EmployeeSelfLeaves>> empSelfLeaves;
   late List<EmployeeSelfLeaves> empSelfLeaves;
-
   @override
   void initState() {
     super.initState();
@@ -74,6 +73,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   Future<void> initializeData() async {
     holidayList = await getLeaves();
     empSelfLeaves = await getEmpLeaves();
+    leaveValidationsModel = await getLeaveValidations();
   }
 
 //MARK: Dropdown API
@@ -280,16 +280,24 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                       leaveDescription(),
                       const SizedBox(height: 20),
                       addLeaveBtn(),
-                      const SizedBox(height: 20),
+                      /* const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
-                          checkLeaveStatus(
-                              empSelfLeaves, selectedFromDate, selectedToDate);
-                          checkLeaveisApprovedStatus(
-                              empSelfLeaves, selectedFromDate, selectedToDate);
+                          ensureLeaveAvailability(
+                            empSelfLeaves,
+                            selectedFromDate,
+                            selectedToDate,
+                            ['Pending', 'Accepted'],
+                          );
+                          /*  checkLeaveStatus22(
+                            empSelfLeaves,
+                            selectedFromDate,
+                            selectedToDate,
+                            ['Approved'],
+                          ); */
                         },
                         child: const Text('test btn'),
-                      ),
+                      ), */
                     ],
                   ),
                 ),
@@ -798,33 +806,11 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () {
-          validateFields();
-          // _fromDateController.text = '2022-01-01';
-          /*  print(
-              'selectedDropdownLookupDetailId: $selectedDropdownLookupDetailId');
-
-          if (_formKey.currentState!.validate()) {
-            print('_formKey selectedTypeCdId: $selectedleaveTypeDropdownId');
-            print('_formKey selectedValue: $selectedValue');
-            print('_formKey selectedName: $selectedName');
-            print('_formKey isHalfDay: $isHalfDayLeave');
-            print('_formKey From Date: ${_fromDateController.text}');
-            print('_formKey To Date: ${_toDateController.text}');
-            print('_formKey Leave Reason: ${_leaveReasonController.text}');
-            validationForLL();
+        onPressed: () async {
+          // validateFields();
+          if (validateFields()) {
+            getLeavesAllocationAndApplyLeave();
           }
-
-          setState(() {
-            if (selectedleaveTypeDropdownId == null ||
-                selectedleaveTypeDropdownId == -1) {
-              leaveTypeValidator = true;
-            } else {
-              leaveTypeValidator = false;
-            }
-          });
-
-          leaveValidation(selectedDropdownLookupDetailId); */
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Styles.primaryColor,
@@ -843,41 +829,45 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     );
   }
 
-  void validateFields() {
+  bool validateFields() {
     print('selectedDropdownLookupDetailId: $selectedDropdownLookupDetailId');
 
     if (!_formKey.currentState!.validate()) {
-      print('_formKey selectedTypeCdId: $selectedleaveTypeDropdownId');
-      print('_formKey selectedValue: $selectedValue');
-      print('_formKey selectedName: $selectedName');
+      print('_formKey selectedTypeCdId: $selectedDropdownLookupDetailId');
+      print('_formKey selectedLeaveDescription: $selectedLeaveDescriptionId');
       print('_formKey isHalfDay: $isHalfDayLeave');
       print('_formKey From Date: ${_fromDateController.text}');
       print('_formKey To Date: ${_toDateController.text}');
       print('_formKey Leave Reason: ${_leaveReasonController.text}');
     }
     // validationForLL();
-    setState(() {
-      if (selectedleaveTypeDropdownId == null ||
-          selectedleaveTypeDropdownId == -1) {
-        leaveTypeValidator = true;
-      } else {
-        leaveTypeValidator = false;
-      }
-      print('_formKey selectedLeaveDescriptionId: $selectedLeaveDescriptionId');
+
+    if (selectedleaveTypeDropdownId == null ||
+        selectedleaveTypeDropdownId == -1) {
+      leaveTypeValidator = true;
+    } else {
+      leaveTypeValidator = false;
+    }
+    print('_formKey selectedLeaveDescriptionId: $selectedLeaveDescriptionId');
+    if (selectedDropdownLookupDetailId == 102 &&
+        selectedDropdownLookupDetailId == 103) {
       if (selectedLeaveDescriptionId == null ||
           selectedLeaveDescriptionId == -1) {
         leaveDescriptionValidator = true;
       } else {
         leaveDescriptionValidator = false;
       }
+    }
 
-      if (_formKey.currentState!.validate() &&
-          !leaveTypeValidator &&
-          !leaveDescriptionValidator) {
-        print('Form Validated succussfully');
-        leaveValidation(selectedDropdownLookupDetailId);
-      }
-    });
+    if (_formKey.currentState!.validate() &&
+        !leaveTypeValidator &&
+        !leaveDescriptionValidator) {
+      print('Form Validated succussfully');
+      // leaveValidation(selectedDropdownLookupDetailId);
+      return true;
+    }
+    setState(() {});
+    return false;
   }
 
   void validationForLL() {
@@ -904,8 +894,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     if (hasAppliedCLLeaveInMonth != null) {
       final message =
           "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${getMonthName(selectedFromDate!)} on this '${formatStringDate(selectedFromDate!)}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.";
-      showCustomDialog(context, hasAppliedCLLeaveInMonth,
-          title: 'Confirmation', message: message);
+      showCustomDialog(context, title: 'Confirmation', message: message);
     } else if (hasApprovedCLLeaveInMonth != null) {
       const message =
           '''Employee has already applied for a leave in this month. 'CL' with status 'Approved'. Multiple CL leaves are not allowed in the same month.''';
@@ -973,7 +962,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       }
     }
   }
- */
+ */ /* 
   bool checkLeaveStatus(List<EmployeeSelfLeaves> empSelfLeaves,
       DateTime? selectedFromDate, DateTime? selectedToDate) {
     // Loop through the list of EmployeeSelfLeaves
@@ -1042,7 +1031,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         'Success 2: Selected dates do not overlap with any existing leave ranges.');
     return true;
   }
-
+ */
 /* bool isLeaveValid = checkLeaveStatus(
   empSelfLeaves,
   selectedFromDate,
@@ -1051,13 +1040,15 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   ['Approved'],
 );
  */
-  bool checkLeaveStatus22(
-      List<EmployeeSelfLeaves> empSelfLeaves,
-      DateTime? selectedFromDate,
-      DateTime? selectedToDate,
-      List<String> statusesToCheck) {
-    // Loop through the list of EmployeeSelfLeaves
-    print('Selected dates: $selectedFromDate | $selectedToDate');
+  bool ensureLeaveAvailability({
+    required List<EmployeeSelfLeaves> empSelfLeaves,
+    DateTime? selectedFromDate,
+    DateTime? selectedToDate,
+    required List<String> statusesToCheck,
+    int? leaveTypeId,
+  }) {
+    print(
+        'checkLeaveStatus22: argues: $selectedFromDate | $selectedToDate | $statusesToCheck | $leaveTypeId');
     for (var leave in empSelfLeaves) {
       // Ensure the entry is not deleted and status matches the statuses to check
       if (leave.isDeleted != true && statusesToCheck.contains(leave.status)) {
@@ -1074,17 +1065,48 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                   selectedToDate.isAfter(
                       leaveFromDate.subtract(const Duration(days: 1))));
 
+          print(
+              'checkLeaveStatus22 leaveTypeId: $leaveTypeId |  ${leave.fromDate} |  ${leave.toDate} | ${leave.status}');
+
           if (isWithinRange) {
             print(
-                '''Error: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
+                '''checkLeaveStatus22: Error: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
             return false; // Exit as the leave cannot be applied
+          }
+          if (leaveTypeId == 102 &&
+              leave.leaveType == 'CL' &&
+              leaveFromDate.month == selectedFromDate.month &&
+              leaveFromDate.year == selectedFromDate.year &&
+              ['Pending', 'Accepted'].contains(leave.status)) {
+            /*  final message =
+                "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${getMonthName(selectedFromDate)} on this '${formatStringDate(selectedFromDate!)}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.";
+             */
+
+            final message =
+                '''111 You have already a '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''';
+
+            showCustomDialog(context,
+                title: 'CL pending/accepted', message: message);
+            return throw Exception();
+          }
+          if (leaveTypeId == 102 &&
+              leave.leaveType == 'CL' &&
+              leaveFromDate.month == selectedFromDate.month &&
+              leaveFromDate.year == selectedFromDate.year &&
+              ['Approved'].contains(leave.status)) {
+            print('checkLeaveStatus22 leaveTypeId: $leaveTypeId');
+            final message =
+                '''222 You have already a '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''';
+
+            Commonutils.showCustomToastMessageLong(message, context, 1, 5);
+            return throw Exception();
           }
         }
       }
     }
 
     print(
-        'Success: Selected dates do not overlap with any existing leave ranges.');
+        'checkLeaveStatus22: Success: Selected dates do not overlap with any existing leave ranges.');
     return true;
   }
 
@@ -1099,7 +1121,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       Commonutils.showCustomToastMessageLong(message, context, 1, 5);
     } else {
       print("checkPLLeave: Employee can apply for 'PL' leave in this month.");
-      applyLeave();
     }
   } */
 
@@ -1120,25 +1141,34 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     return null;
   }
 
-  void leaveValidation(int? leaveTypeId) {
+  bool leaveValidation(int? leaveTypeId, double countOfLeaves) {
+    late bool isLeaveValid;
+    print('leaveValidation: $leaveTypeId | $countOfLeaves');
     switch (leaveTypeId) {
       case 102:
         // CL Validation
-        checkCLLeave(selectedFromDate!);
+        // checkCLLeave(selectedFromDate!);
         break;
       case 103:
         // PL Validation
+        isLeaveValid = plLeaveCondition(countOfLeaves);
         // checkPLLeave(selectedFromDate!, selectedToDate);
         break;
       case 104:
         // LWP Validation
+        isLeaveValid = true;
         break;
       case 160:
-      // WFH Validation
+        // WFH Validation
+        isLeaveValid = true;
       case 179:
         // LL Validation
+        isLeaveValid = llLeaveCondition();
         break;
+      default:
+        isLeaveValid = true;
     }
+    return isLeaveValid;
   }
 
   // leave.status == 'Approved'
@@ -1187,8 +1217,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   }
 
   void showCustomDialog(
-    BuildContext context,
-    DateTime? selectedFromDate, {
+    BuildContext context, {
     required String title,
     required String message,
     bool isActions = true,
@@ -1227,7 +1256,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                applyLeave();
+                // applyLeave();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Styles.primaryColor,
@@ -1767,6 +1796,199 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         selectedToDate = null;
         _toDateController.clear();
       });
+    }
+  }
+
+  Future<int> checkLeavesAllocation(
+      String fromDate, int? selectedDropdownLookupDetailId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString("accessToken") ?? '';
+    final empId = prefs.getString("employeeId") ?? "";
+
+    final apiUrl =
+        '$baseUrl$getleaveStatistics${fromDate.split('-')[2]}/$empId';
+    // 'http://182.18.157.215/HRMS/API/hrmsapi/Attendance/GetLeaveStatistics/2025/176';
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'Authorization': accessToken,
+    };
+
+    final jsonResponse = await http.get(
+      Uri.parse(apiUrl),
+      headers: headers,
+    );
+
+    print('checkLeaves: $apiUrl');
+
+    if (selectedFromDate != null && selectedToDate != null) {
+      if (selectedFromDate!.year != selectedToDate!.year) {
+        return 102; // years different
+      }
+    }
+
+    if (jsonResponse.statusCode == 200) {
+      final Map<String, dynamic> response = jsonDecode(jsonResponse.body);
+
+      bool isLeaveValid = leaveValidation(selectedDropdownLookupDetailId,
+          checkForLeavesAvailability(selectedDropdownLookupDetailId, response));
+      /* if (checkForLeavesAvailability(selectedDropdownLookupDetailId, response) >
+          0) {
+        return 200;
+      } */
+
+      return 200; /* 
+      if (isLeaveValid) {
+      }
+      return 400; // no leaves */
+    }
+    return 500; // api failed
+  }
+
+  double checkForLeavesAvailability(
+      int? leaveTypeId, Map<String, dynamic> response) {
+    late double allocatedLeaves;
+    late double usedLeaves;
+    double availableLeaves = 0;
+    switch (leaveTypeId) {
+      case 102: // CL
+        allocatedLeaves = response['allottedCasualLeaves'] ?? 0.0;
+        usedLeaves = response['usedCasualLeavesInYear'] ?? 0.0;
+        availableLeaves = allocatedLeaves.toDouble() - usedLeaves.toDouble();
+        break;
+      case 103: // PL
+        allocatedLeaves = response['allottedPrivilegeLeaves'] ?? 0.0;
+        usedLeaves = response['usedPrivilegeLeavesInYear'] ?? 0.0;
+        availableLeaves = allocatedLeaves.toDouble() - usedLeaves.toDouble();
+        break;
+      case 104: // LWP
+        // availableLeaves = response['totalLWPsInYear'] ?? 0.0;
+        availableLeaves = 1;
+        break;
+      case 160: // WFH
+        // availableLeaves = response['longLeavesInanYear'] ?? 0.0;
+        availableLeaves = 1;
+        break;
+      case 179: // LL
+        // availableLeaves = response['longLeavesInanYear'] ?? 0.0;
+        availableLeaves = 1;
+        break;
+    }
+    return availableLeaves;
+  }
+
+  bool plLeaveCondition(double countOfLeaves) {
+    print(
+        'plLeaveCondition: $countOfLeaves | $selectedFromDate | $selectedToDate | ${selectedToDate!.difference(selectedFromDate!).inDays}');
+    print(
+        'plLeaveCondition: ${selectedDropdownLookupDetailId == 103 && selectedFromDate == DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)}');
+    if (selectedDropdownLookupDetailId == 103 &&
+        selectedFromDate ==
+            DateTime(DateTime.now().year, DateTime.now().month,
+                DateTime.now().day)) {
+      print('plLeaveCondition: You cannot apply PL on current date');
+      Commonutils.showCustomToastMessageLong(
+          'You cannot apply PL on current date',
+          // 'Years must be same while applying a leave',
+          context,
+          1,
+          3);
+      return false;
+    }
+    if (selectedDropdownLookupDetailId == 103 &&
+        countOfLeaves <= selectedToDate!.difference(selectedFromDate!).inDays) {
+      Commonutils.showCustomToastMessageLong(
+          'You have only $countOfLeaves PL left',
+          // 'Years must be same while applying a leave',
+          context,
+          1,
+          3);
+      return false;
+    }
+    return true;
+  }
+
+  void getLeavesAllocationAndApplyLeave() {
+    checkLeavesAllocation(
+            _fromDateController.text.trim(), selectedDropdownLookupDetailId)
+        .then((int value) {
+      print('checkLeavesAllocation: $value');
+      switch (value) {
+        case 102:
+          Commonutils.showCustomToastMessageLong(
+              'Please ensure the start and end dates fall within the same year',
+              // 'Years must be same while applying a leave',
+              context,
+              1,
+              3);
+          break;
+        case 200:
+          // applyLeave();
+          final isAlreadyLeaveOnSameDateWithPendingStatus =
+              ensureLeaveAvailability(
+            empSelfLeaves: empSelfLeaves,
+            selectedFromDate: selectedFromDate,
+            selectedToDate: selectedToDate ?? selectedFromDate,
+            statusesToCheck: ['Pending', 'Accepted'],
+            leaveTypeId: selectedDropdownLookupDetailId,
+          );
+
+          final isAlreadyLeaveOnSameDateWithApprovedStatus =
+              ensureLeaveAvailability(
+            empSelfLeaves: empSelfLeaves,
+            selectedFromDate: selectedFromDate,
+            selectedToDate: selectedToDate ?? selectedFromDate,
+            statusesToCheck: ['Approved'],
+            leaveTypeId: selectedDropdownLookupDetailId,
+          );
+          if (!isAlreadyLeaveOnSameDateWithPendingStatus) {
+            /*    final message =
+                        "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${getMonthName(selectedFromDate!)} on this '${formatStringDate(selectedFromDate!)}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.";
+                    showCustomDialog(context,
+                        title: 'Test Confirmation', message: message); */
+            const message = 'Duplicate leave is not allowed.';
+            Commonutils.showCustomToastMessageLong(message, context, 1, 3);
+          } else if (!isAlreadyLeaveOnSameDateWithApprovedStatus) {
+            final message =
+                '''You have already a leave on ${getMonthName(selectedFromDate!)} to ${selectedToDate == null ? '' : getMonthName(selectedToDate!)} with the status of 'Approved'.''';
+
+            Commonutils.showCustomToastMessageLong(message, context, 1, 5);
+          } else {
+            // applyLeave();
+            Commonutils.showCustomToastMessageLong(
+                'Leave applied successfully!!!!', context, 0, 3);
+          }
+          break;
+        case 400:
+          Commonutils.showCustomToastMessageLong(
+              Constants.plErrorMessage, context, 1, 3);
+          break;
+        case 500:
+          Commonutils.showCustomToastMessageLong(
+              'Something went wrong, please try again', context, 1, 3);
+          break;
+      }
+    });
+  }
+
+  bool llLeaveCondition() {
+    // leaveValidationsModel
+    try {
+      final maxLongLeavesToApply =
+          leaveValidationsModel.mininumDaysToConsiderAsLongLeave;
+
+      if (maxLongLeavesToApply != null &&
+          maxLongLeavesToApply >
+              selectedToDate!.difference(selectedFromDate!).inDays) {
+        Commonutils.showCustomToastMessageLong(
+            'Long Leave must be apply minimum 7 days', context, 1, 3);
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      print('catch: $e');
+      rethrow;
     }
   }
 }
