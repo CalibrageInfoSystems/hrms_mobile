@@ -158,8 +158,7 @@ class Commonutils {
     final String day = dateTime.day.toString().padLeft(2, '0');
     final String month = monthNames[dateTime.month - 1];
     final String year = dateTime.year.toString();
-
-    return "$day-$month-$year";
+    return "$day $month $year";
   }
 
   static Future<bool> checkTokenStatus(BuildContext context) async {

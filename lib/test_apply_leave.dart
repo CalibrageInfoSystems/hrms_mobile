@@ -230,7 +230,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
 
   void login(String logintime) {
     DateTime currentTime = DateTime.now();
-    DateTime formattedlogintime = DateTime.parse(logintime!);
+    DateTime formattedlogintime = DateTime.parse(logintime);
     DateTime loginTime = formattedlogintime /* Replace with your login time */;
 
     // Calculate the time difference
@@ -725,7 +725,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () async {
-          // validateFields();
+          FocusScope.of(context).unfocus();
           if (validateFields()) {
             getLeavesAllocationAndApplyLeave();
           }
@@ -817,8 +817,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     } else if (hasApprovedCLLeaveInMonth != null) {
       const message =
           '''Employee has already applied for a leave in this month. 'CL' with status 'Approved'. Multiple CL leaves are not allowed in the same month.''';
-      /*   showCustomDialog(context, hasAppliedCLLeaveInMonth,
-          isActions: false, title: 'Warning', message: message); */
       Commonutils.showCustomToastMessageLong(message, context, 1, 5);
     } else {
       print("checkCLLeave: Employee can apply for 'CL' leave in this month.");
@@ -895,15 +893,27 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
               leave.leaveType == 'CL' &&
               leaveFromDate.month == formFromDate.month &&
               leaveFromDate.year == formFromDate.year &&
-              !['Rejected'].contains(leave.status)) {
+              !['Rejected', 'Approved'].contains(leave.status)) {
             final message =
-                '''You have already a '${leave.leaveType}' range of ${Commonutils.ddMMyyyyFormat(leave.fromDate)} ${selectedToDate != null ? 'to ${Commonutils.ddMMyyyyFormat(formToDate)}' : ''} with the status of '${leave.status}'.''';
+                '''Kindly confirm whether you wish to retract the previously submitted a leave on '${Commonutils.ddMMyyyyFormat(leave.fromDate)}' which has not yet been approved. Please click 'Confirm' to proceed with revoking the previously applied leave request or 'Cancel' to stop the creation of the current leave.''';
+            // '''You have already a '${leave.leaveType}' range of ${Commonutils.ddMMyyyyFormat(leave.fromDate)} ${selectedToDate != null ? 'to ${Commonutils.ddMMyyyyFormat(formToDate)}' : ''} with the status of '${leave.status}'.''';
 
             showCustomDialog(context, title: 'CL Overlap', message: message,
                 onConfirm: () {
               leaveIdsToDelete = leave.employeeLeaveId.toString();
               createLeave();
             });
+            return true;
+          }
+          if (leaveTypeId == 102 &&
+              leave.leaveType == 'CL' &&
+              leaveFromDate.month == formFromDate.month &&
+              leaveFromDate.year == formFromDate.year &&
+              ['Approved'].contains(leave.status)) {
+            final message =
+                '''${leave.employeeName} has a approved CL on this date '${Commonutils.ddMMyyyyFormat(leave.fromDate)}', so the leave request is not valid.''';
+            // 'You have already an approved CL leave on ${Commonutils.ddMMyyyyFormat(leave.fromDate)}';
+            Commonutils.showCustomToastMessageLong(message, context, 1, 5);
             return true;
           }
           /* if (leaveTypeId == 102 &&
@@ -1087,78 +1097,76 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
               ),
             ],
           ),
-          actions: isActions ? actions(context, onConfirm: onConfirm) : null,
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      onConfirm?.call();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Styles.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    child: const Text('Confirm',
+                        style: TextStyle(color: Colors.white)),
+                    /* style: ElevatedButton.styleFrom(
+                    backgroundColor: Styles.primaryColor,
+                  ), */
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      confirmedToSplitWFH = false;
+                      wfhId = null;
+                      // Add your submit logic here
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Styles.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    child: const Text('Cancel',
+                        style: TextStyle(color: Colors.white)),
+                    /* style: ElevatedButton.styleFrom(
+                    backgroundColor: Styles.primaryColor,
+                  ), */
+                  ),
+                ),
+              ],
+            )
+          ],
         );
       },
     );
   }
 
-  List<Widget> actions(BuildContext context,
-      {required void Function()? onConfirm}) {
-    return [
-      Row(
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: onConfirm,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Styles.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-              child:
-                  const Text('Confirm', style: TextStyle(color: Colors.white)),
-              /* style: ElevatedButton.styleFrom(
-                    backgroundColor: Styles.primaryColor,
-                  ), */
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                confirmedToSplitWFH = false;
-                wfhId = null;
-                // Add your submit logic here
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Styles.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-              child:
-                  const Text('Cancel', style: TextStyle(color: Colors.white)),
-              /* style: ElevatedButton.styleFrom(
-                    backgroundColor: Styles.primaryColor,
-                  ), */
-            ),
-          ),
-        ],
-      )
-    ];
-  }
-
   Future<void> createLeave() async {
-    bool isConnected = await Commonutils.checkInternetConnectivity();
-    if (!isConnected) {
-      Commonutils.showCustomToastMessageLong(
-          'Please Check the Internet Connection', context, 1, 5);
-      FocusScope.of(context).unfocus();
-      return;
-    }
+    try {
+      bool isConnected = await Commonutils.checkInternetConnectivity();
+      if (!isConnected) {
+        Commonutils.showCustomToastMessageLong(
+            'Please Check the Internet Connection', context, 1, 5);
+        return;
+      }
+      // checking session time out
+      await getLoginTime();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final employeeId = prefs.getString("employeeId");
+      final accessToken = prefs.getString("accessToken") ?? '';
+      final apiUrl = Uri.parse(baseUrl + applyleaveapi);
+      final loadedData = await SharedPreferencesHelper.getCategories();
+      final employeeName = loadedData?['employeeName'];
 
-    // check token validation
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final employeeId = prefs.getString("employeeId");
-    final accessToken = prefs.getString("accessToken") ?? '';
-    final apiUrl = Uri.parse(baseUrl + applyleaveapi);
-    final loadedData = await SharedPreferencesHelper.getCategories();
-    final employeeName = loadedData?['employeeName'];
-
-    final requestBody =
+      final requestBody =
 
 /*     jsonEncode({
       "employeeId": employeeId,
@@ -1181,59 +1189,67 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       "leaveReasonId": selectedDropdownLookupDetailId,
       "isFromAttendance": false,
     }); */
-        jsonEncode({
-      "employeeId": employeeId,
-      "fromDate": Commonutils.getDateWithOneDaySubtracted(selectedFromDate),
-      "toDate": Commonutils.getDateWithOneDaySubtracted(selectedToDate),
-      "leaveTypeId": selectedDropdownLookupDetailId,
-      "note": _leaveReasonController.text,
-      "acceptedBy": null,
-      "acceptedAt": null,
-      "approvedBy": null,
-      "approvedAt": null,
-      "rejected": null,
-      "comments": null,
-      "isApprovalEscalated": null,
-      "url": leaveApplyURL,
-      // "employeeName": employeeName,
-      // "getLeaveType": getLeaveType(selectedDropdownLookupDetailId!),
-      "isHalfDayLeave": isHalfDayLeave,
-      "leaveReasonId": selectedDropdownLookupDetailId,
-      "isFromAttendance": false,
+          jsonEncode({
+        "employeeId": employeeId,
+        "fromDate": Commonutils.getDateWithOneDaySubtracted(selectedFromDate),
+        "toDate": Commonutils.getDateWithOneDaySubtracted(selectedToDate),
+        "leaveTypeId": selectedDropdownLookupDetailId,
+        "note": _leaveReasonController.text,
+        "acceptedBy": null,
+        "acceptedAt": null,
+        "approvedBy": null,
+        "approvedAt": null,
+        "rejected": null,
+        "comments": null,
+        "isApprovalEscalated": null,
+        "url": leaveApplyURL,
+        // "employeeName": employeeName,
+        // "getLeaveType": getLeaveType(selectedDropdownLookupDetailId!),
+        "isHalfDayLeave": isHalfDayLeave,
+        "leaveReasonId": selectedDropdownLookupDetailId,
+        "isFromAttendance": false,
 // change
-      "employeeLeaveId": null,
-      "sFromDate": Commonutils.formatApiDate(selectedFromDate),
-      "sToDate": Commonutils.formatApiDate(selectedToDate),
-      "isDeleted": false,
-      "leaveIdsToDelete": leaveIdsToDelete,
-      "confirmedToSplitWFH": confirmedToSplitWFH,
-      "wfhId": wfhId,
-    });
+        "employeeLeaveId": null,
+        "sFromDate": Commonutils.formatApiDate(selectedFromDate),
+        "sToDate": Commonutils.formatApiDate(selectedToDate),
+        "isDeleted": false,
+        "leaveIdsToDelete": leaveIdsToDelete,
+        "confirmedToSplitWFH": confirmedToSplitWFH,
+        "wfhId": wfhId,
+      });
 
-    final jsonResponse = await http.post(
-      apiUrl,
-      body: requestBody,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': accessToken,
-      },
-    );
+      final jsonResponse = await http.post(
+        apiUrl,
+        body: requestBody,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': accessToken,
+        },
+      );
 
-    if (jsonResponse.statusCode == 200) {
-      print('lol: Leave applied successfully');
-      Map<String, dynamic> response = jsonDecode(jsonResponse.body);
-      if (response['isSuccess']) {
-        Commonutils.showCustomToastMessageLong(
-            'Leave Applied Successfully', context, 0, 3);
-        Navigator.of(context).pop();
+      if (jsonResponse.statusCode == 200) {
+        Map<String, dynamic> response = jsonDecode(jsonResponse.body);
+        print('lol: Leave applied successfully');
+        if (response['isSuccess']) {
+          Commonutils.showCustomToastMessageLong(
+              'Leave Applied Successfully', context, 0, 3);
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => home_screen()),
+          );
+        } else {
+          Commonutils.showCustomToastMessageLong(
+              response['message'] as String, context, 1, 5);
+        }
       } else {
-        print('lol: error: ${response['message']}');
         Commonutils.showCustomToastMessageLong(
-            response['message'] as String, context, 1, 3);
+            'Something went wrong, please check your leaves and apply again.',
+            context,
+            1,
+            5);
       }
-    } else {
-      Commonutils.showCustomToastMessageLong(
-          'Something went wrong, please try again later', context, 1, 5);
+    } catch (e) {
+      Commonutils.showCustomToastMessageLong(e.toString(), context, 1, 5);
+      rethrow;
     }
   }
 
@@ -1399,8 +1415,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                     offset: const Offset(0, 0),
                     scrollbarTheme: ScrollbarThemeData(
                       radius: const Radius.circular(40),
-                      thickness: MaterialStateProperty.all<double>(6),
-                      thumbVisibility: MaterialStateProperty.all<bool>(true),
+                      thickness: WidgetStateProperty.all<double>(6),
+                      thumbVisibility: WidgetStateProperty.all<bool>(true),
                     ),
                   ),
                   menuItemStyleData: const MenuItemStyleData(
@@ -1495,8 +1511,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                     offset: const Offset(0, 0),
                     scrollbarTheme: ScrollbarThemeData(
                       radius: const Radius.circular(40),
-                      thickness: MaterialStateProperty.all<double>(6),
-                      thumbVisibility: MaterialStateProperty.all<bool>(true),
+                      thickness: WidgetStateProperty.all<double>(6),
+                      thumbVisibility: WidgetStateProperty.all<bool>(true),
                     ),
                   ),
                   menuItemStyleData: const MenuItemStyleData(
