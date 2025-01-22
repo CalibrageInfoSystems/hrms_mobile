@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -5,6 +7,7 @@ import 'package:hrms/Constants.dart';
 import 'package:hrms/SharedPreferencesHelper.dart';
 import 'package:hrms/main.dart';
 import 'package:hrms/styles.dart';
+import 'package:hrms/test_projects.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -123,17 +126,152 @@ class Commonutils {
     return formatter.format(date);
   }
 
-  static Future<bool> checkTokenStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final logintime = prefs.getString('loginTime') ?? 'Unknown';
-    DateTime formattedlogintime = DateTime.parse(logintime);
-    DateTime currentTime = DateTime.now();
-    Duration timeDifference = currentTime.difference(formattedlogintime);
+  static String? getDateWithOneDaySubtracted(DateTime? dateTime) {
+    if (dateTime == null) return null;
 
-    if (timeDifference.inSeconds > 3600) {
+    // Subtract one day and format the date as "YYYY-MM-DD"
+    final DateTime updatedDate = dateTime.subtract(const Duration(days: 1));
+    final DateFormat formatter = DateFormat('yyyy-MM-dd');
+    return formatter.format(updatedDate);
+  }
+
+  static String? ddMMyyyyFormat(DateTime? dateTime) {
+    if (dateTime == null) return null;
+
+    // Map of month names
+    const List<String> monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+
+    // Extract and format the date
+    final String day = dateTime.day.toString().padLeft(2, '0');
+    final String month = monthNames[dateTime.month - 1];
+    final String year = dateTime.year.toString();
+
+    return "$day-$month-$year";
+  }
+
+  static Future<bool> checkTokenStatus(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? loginTime = prefs.getString('loginTime');
+    if (loginTime == null) {
+      // _showtimeoutdialog(context);
+      return false;
+    }
+    DateTime currentTime = DateTime.now();
+    DateTime formattedlogintime = DateTime.parse(loginTime);
+
+    Duration timeDifference = currentTime.difference(formattedlogintime);
+    print(
+        'checkTokenStatus: ${timeDifference.inSeconds} | loginTime: $loginTime | ${timeDifference.inSeconds < 3600}');
+    if (timeDifference.inSeconds < 3600) {
+      // if (timeDifference.inSeconds > 3600) {
+      // _showtimeoutdialog(context);
+
       return false;
     }
     return true;
+  }
+
+  static void showtimeoutdialog(BuildContext context,
+      {required void Function()? onPressed}) {
+    showDialog(
+      // barrierDismissible: false,
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              title: Column(
+                //mainAxisAlignment: MainAxisAlignment.,
+                children: [
+                  SizedBox(
+                    height: 50.0,
+                    width: 60.0,
+                    child: SvgPicture.asset(
+                      'assets/cislogo-new.svg',
+                      height: 120.0,
+                      width: 55.0,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 7.0,
+                  ),
+                  const Text(
+                    "Session Time Out",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Calibri',
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 3.0,
+                  ),
+                  const Text(
+                    "Please Login Again",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Calibri',
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: onPressed,
+                  /*   onPressed: () {
+                    _deleteLoginTime();
+                    _onConfirmLogout(context);
+                    Navigator.of(context).pop();
+                  }, */
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFf15f22),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                  child: const Text(
+                    'Ok',
+                    style:
+                        TextStyle(color: Colors.white, fontFamily: 'Calibri'),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  static Future<void> _deleteLoginTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('loginTime');
+  }
+
+  static void _onConfirmLogout(BuildContext context) {
+    SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
+    Commonutils.showCustomToastMessageLong("Logout Successful", context, 0, 3);
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginPage()),
+      (route) => false,
+    );
   }
 }
 

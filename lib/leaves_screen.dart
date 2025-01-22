@@ -6,6 +6,7 @@ import 'package:flutter_month_picker/flutter_month_picker.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/holiday_model.dart';
 import 'package:hrms/leave_model.dart';
+import 'package:hrms/test_apply_leave.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
@@ -359,13 +360,17 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                     // Login is within the allowed window
                                     Navigator.of(context).pushReplacement(
                                       MaterialPageRoute(
-                                        builder: (context) => apply_leave(
-                                          buttonName:
-                                              "test", // Example button name
-                                          lookupDetailId: -3,
-                                          employename:
-                                              '${EmployeName}', // Pass the lookupDetailId
-                                        ),
+                                        builder: (context) {
+                                          return
+                                              /* apply_leave(
+                                            buttonName:
+                                                "test", // Example button name
+                                            lookupDetailId: -3,
+                                            employename:
+                                                '${EmployeName}', // Pass the lookupDetailId
+                                          ); */
+                                              const TestApplyLeave();
+                                        },
                                       ),
                                     );
 

@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +9,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Commonutils.dart';
 import 'package:hrms/Constants.dart';
 import 'package:hrms/Model%20Class/LookupDetail.dart';
+import 'package:hrms/Model%20Class/employee_self_leaves.dart';
 import 'package:hrms/SharedPreferencesHelper.dart';
 import 'package:hrms/api%20config.dart';
+import 'package:hrms/common_widgets/custom_textfield.dart';
 import 'package:hrms/holiday_model.dart';
+import 'package:hrms/home_screen.dart';
 import 'package:hrms/main.dart';
 import 'package:hrms/styles.dart';
 import 'package:http/http.dart' as http;
@@ -38,6 +40,9 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   int? selectedleaveTypeDropdownId;
   int? selectedDropdownLookupDetailId;
   int? selectedLeaveDescriptionId;
+  bool confirmedToSplitWFH = false;
+  String? wfhId;
+  String? leaveIdsToDelete;
   // String? selectedValue;
 
   int? selectedDescriptionId;
@@ -61,11 +66,13 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   late LeaveValidationsModel leaveValidationsModel;
   // late Future<List<EmployeeSelfLeaves>> empSelfLeaves;
   late List<EmployeeSelfLeaves> empSelfLeaves;
+  String? logintime;
+  bool ismatchedlogin = false;
   @override
   void initState() {
     super.initState();
     futreLeaveTypes = getLeaveTypes();
-    // empSelfLeaves = getEmpLeaves();
+    getLoginTime();
 
     initializeData();
   }
@@ -215,9 +222,45 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     }
   }
 
+  Future<void> getLoginTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    logintime = prefs.getString('loginTime') ?? 'Unknown';
+    login(logintime!);
+  }
+
+  void login(String logintime) {
+    DateTime currentTime = DateTime.now();
+    DateTime formattedlogintime = DateTime.parse(logintime!);
+    DateTime loginTime = formattedlogintime /* Replace with your login time */;
+
+    // Calculate the time difference
+    Duration timeDifference = currentTime.difference(loginTime);
+
+    // Check if the time difference is less than or equal to 1 hour (3600 seconds)
+    if (timeDifference.inSeconds > 3600) {
+      print("Login is more than 1 hour from current time.");
+      setState(() {
+        ismatchedlogin = true;
+      });
+    }
+    /*  if (timeDifference.inSeconds <= 3600) {
+      print("Login is within 1 hour of current time.");
+      setState(() {
+        ismatchedlogin = false;
+      });
+    } else {
+      print("Login is more than 1 hour from current time.");
+      setState(() {
+        ismatchedlogin = true;
+        throw SessionTimeOut('Session Time Out');
+      });
+    } */
+  }
+
 //MARK: Build Method
   @override
   Widget build(BuildContext context) {
+    if (ismatchedlogin) Future.microtask(() => showtimeoutdialog(context));
     return Scaffold(
         appBar: appBar(),
         body: Stack(
@@ -280,24 +323,9 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                       leaveDescription(),
                       const SizedBox(height: 20),
                       addLeaveBtn(),
-                      /* const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       ElevatedButton(
-                        onPressed: () {
-                          ensureLeaveAvailability(
-                            empSelfLeaves,
-                            selectedFromDate,
-                            selectedToDate,
-                            ['Pending', 'Accepted'],
-                          );
-                          /*  checkLeaveStatus22(
-                            empSelfLeaves,
-                            selectedFromDate,
-                            selectedToDate,
-                            ['Approved'],
-                          ); */
-                        },
-                        child: const Text('test btn'),
-                      ), */
+                          onPressed: () {}, child: const Text('test')),
                     ],
                   ),
                 ),
@@ -421,7 +449,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       case 103: // PL | 103 // PRIVILEGE LEAVE
         {
           // DateTime? initialDate = calculatePLInitialDate(holidayList);
-          // DateTime? initialDate = calculatePLInitialDate(holidayList);
           Commonutils.launchDatePicker(
             context,
             // initialDate: initialDate,
@@ -432,16 +459,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
               // initialDate: initialDate,
             ),
             onDateSelected: onDateSelectedForFromDate,
-
-            /* (pickedDay) {
-              if (pickedDay != null) {
-                setState(() {
-                  selectedFromDate = pickedDay;
-                  _fromDateController.text =
-                      Commonutils.formatDisplayDate(pickedDay);
-                });
-              }
-            }, */
           );
         }
         break;
@@ -454,15 +471,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
             selectableDayPredicate: (DateTime date) =>
                 selectableDayPredicateForOthers(date, holidayList),
             onDateSelected: onDateSelectedForFromDate,
-            /* onDateSelected: (pickedDay) {
-              if (pickedDay != null) {
-                setState(() {
-                  selectedFromDate = pickedDay;
-                  _fromDateController.text =
-                      Commonutils.formatDisplayDate(pickedDay);
-                });
-              }
-            }, */
           );
         }
         break;
@@ -475,15 +483,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
             selectableDayPredicate: (DateTime date) =>
                 selectableDayPredicateForOthers(date, holidayList),
             onDateSelected: onDateSelectedForFromDate,
-            /*  onDateSelected: (pickedDay) {
-              if (pickedDay != null) {
-                setState(() {
-                  selectedFromDate = pickedDay;
-                  _fromDateController.text =
-                      Commonutils.formatDisplayDate(pickedDay);
-                });
-              }
-            }, */
           );
         }
         break;
@@ -496,56 +495,9 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
             selectableDayPredicate: (DateTime date) =>
                 selectableDayPredicateForOthers(date, holidayList),
             onDateSelected: onDateSelectedForFromDate,
-            /* nDateSelected: (pickedDay) {
-              if (pickedDay != null) {
-                setState(() {
-                  selectedFromDate = pickedDay;
-                  _fromDateController.text =
-                      Commonutils.formatDisplayDate(pickedDay);
-                });
-              }
-            }, */
           );
         }
         break;
-
-/*       
-     
-      case 160: // WFH | 160 // WORK FROM HOME
-        {
-          DateTime? initialDate = calculatePLInitialDate(holidayList);
-          Commonutils.launchDatePicker(
-            context,
-            initialDate: initialDate,
-            firstDate: today,
-            selectableDayPredicate: (DateTime date) =>
-                selectableDayPredicateForFromDate(date, initialDate),
-          );
-        }
-        break;
-      case 179: // LL | 179 // LONG LEAVE
-        {
-          DateTime? initialDate = calculatePLInitialDate(holidayList);
-          Commonutils.launchDatePicker(
-            context,
-            initialDate: initialDate,
-            firstDate: today,
-            selectableDayPredicate: (DateTime date) =>
-                selectableDayPredicateForFromDate(date, initialDate),
-          );
-        }
-        break;
-      default:
-        {
-          DateTime? initialDate = calculatePLInitialDate(holidayList);
-          Commonutils.launchDatePicker(
-            context,
-            initialDate: initialDate,
-            firstDate: today,
-            selectableDayPredicate: (DateTime date) =>
-                selectableDayPredicateForFromDate(date, initialDate),
-          );
-        } */
     }
   }
 
@@ -747,40 +699,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     return initialDate;
   }
 
-/*   DateTime calculateInitialDateWith3WorkingDays(List<Holiday_Model> leaves) {
-    DateTime today = DateTime.now();
-    DateTime initialDate = today.add(Duration(days: 1)); // Start from tomorrow
-
-    bool isHolidayOrWeekend(DateTime date) {
-      if (date.weekday == DateTime.saturday ||
-          date.weekday == DateTime.sunday) {
-        return true;
-      }
-      for (var holiday in leaves) {
-        if (holiday.isActive) {
-          DateTime endDate = holiday.toDate ?? holiday.fromDate;
-          if (date.isAfter(holiday.fromDate.subtract(Duration(days: 1))) &&
-              date.isBefore(endDate.add(Duration(days: 1)))) {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-
-    int workingDaysAdded = 0;
-
-    // Add 3 working days, skipping holidays and weekends
-    while (workingDaysAdded < 3) {
-      if (!isHolidayOrWeekend(initialDate)) {
-        workingDaysAdded++;
-      }
-      initialDate = initialDate.add(Duration(days: 1));
-    }
-
-    return initialDate;
-  } */
-
   Container leaveTypeValidation() {
     return Container(
       padding: const EdgeInsets.only(left: 15, top: 8),
@@ -832,13 +750,14 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   bool validateFields() {
     print('selectedDropdownLookupDetailId: $selectedDropdownLookupDetailId');
 
+    print('_formKey selectedTypeCdId: $selectedDropdownLookupDetailId');
+    print('_formKey selectedLeaveDescription: $selectedLeaveDescriptionId');
+    print('_formKey isHalfDay: $isHalfDayLeave');
+    print('_formKey From Date: ${_fromDateController.text}');
+    print('_formKey To Date: ${_toDateController.text}');
+    print('_formKey Leave Reason: ${_leaveReasonController.text}');
     if (!_formKey.currentState!.validate()) {
-      print('_formKey selectedTypeCdId: $selectedDropdownLookupDetailId');
-      print('_formKey selectedLeaveDescription: $selectedLeaveDescriptionId');
-      print('_formKey isHalfDay: $isHalfDayLeave');
-      print('_formKey From Date: ${_fromDateController.text}');
-      print('_formKey To Date: ${_toDateController.text}');
-      print('_formKey Leave Reason: ${_leaveReasonController.text}');
+      return false;
     }
     // validationForLL();
 
@@ -903,7 +822,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       Commonutils.showCustomToastMessageLong(message, context, 1, 5);
     } else {
       print("checkCLLeave: Employee can apply for 'CL' leave in this month.");
-      applyLeave();
+      createLeave();
     }
   }
 
@@ -929,118 +848,86 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     return false;
   }
 
-/*   void checkLeaveisWithinLeaveRange(List<EmployeeSelfLeaves> empSelfLeaves,
-      DateTime? selectedFromDate, DateTime? selectedToDate) {
-    // Loop through the list of EmployeeSelfLeaves
-    print('Selected dates: $selectedFromDate | $selectedToDate');
-    for (var leave in empSelfLeaves) {
-      // Ensure the entry is not deleted
-      if (leave.isDeleted != true) {
-        // Get the leave date range
-        DateTime? leaveFromDate = leave.fromDate;
-        DateTime? leaveToDate = leave.toDate;
-        bool? isWithinRange;
-        // Check if the selected dates fall within the leave range
-        if (leaveFromDate != null && leaveToDate != null) {
-          isWithinRange = selectedFromDate!
-                  .isAfter(leaveFromDate.subtract(const Duration(days: 1))) &&
-              selectedFromDate
-                  .isBefore(leaveToDate.add(const Duration(days: 1))) &&
-              (selectedToDate == null ||
-                  (selectedToDate.isAfter(
-                          leaveFromDate.subtract(const Duration(days: 1))) &&
-                      selectedToDate
-                          .isBefore(leaveToDate.add(const Duration(days: 1)))));
-        }
-        if (isWithinRange!) {
-          print(
-              'Selected dates fall within the leave range of ${leave.fromDate} to ${leave.toDate}.');
-        } else {
-          print(
-              'Selected dates do not fall within the leave range of ${leave.fromDate} to ${leave.toDate}.');
-        }
-      }
-    }
-  }
- */ /* 
-  bool checkLeaveStatus(List<EmployeeSelfLeaves> empSelfLeaves,
-      DateTime? selectedFromDate, DateTime? selectedToDate) {
-    // Loop through the list of EmployeeSelfLeaves
-    print('Selected dates: $selectedFromDate | $selectedToDate');
-    for (var leave in empSelfLeaves) {
-      // Ensure the entry is not deleted
-      if (leave.isDeleted != true &&
-          (leave.status == 'Pending' || leave.status == 'Accepted')) {
-        // Get the leave date range
-        DateTime? leaveFromDate = leave.fromDate;
-        DateTime? leaveToDate = leave.toDate;
-
-        // Ensure leave dates are not null
-        if (leaveFromDate != null && leaveToDate != null) {
-          // Check for overlap
-          bool isWithinRange = selectedFromDate!
-                  .isBefore(leaveToDate.add(const Duration(days: 1))) &&
-              (selectedToDate == null ||
-                  selectedToDate.isAfter(
-                      leaveFromDate.subtract(const Duration(days: 1))));
-
-          if (isWithinRange) {
-            print(
-                '''Error 1: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
-            return false; // Exit as the leave cannot be applied
-          }
-        }
-      }
-    }
-
-    print(
-        'Success 1: Selected dates do not overlap with any existing leave ranges.');
-    return true;
-  }
-
-  bool checkLeaveisApprovedStatus(List<EmployeeSelfLeaves> empSelfLeaves,
-      DateTime? selectedFromDate, DateTime? selectedToDate) {
-    // Loop through the list of EmployeeSelfLeaves
-    print('Selected dates: $selectedFromDate | $selectedToDate');
-    for (var leave in empSelfLeaves) {
-      // Ensure the entry is not deleted
-      if (leave.isDeleted != true && leave.status == 'Approved') {
-        // Get the leave date range
-        DateTime? leaveFromDate = leave.fromDate;
-        DateTime? leaveToDate = leave.toDate;
-
-        // Ensure leave dates are not null
-        if (leaveFromDate != null && leaveToDate != null) {
-          // Check for overlap
-          bool isWithinRange = selectedFromDate!
-                  .isBefore(leaveToDate.add(const Duration(days: 1))) &&
-              (selectedToDate == null ||
-                  selectedToDate.isAfter(
-                      leaveFromDate.subtract(const Duration(days: 1))));
-
-          if (isWithinRange) {
-            print(
-                '''Error 2: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
-            return false; // Exit as the leave cannot be applied
-          }
-        }
-      }
-    }
-
-    print(
-        'Success 2: Selected dates do not overlap with any existing leave ranges.');
-    return true;
-  }
- */
-/* bool isLeaveValid = checkLeaveStatus(
-  empSelfLeaves,
-  selectedFromDate,
-  selectedToDate,
-  ['Pending', 'Accepted'],
-  ['Approved'],
-);
- */
   bool ensureLeaveAvailability({
+    required List<EmployeeSelfLeaves> empSelfLeaves,
+    DateTime? formFromDate,
+    DateTime? formToDate,
+    required List<String> statusesToCheck,
+    int? leaveTypeId,
+  }) {
+    print(
+        'checkLeaveStatus22: argues: $formFromDate | $formToDate | $statusesToCheck | $leaveTypeId');
+    for (var leave in empSelfLeaves) {
+      if (leave.isDeleted != true && !statusesToCheck.contains(leave.status)) {
+        DateTime? leaveFromDate = leave.fromDate;
+        DateTime? leaveToDate = leave.toDate;
+
+        if (leaveFromDate != null && leaveToDate != null) {
+          // Check for overlap
+          bool isWithinRange = formFromDate!
+                  .isBefore(leaveToDate.add(const Duration(days: 1))) &&
+              (formToDate == null ||
+                  formToDate.isAfter(
+                      leaveFromDate.subtract(const Duration(days: 1))));
+
+          if (isWithinRange && leaveTypeId != 102) {
+            final message =
+                '''The current leave request from '${Commonutils.ddMMyyyyFormat(formFromDate)}' (${selectedToDate != null ? 'to ${Commonutils.ddMMyyyyFormat(formToDate)}' : ''}) is overlapping with applied leaves. Please check and try again.''';
+            Commonutils.showCustomToastMessageLong(message, context, 1, 5);
+            return true;
+          }
+
+          if (leaveTypeId == 102 &&
+              leave.leaveType == 'CL' &&
+              leaveFromDate.month == formFromDate.month &&
+              leaveFromDate.year == formFromDate.year &&
+              leaveFromDate.day == formFromDate.day &&
+              !['Rejected'].contains(leave.status)) {
+            final message =
+                '''The current leave request on ${Commonutils.ddMMyyyyFormat(formFromDate)} is overlapping with applied leaves. Please check and try again.''';
+
+            Commonutils.showCustomToastMessageLong(message, context, 1, 5);
+
+            throw Exception(message);
+            // return true;
+          }
+          if (leaveTypeId == 102 &&
+              leave.leaveType == 'CL' &&
+              leaveFromDate.month == formFromDate.month &&
+              leaveFromDate.year == formFromDate.year &&
+              !['Rejected'].contains(leave.status)) {
+            final message =
+                '''You have already a '${leave.leaveType}' range of ${Commonutils.ddMMyyyyFormat(leave.fromDate)} ${selectedToDate != null ? 'to ${Commonutils.ddMMyyyyFormat(formToDate)}' : ''} with the status of '${leave.status}'.''';
+
+            showCustomDialog(context, title: 'CL Overlap', message: message,
+                onConfirm: () {
+              leaveIdsToDelete = leave.employeeLeaveId.toString();
+              createLeave();
+            });
+            return true;
+          }
+          /* if (leaveTypeId == 102 &&
+              leave.leaveType == 'CL' &&
+              leaveFromDate.month == selectedFromDate.month &&
+              leaveFromDate.year == selectedFromDate.year &&
+              ['Approved'].contains(leave.status)) {
+            // print('checkLeaveStatus22 leaveTypeId: $leaveTypeId');
+            final message =
+                '''222 You have already a '${leave.leaveType}' range of ${Commonutils.formatDisplayDate(leave.fromDate)} to ${Commonutils.formatDisplayDate(leave.toDate)} with the status of '${leave.status}'.''';
+
+            Commonutils.showCustomToastMessageLong(message, context, 1, 5);
+            return true;
+          } */
+        }
+      }
+    }
+
+    print(
+        'checkLeaveStatus22: Success: Selected dates do not overlap with any existing leave ranges.');
+    return false;
+  }
+
+  bool checkingWfhDatesClashOrNot({
     required List<EmployeeSelfLeaves> empSelfLeaves,
     DateTime? selectedFromDate,
     DateTime? selectedToDate,
@@ -1048,15 +935,15 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     int? leaveTypeId,
   }) {
     print(
-        'checkLeaveStatus22: argues: $selectedFromDate | $selectedToDate | $statusesToCheck | $leaveTypeId');
+        'checkingWfhDatesClashOrNot: argues $selectedFromDate | $selectedToDate | $statusesToCheck | $leaveTypeId');
     for (var leave in empSelfLeaves) {
-      // Ensure the entry is not deleted and status matches the statuses to check
-      if (leave.isDeleted != true && statusesToCheck.contains(leave.status)) {
-        // Get the leave date range
+      // Checking only leaves which are not deleted & status is not rejected & leave type is 160(WFH)
+      if (leave.isDeleted != true &&
+          !statusesToCheck.contains(leave.status) &&
+          leave.leaveTypeId == 160) {
         DateTime? leaveFromDate = leave.fromDate;
         DateTime? leaveToDate = leave.toDate;
 
-        // Ensure leave dates are not null
         if (leaveFromDate != null && leaveToDate != null) {
           // Check for overlap
           bool isWithinRange = selectedFromDate!
@@ -1066,71 +953,34 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
                       leaveFromDate.subtract(const Duration(days: 1))));
 
           print(
-              'checkLeaveStatus22 leaveTypeId: $leaveTypeId |  ${leave.fromDate} |  ${leave.toDate} | ${leave.status}');
+              'checkLeaveStatus33 leaveTypeId: $leaveTypeId |  ${leave.leaveType} | ${leave.fromDate} |  ${leave.toDate} | ${leave.status}');
 
           if (isWithinRange) {
-            print(
-                '''checkLeaveStatus22: Error: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
-            return false; // Exit as the leave cannot be applied
-          }
-          if (leaveTypeId == 102 &&
-              leave.leaveType == 'CL' &&
-              leaveFromDate.month == selectedFromDate.month &&
-              leaveFromDate.year == selectedFromDate.year &&
-              ['Pending', 'Accepted'].contains(leave.status)) {
-            /*  final message =
-                "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${getMonthName(selectedFromDate)} on this '${formatStringDate(selectedFromDate!)}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.";
-             */
-
-            final message =
-                '''111 You have already a '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''';
-
-            showCustomDialog(context,
-                title: 'CL pending/accepted', message: message);
-            return throw Exception();
-          }
-          if (leaveTypeId == 102 &&
-              leave.leaveType == 'CL' &&
-              leaveFromDate.month == selectedFromDate.month &&
-              leaveFromDate.year == selectedFromDate.year &&
-              ['Approved'].contains(leave.status)) {
-            print('checkLeaveStatus22 leaveTypeId: $leaveTypeId');
-            final message =
-                '''222 You have already a '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''';
-
-            Commonutils.showCustomToastMessageLong(message, context, 1, 5);
-            return throw Exception();
+            showCustomDialog(
+              context,
+              title: 'WFH Overlap Dialog',
+              message: Constants.wfhDialogMessage,
+              onConfirm: () {
+                confirmedToSplitWFH = true;
+                wfhId = leave.employeeLeaveId.toString();
+                createLeave();
+              },
+            );
+            return true;
           }
         }
       }
     }
-
-    print(
-        'checkLeaveStatus22: Success: Selected dates do not overlap with any existing leave ranges.');
-    return true;
+    // No WFH overlap
+    return false;
   }
-
-  /* 
-  void checkPLLeave(DateTime selectedFromDate, DateTime? selectedToDate) {
-    // check pl leaves on date is already present or not and leave status pending, accepted or approved and isDeleted is not true
-    final hasAppliedPLLeaveInMonth =
-        getAppliedPLLeaveDateInMonth(empSelfLeaves, dateTime);
-    if (hasAppliedPLLeaveInMonth != null) {
-      const message =
-          """Employee has already applied for a leave in this month. 'PL' with status 'Pending', 'Accepted' or 'Approved'. Multiple PL leaves are not allowed in the same month.""";
-      Commonutils.showCustomToastMessageLong(message, context, 1, 5);
-    } else {
-      print("checkPLLeave: Employee can apply for 'PL' leave in this month.");
-    }
-  } */
 
   DateTime? checkApprovedCLLeaveDateInMonth(
       List<EmployeeSelfLeaves> empSelfLeaves, DateTime fromDateObj) {
     for (var leave in empSelfLeaves) {
       if (leave.leaveType == 'CL' &&
-          leave.status == 'Approved' &&
+          leave.status != 'Rejected' &&
           leave.isDeleted != true) {
-        // Check if the month and year match
         if (leave.fromDate != null &&
             leave.fromDate!.year == fromDateObj.year &&
             leave.fromDate!.month == fromDateObj.month) {
@@ -1143,11 +993,22 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
 
   bool leaveValidation(int? leaveTypeId, double countOfLeaves) {
     late bool isLeaveValid;
-    print('leaveValidation: $leaveTypeId | $countOfLeaves');
+    print(
+        'leaveValidation: $leaveTypeId | $countOfLeaves | ${countOfLeaves <= 0}');
+
+    if (countOfLeaves <= 0 && selectedFromDate!.year > DateTime.now().year) {
+      // selected year is future then display
+      Commonutils.showCustomToastMessageLong(
+          Constants.plErrorMessage, context, 1, 3);
+      return false;
+    }
+
     switch (leaveTypeId) {
       case 102:
         // CL Validation
         // checkCLLeave(selectedFromDate!);
+        // isLeaveValid = true;
+        isLeaveValid = clLeaveCondition(countOfLeaves);
         break;
       case 103:
         // PL Validation
@@ -1160,7 +1021,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         break;
       case 160:
         // WFH Validation
-        isLeaveValid = true;
+        isLeaveValid = wfhLeaveCondition(countOfLeaves);
       case 179:
         // LL Validation
         isLeaveValid = llLeaveCondition();
@@ -1191,23 +1052,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     return null;
   }
 
-  /*  DateTime? getAppliedCLLeaveDateInMonth(
-      List<EmployeeSelfLeaves> empSelfLeaves, DateTime fromDateObj) {
-    for (var leave in empSelfLeaves) {
-      if (leave.leaveType == 'CL' &&
-          (leave.status == 'Pending' || leave.status == 'Accepted') &&
-          leave.isDeleted == false) {
-        // Check if the month and year match
-        if (leave.fromDate != null &&
-            leave.fromDate!.year == fromDateObj.year &&
-            leave.fromDate!.month == fromDateObj.month) {
-          return leave.fromDate;
-        }
-      }
-    }
-    return null;
-  } */
-
   String getMonthName(DateTime date) {
     return DateFormat('MMMM').format(date);
   }
@@ -1221,6 +1065,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     required String title,
     required String message,
     bool isActions = true,
+    void Function()? onConfirm,
   }) {
     showDialog(
       context: context,
@@ -1238,26 +1083,24 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                // "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${getMonthName(selectedFromDate!)} on this '${formatStringDate(selectedFromDate!)}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.",
                 message,
               ),
             ],
           ),
-          actions: isActions ? actions(context) : null,
+          actions: isActions ? actions(context, onConfirm: onConfirm) : null,
         );
       },
     );
   }
 
-  List<Widget> actions(BuildContext context) {
+  List<Widget> actions(BuildContext context,
+      {required void Function()? onConfirm}) {
     return [
       Row(
         children: [
           Expanded(
             child: ElevatedButton(
-              onPressed: () {
-                // applyLeave();
-              },
+              onPressed: onConfirm,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Styles.primaryColor,
                 shape: RoundedRectangleBorder(
@@ -1275,6 +1118,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           Expanded(
             child: ElevatedButton(
               onPressed: () {
+                confirmedToSplitWFH = false;
+                wfhId = null;
                 // Add your submit logic here
                 Navigator.of(context).pop();
               },
@@ -1296,25 +1141,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     ];
   }
 
-  Future<void> getLeaveStatistics({int? leaveStatasticsYear}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('accessToken') ?? '';
-    final employeeId = prefs.getString("employeeId");
-    leaveStatasticsYear ??= DateTime.now().year;
-
-    final apiUrl = Uri.parse(
-        '$baseUrl$getleaveStatistics$leaveStatasticsYear/$employeeId');
-    // final apiUrl = 'http://182.18.157.215/HRMS/API/hrmsapi/Attendance/GetLeaveStatistics/2025/131';
-    final jsonResponse = await http.get(
-      apiUrl,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': accessToken,
-      },
-    );
-  }
-
-  Future<void> applyLeave() async {
+  Future<void> createLeave() async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
       Commonutils.showCustomToastMessageLong(
@@ -1322,10 +1149,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       FocusScope.of(context).unfocus();
       return;
     }
-    final tokenStatus = await Commonutils.checkTokenStatus();
-    if (!tokenStatus) {
-      return;
-    }
+
     // check token validation
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final employeeId = prefs.getString("employeeId");
@@ -1334,7 +1158,9 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     final loadedData = await SharedPreferencesHelper.getCategories();
     final employeeName = loadedData?['employeeName'];
 
-    final requestBody = jsonEncode({
+    final requestBody =
+
+/*     jsonEncode({
       "employeeId": employeeId,
       "fromDate": Commonutils.formatApiDate(selectedFromDate),
       "toDate": Commonutils.formatApiDate(selectedToDate) ??
@@ -1354,6 +1180,34 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       "isHalfDayLeave": isHalfDayLeave,
       "leaveReasonId": selectedDropdownLookupDetailId,
       "isFromAttendance": false,
+    }); */
+        jsonEncode({
+      "employeeId": employeeId,
+      "fromDate": Commonutils.getDateWithOneDaySubtracted(selectedFromDate),
+      "toDate": Commonutils.getDateWithOneDaySubtracted(selectedToDate),
+      "leaveTypeId": selectedDropdownLookupDetailId,
+      "note": _leaveReasonController.text,
+      "acceptedBy": null,
+      "acceptedAt": null,
+      "approvedBy": null,
+      "approvedAt": null,
+      "rejected": null,
+      "comments": null,
+      "isApprovalEscalated": null,
+      "url": leaveApplyURL,
+      // "employeeName": employeeName,
+      // "getLeaveType": getLeaveType(selectedDropdownLookupDetailId!),
+      "isHalfDayLeave": isHalfDayLeave,
+      "leaveReasonId": selectedDropdownLookupDetailId,
+      "isFromAttendance": false,
+// change
+      "employeeLeaveId": null,
+      "sFromDate": Commonutils.formatApiDate(selectedFromDate),
+      "sToDate": Commonutils.formatApiDate(selectedToDate),
+      "isDeleted": false,
+      "leaveIdsToDelete": leaveIdsToDelete,
+      "confirmedToSplitWFH": confirmedToSplitWFH,
+      "wfhId": wfhId,
     });
 
     final jsonResponse = await http.post(
@@ -1682,7 +1536,10 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           color: Colors.white,
         ),
         onPressed: () {
-          Navigator.pop(context);
+          // Navigator.pop(context);
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => home_screen()),
+          );
         },
       ),
     );
@@ -1830,17 +1687,16 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     if (jsonResponse.statusCode == 200) {
       final Map<String, dynamic> response = jsonDecode(jsonResponse.body);
 
-      bool isLeaveValid = leaveValidation(selectedDropdownLookupDetailId,
+      final isLeaveValid = leaveValidation(selectedDropdownLookupDetailId,
           checkForLeavesAvailability(selectedDropdownLookupDetailId, response));
       /* if (checkForLeavesAvailability(selectedDropdownLookupDetailId, response) >
           0) {
         return 200;
       } */
-
-      return 200; /* 
       if (isLeaveValid) {
+        return 200;
       }
-      return 400; // no leaves */
+      return 400;
     }
     return 500; // api failed
   }
@@ -1880,31 +1736,72 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   bool plLeaveCondition(double countOfLeaves) {
     print(
         'plLeaveCondition: $countOfLeaves | $selectedFromDate | $selectedToDate | ${selectedToDate!.difference(selectedFromDate!).inDays}');
-    print(
-        'plLeaveCondition: ${selectedDropdownLookupDetailId == 103 && selectedFromDate == DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)}');
     if (selectedDropdownLookupDetailId == 103 &&
         selectedFromDate ==
             DateTime(DateTime.now().year, DateTime.now().month,
                 DateTime.now().day)) {
       print('plLeaveCondition: You cannot apply PL on current date');
       Commonutils.showCustomToastMessageLong(
-          'You cannot apply PL on current date',
+          Constants.plCurrentDateErrorMessage,
           // 'Years must be same while applying a leave',
           context,
           1,
-          3);
-      return false;
+          5);
+      // return false;
+      throw Exception('You cannot apply PL on current date');
     }
+
     if (selectedDropdownLookupDetailId == 103 &&
         countOfLeaves <= selectedToDate!.difference(selectedFromDate!).inDays) {
       Commonutils.showCustomToastMessageLong(
-          'You have only $countOfLeaves PL left',
+          'You have No PL\'s left',
           // 'Years must be same while applying a leave',
           context,
           1,
-          3);
+          5);
+      throw Exception('You have only $countOfLeaves PL\'s left');
+    }
+    return true;
+  }
+
+  bool clLeaveCondition(double countOfLeaves) {
+    print(
+        'clLeaveCondition: $countOfLeaves | $selectedFromDate | $selectedToDate');
+
+    if (selectedDropdownLookupDetailId == 102 && countOfLeaves <= 0) {
+      Commonutils.showCustomToastMessageLong(
+          'You have No CL\'s left',
+          // 'Years must be same while applying a leave',
+          context,
+          1,
+          5);
       return false;
     }
+
+    final isCLOverlapping = ensureLeaveAvailability(
+      empSelfLeaves: empSelfLeaves,
+      formFromDate: selectedFromDate,
+      formToDate: selectedToDate ?? selectedFromDate,
+      statusesToCheck: ['Rejected'],
+      // statusesToCheck: ['Pending', 'Accepted'],
+      leaveTypeId: selectedDropdownLookupDetailId,
+    );
+    if (isCLOverlapping) return false;
+    return true;
+  }
+
+  bool wfhLeaveCondition(double countOfLeaves) {
+    print(
+        'wfhLeaveCondition: $countOfLeaves | $selectedFromDate | $selectedToDate | ${selectedToDate!.difference(selectedFromDate!).inDays}');
+/*     final isWFHOverlapping = checkingWfhDatesClashOrNot(
+      empSelfLeaves: empSelfLeaves,
+      selectedFromDate: selectedFromDate,
+      selectedToDate: selectedToDate ?? selectedFromDate,
+      statusesToCheck: ['Rejected'],
+      leaveTypeId: selectedDropdownLookupDetailId,
+    );
+    if (isWFHOverlapping) return false; */
+
     return true;
   }
 
@@ -1924,48 +1821,60 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           break;
         case 200:
           // applyLeave();
-          final isAlreadyLeaveOnSameDateWithPendingStatus =
-              ensureLeaveAvailability(
+          final isWFHOverlapping = checkingWfhDatesClashOrNot(
             empSelfLeaves: empSelfLeaves,
             selectedFromDate: selectedFromDate,
             selectedToDate: selectedToDate ?? selectedFromDate,
-            statusesToCheck: ['Pending', 'Accepted'],
+            statusesToCheck: ['Rejected'],
+            leaveTypeId: selectedDropdownLookupDetailId,
+          );
+          final isAlreadyLeaveOnSameDateWithPendingStatus =
+              ensureLeaveAvailability(
+            empSelfLeaves: empSelfLeaves,
+            formFromDate: selectedFromDate,
+            formToDate: selectedToDate ?? selectedFromDate,
+            statusesToCheck: ['Rejected'],
+            // statusesToCheck: ['Pending', 'Accepted'],
             leaveTypeId: selectedDropdownLookupDetailId,
           );
 
-          final isAlreadyLeaveOnSameDateWithApprovedStatus =
+/*           final isAlreadyLeaveOnSameDateWithApprovedStatus =
               ensureLeaveAvailability(
             empSelfLeaves: empSelfLeaves,
             selectedFromDate: selectedFromDate,
             selectedToDate: selectedToDate ?? selectedFromDate,
             statusesToCheck: ['Approved'],
             leaveTypeId: selectedDropdownLookupDetailId,
-          );
-          if (!isAlreadyLeaveOnSameDateWithPendingStatus) {
-            /*    final message =
-                        "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${getMonthName(selectedFromDate!)} on this '${formatStringDate(selectedFromDate!)}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.";
-                    showCustomDialog(context,
-                        title: 'Test Confirmation', message: message); */
-            const message = 'Duplicate leave is not allowed.';
+          ); */
+          if (isWFHOverlapping) {
+            // handling wfh overlapping
+          } else if (isAlreadyLeaveOnSameDateWithPendingStatus) {
+            const message =
+                'The current leave request on 10-Apr-2025 is overlapping with applied leaves. Please check and try again.';
+            // const message = 'Duplicate leave is not allowed.';
             Commonutils.showCustomToastMessageLong(message, context, 1, 3);
-          } else if (!isAlreadyLeaveOnSameDateWithApprovedStatus) {
+          }
+          /* else if (!isAlreadyLeaveOnSameDateWithApprovedStatus) {
             final message =
                 '''You have already a leave on ${getMonthName(selectedFromDate!)} to ${selectedToDate == null ? '' : getMonthName(selectedToDate!)} with the status of 'Approved'.''';
 
             Commonutils.showCustomToastMessageLong(message, context, 1, 5);
-          } else {
-            // applyLeave();
-            Commonutils.showCustomToastMessageLong(
-                'Leave applied successfully!!!!', context, 0, 3);
+          }  */
+          else {
+            createLeave();
+            // Commonutils.showCustomToastMessageLong(
+            //     'Leave applied successfully!!!!', context, 0, 3);
           }
           break;
         case 400:
-          Commonutils.showCustomToastMessageLong(
-              Constants.plErrorMessage, context, 1, 3);
+          {
+            // Commonutils.showCustomToastMessageLong('400', context, 1, 5);
+            print('------------------400------------------');
+          }
           break;
         case 500:
           Commonutils.showCustomToastMessageLong(
-              'Something went wrong, please try again', context, 1, 3);
+              'Something went wrong, please try again', context, 1, 5);
           break;
       }
     });
@@ -1992,604 +1901,3 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     }
   }
 }
-
-class CustomTextField extends StatelessWidget {
-  final String hintText;
-  final TextEditingController controller;
-  final bool readOnly;
-  final int maxLines;
-  final Color? fillColor;
-  final VoidCallback? onTap;
-  final String? Function(String?)? validator;
-
-  const CustomTextField({
-    super.key,
-    required this.hintText,
-    required this.controller,
-    this.readOnly = true,
-    this.maxLines = 1,
-    this.onTap,
-    this.fillColor = Colors.white,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      readOnly: readOnly,
-      maxLines: maxLines,
-      style: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.normal,
-      ), // Replace with your custom style
-      validator: validator,
-      decoration: InputDecoration(
-        hintText: hintText,
-        filled: true,
-        fillColor: fillColor,
-        hintStyle: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.normal,
-        ), // Replace with your custom hint style
-        border: customBorder(
-          borderColor: Styles.primaryColor,
-        ),
-        focusedErrorBorder: customBorder(
-          borderColor: Styles.primaryColor,
-        ),
-        disabledBorder: customBorder(
-          borderColor: Styles.primaryColor,
-        ),
-        enabledBorder: customBorder(
-          borderColor: Styles.primaryColor,
-        ),
-        focusedBorder: customBorder(
-          borderColor: Styles.primaryColor,
-        ),
-        errorBorder: customBorder(
-          borderColor: Colors.red,
-        ),
-        contentPadding: maxLines != 1
-            ? const EdgeInsets.symmetric(horizontal: 15, vertical: 6)
-            : const EdgeInsets.only(left: 15, top: 6),
-        suffixIcon: maxLines != 1
-            ? null
-            : const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.calendar_today,
-                  color: Colors.black54,
-                ),
-              ),
-        // border: InputBorder.none,
-      ),
-      onTap: onTap,
-    );
-  }
-
-  InputBorder customBorder({required Color borderColor, double width = 1.5}) {
-    return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(5.0),
-      borderSide: BorderSide(color: borderColor, width: width),
-    );
-  }
-}
-
-//MARK: Leaves Model
-List<LeaveDescriptionModel> leaveDescriptionModelFromJson(String str) =>
-    List<LeaveDescriptionModel>.from(
-        json.decode(str).map((x) => LeaveDescriptionModel.fromJson(x)));
-
-String leaveDescriptionModelToJson(List<LeaveDescriptionModel> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
-
-class LeaveDescriptionModel {
-  final int? lookupDetailId;
-  final String? code;
-  final String? name;
-  final int? lookupId;
-  final String? description;
-  final bool? isActive;
-  final int? fkeySelfId;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-  final String? createdBy;
-  final String? updatedBy;
-
-  LeaveDescriptionModel({
-    this.lookupDetailId,
-    this.code,
-    this.name,
-    this.lookupId,
-    this.description,
-    this.isActive,
-    this.fkeySelfId,
-    this.createdAt,
-    this.updatedAt,
-    this.createdBy,
-    this.updatedBy,
-  });
-
-  factory LeaveDescriptionModel.fromJson(Map<String, dynamic> json) =>
-      LeaveDescriptionModel(
-        lookupDetailId: json["lookupDetailId"],
-        code: json["code"],
-        name: json["name"],
-        lookupId: json["lookupId"],
-        description: json["description"],
-        isActive: json["isActive"],
-        fkeySelfId: json["fkeySelfId"],
-        createdAt: json["createdAt"] == null
-            ? null
-            : DateTime.parse(json["createdAt"]),
-        updatedAt: json["updatedAt"] == null
-            ? null
-            : DateTime.parse(json["updatedAt"]),
-        createdBy: json["createdBy"],
-        updatedBy: json["updatedBy"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "lookupDetailId": lookupDetailId,
-        "code": code,
-        "name": name,
-        "lookupId": lookupId,
-        "description": description,
-        "isActive": isActive,
-        "fkeySelfId": fkeySelfId,
-        "createdAt": createdAt?.toIso8601String(),
-        "updatedAt": updatedAt?.toIso8601String(),
-        "createdBy": createdBy,
-        "updatedBy": updatedBy,
-      };
-}
-
-//MARK: Leave Validations
-LeaveValidationsModel leaveValidationsModelFromJson(String str) =>
-    LeaveValidationsModel.fromJson(json.decode(str));
-
-String leaveValidationsModelToJson(LeaveValidationsModel data) =>
-    json.encode(data.toJson());
-
-class LeaveValidationsModel {
-  final int? appSettingId;
-  final int? minimumJobOpeningProcessTime;
-  final int? maximumTimesJobOpeningBeProcessed;
-  final int? leaveAccumulationProcessDuration;
-  final int? maximumAllowableMaternityLeaves;
-  final int? maximumAllowableMiscarriageLeaves;
-  final int? maximumAllowableEventLeaves;
-  final int? maximumAllowableMarriageLeaves;
-  final int? maximumAllowableStudyLeaves;
-  final int? maximumAllowableDeathCeremonyLeaves;
-  final int? maximumAllowableHouseWarmingLeaves;
-  final bool? useHierarchicalMailForLeaveApproval;
-  final int? mininumDaysToConsiderAsLongLeave;
-
-  LeaveValidationsModel({
-    this.appSettingId,
-    this.minimumJobOpeningProcessTime,
-    this.maximumTimesJobOpeningBeProcessed,
-    this.leaveAccumulationProcessDuration,
-    this.maximumAllowableMaternityLeaves,
-    this.maximumAllowableMiscarriageLeaves,
-    this.maximumAllowableEventLeaves,
-    this.maximumAllowableMarriageLeaves,
-    this.maximumAllowableStudyLeaves,
-    this.maximumAllowableDeathCeremonyLeaves,
-    this.maximumAllowableHouseWarmingLeaves,
-    this.useHierarchicalMailForLeaveApproval,
-    this.mininumDaysToConsiderAsLongLeave,
-  });
-
-  factory LeaveValidationsModel.fromJson(Map<String, dynamic> json) =>
-      LeaveValidationsModel(
-        appSettingId: json["appSettingId"],
-        minimumJobOpeningProcessTime: json["minimumJobOpeningProcessTime"],
-        maximumTimesJobOpeningBeProcessed:
-            json["maximumTimesJobOpeningBeProcessed"],
-        leaveAccumulationProcessDuration:
-            json["leaveAccumulationProcessDuration"],
-        maximumAllowableMaternityLeaves:
-            json["maximumAllowableMaternityLeaves"],
-        maximumAllowableMiscarriageLeaves:
-            json["maximumAllowableMiscarriageLeaves"],
-        maximumAllowableEventLeaves: json["maximumAllowableEventLeaves"],
-        maximumAllowableMarriageLeaves: json["maximumAllowableMarriageLeaves"],
-        maximumAllowableStudyLeaves: json["maximumAllowableStudyLeaves"],
-        maximumAllowableDeathCeremonyLeaves:
-            json["maximumAllowableDeathCeremonyLeaves"],
-        maximumAllowableHouseWarmingLeaves:
-            json["maximumAllowableHouseWarmingLeaves"],
-        useHierarchicalMailForLeaveApproval:
-            json["useHierarchicalMailForLeaveApproval"],
-        mininumDaysToConsiderAsLongLeave:
-            json["mininumDaysToConsiderAsLongLeave"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "appSettingId": appSettingId,
-        "minimumJobOpeningProcessTime": minimumJobOpeningProcessTime,
-        "maximumTimesJobOpeningBeProcessed": maximumTimesJobOpeningBeProcessed,
-        "leaveAccumulationProcessDuration": leaveAccumulationProcessDuration,
-        "maximumAllowableMaternityLeaves": maximumAllowableMaternityLeaves,
-        "maximumAllowableMiscarriageLeaves": maximumAllowableMiscarriageLeaves,
-        "maximumAllowableEventLeaves": maximumAllowableEventLeaves,
-        "maximumAllowableMarriageLeaves": maximumAllowableMarriageLeaves,
-        "maximumAllowableStudyLeaves": maximumAllowableStudyLeaves,
-        "maximumAllowableDeathCeremonyLeaves":
-            maximumAllowableDeathCeremonyLeaves,
-        "maximumAllowableHouseWarmingLeaves":
-            maximumAllowableHouseWarmingLeaves,
-        "useHierarchicalMailForLeaveApproval":
-            useHierarchicalMailForLeaveApproval,
-        "mininumDaysToConsiderAsLongLeave": mininumDaysToConsiderAsLongLeave,
-      };
-}
-
-//MARK: Emp Self Leaves
-List<EmployeeSelfLeaves> employeeSelfLeavesFromJson(String str) =>
-    List<EmployeeSelfLeaves>.from(
-        json.decode(str).map((x) => EmployeeSelfLeaves.fromJson(x)));
-
-String employeeSelfLeavesToJson(List<EmployeeSelfLeaves> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
-
-class EmployeeSelfLeaves {
-  final int? employeeId;
-  final String? employeeName;
-  final String? code;
-  final int? employeeLeaveId;
-  final double? usedCLsInMonth;
-  final double? usedPLsInMonth;
-  final String? leaveType;
-  final DateTime? fromDate;
-  final DateTime? toDate;
-  final int? leaveTypeId;
-  final bool? rejected;
-  final DateTime? acceptedAt;
-  final String? acceptedBy;
-  final DateTime? approvedAt;
-  final String? approvedBy;
-  final String? note;
-  final String? status;
-  final bool? isApprovalEscalated;
-  final bool? isHalfDayLeave;
-  final String? comments;
-  final DateTime? createdAt;
-  final String? createdBy;
-  final bool? isLeaveUsed;
-  final bool? isDeleted;
-  final DateTime? rejectedAt;
-  final String? rejectedBy;
-
-  EmployeeSelfLeaves({
-    this.employeeId,
-    this.employeeName,
-    this.code,
-    this.employeeLeaveId,
-    this.usedCLsInMonth,
-    this.usedPLsInMonth,
-    this.leaveType,
-    this.fromDate,
-    this.toDate,
-    this.leaveTypeId,
-    this.rejected,
-    this.acceptedAt,
-    this.acceptedBy,
-    this.approvedAt,
-    this.approvedBy,
-    this.note,
-    this.status,
-    this.isApprovalEscalated,
-    this.isHalfDayLeave,
-    this.comments,
-    this.createdAt,
-    this.createdBy,
-    this.isLeaveUsed,
-    this.isDeleted,
-    this.rejectedAt,
-    this.rejectedBy,
-  });
-
-  factory EmployeeSelfLeaves.fromJson(Map<String, dynamic> json) =>
-      EmployeeSelfLeaves(
-        employeeId: json["employeeId"],
-        employeeName: json["employeeName"],
-        code: json["code"],
-        employeeLeaveId: json["employeeLeaveId"],
-        usedCLsInMonth: json["usedCLsInMonth"]?.toDouble(),
-        usedPLsInMonth: json["usedPLsInMonth"]?.toDouble(),
-        leaveType: json["leaveType"],
-        fromDate:
-            json["fromDate"] == null ? null : DateTime.parse(json["fromDate"]),
-        toDate: json["toDate"] == null ? null : DateTime.parse(json["toDate"]),
-        leaveTypeId: json["leaveTypeId"],
-        rejected: json["rejected"],
-        acceptedAt: json["acceptedAt"] == null
-            ? null
-            : DateTime.parse(json["acceptedAt"]),
-        acceptedBy: json["acceptedBy"],
-        approvedAt: json["approvedAt"] == null
-            ? null
-            : DateTime.parse(json["approvedAt"]),
-        approvedBy: json["approvedBy"],
-        note: json["note"],
-        status: json["status"],
-        isApprovalEscalated: json["isApprovalEscalated"],
-        isHalfDayLeave: json["isHalfDayLeave"],
-        comments: json["comments"],
-        createdAt: json["createdAt"] == null
-            ? null
-            : DateTime.parse(json["createdAt"]),
-        createdBy: json["createdBy"],
-        isLeaveUsed: json["isLeaveUsed"],
-        isDeleted: json["isDeleted"],
-        rejectedAt: json["rejectedAt"] == null
-            ? null
-            : DateTime.parse(json["rejectedAt"]),
-        rejectedBy: json["rejectedBy"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "employeeId": employeeId,
-        "employeeName": employeeName,
-        "code": code,
-        "employeeLeaveId": employeeLeaveId,
-        "usedCLsInMonth": usedCLsInMonth,
-        "usedPLsInMonth": usedPLsInMonth,
-        "leaveType": leaveType,
-        "fromDate": fromDate?.toIso8601String(),
-        "toDate": toDate?.toIso8601String(),
-        "leaveTypeId": leaveTypeId,
-        "rejected": rejected,
-        "acceptedAt": acceptedAt?.toIso8601String(),
-        "acceptedBy": acceptedBy,
-        "approvedAt": approvedAt?.toIso8601String(),
-        "approvedBy": approvedBy,
-        "note": note,
-        "status": status,
-        "isApprovalEscalated": isApprovalEscalated,
-        "isHalfDayLeave": isHalfDayLeave,
-        "comments": comments,
-        "createdAt": createdAt?.toIso8601String(),
-        "createdBy": createdBy,
-        "isLeaveUsed": isLeaveUsed,
-        "isDeleted": isDeleted,
-        "rejectedAt": rejectedAt?.toIso8601String(),
-        "rejectedBy": rejectedBy,
-      };
-}
-
-/* 
-[
-    {
-        "employeeId": 85,
-        "employeeName": "Suman D",
-        "code": "CIS00054",
-        "employeeLeaveId": 2710,
-        "usedCLsInMonth": 0.0,
-        "usedPLsInMonth": 0.0,
-        "leaveType": "PL",
-        "fromDate": "2025-02-12T00:00:00",
-        "toDate": "2025-02-13T00:00:00",
-        "leaveTypeId": 103,
-        "rejected": null,
-        "acceptedAt": null,
-        "acceptedBy": "",
-        "approvedAt": null,
-        "approvedBy": "",
-        "note": "test",
-        "status": "Pending",
-        "isApprovalEscalated": null,
-        "isHalfDayLeave": false,
-        "comments": null,
-        "createdAt": "2025-01-16T16:01:36.933",
-        "createdBy": "Suman",
-        "isLeaveUsed": false,
-        "isDeleted": null,
-        "rejectedAt": null,
-        "rejectedBy": null
-    },
-    {
-        "employeeId": 85,
-        "employeeName": "Suman D",
-        "code": "CIS00054",
-        "employeeLeaveId": 2709,
-        "usedCLsInMonth": 0.0,
-        "usedPLsInMonth": 0.0,
-        "leaveType": "CL",
-        "fromDate": "2025-12-01T00:00:00",
-        "toDate": "2025-12-01T00:00:00",
-        "leaveTypeId": 102,
-        "rejected": false,
-        "acceptedAt": "2025-01-16T14:55:54",
-        "acceptedBy": "Nikhitha Yathamshetty",
-        "approvedAt": "2025-01-16T14:56:03",
-        "approvedBy": "Nikhitha Yathamshetty",
-        "note": "dec 1st",
-        "status": "Approved",
-        "isApprovalEscalated": true,
-        "isHalfDayLeave": false,
-        "comments": "thrtrthrt",
-        "createdAt": "2025-01-16T14:52:18.593",
-        "createdBy": "Suman",
-        "isLeaveUsed": false,
-        "isDeleted": null,
-        "rejectedAt": null,
-        "rejectedBy": null
-    },
-    {
-        "employeeId": 85,
-        "employeeName": "Suman D",
-        "code": "CIS00054",
-        "employeeLeaveId": 2708,
-        "usedCLsInMonth": 0.0,
-        "usedPLsInMonth": 0.0,
-        "leaveType": "LL",
-        "fromDate": "2025-04-08T00:00:00",
-        "toDate": "2025-04-15T00:00:00",
-        "leaveTypeId": 179,
-        "rejected": null,
-        "acceptedAt": null,
-        "acceptedBy": "",
-        "approvedAt": null,
-        "approvedBy": "",
-        "note": "test",
-        "status": "Pending",
-        "isApprovalEscalated": null,
-        "isHalfDayLeave": false,
-        "comments": null,
-        "createdAt": "2025-01-16T11:56:08.953",
-        "createdBy": "Suman",
-        "isLeaveUsed": false,
-        "isDeleted": null,
-        "rejectedAt": null,
-        "rejectedBy": null
-    },
-    {
-        "employeeId": 85,
-        "employeeName": "Suman D",
-        "code": "CIS00054",
-        "employeeLeaveId": 2707,
-        "usedCLsInMonth": 0.0,
-        "usedPLsInMonth": 0.0,
-        "leaveType": "LWP",
-        "fromDate": "2025-02-03T00:00:00",
-        "toDate": "2025-02-04T00:00:00",
-        "leaveTypeId": 104,
-        "rejected": null,
-        "acceptedAt": null,
-        "acceptedBy": "",
-        "approvedAt": null,
-        "approvedBy": "",
-        "note": "test",
-        "status": "Pending",
-        "isApprovalEscalated": null,
-        "isHalfDayLeave": false,
-        "comments": null,
-        "createdAt": "2025-01-16T11:55:35.55",
-        "createdBy": "Suman",
-        "isLeaveUsed": false,
-        "isDeleted": null,
-        "rejectedAt": null,
-        "rejectedBy": null
-    },
-    {
-        "employeeId": 85,
-        "employeeName": "Suman D",
-        "code": "CIS00054",
-        "employeeLeaveId": 2706,
-        "usedCLsInMonth": 0.0,
-        "usedPLsInMonth": 0.0,
-        "leaveType": "PL",
-        "fromDate": "2025-01-16T00:00:00",
-        "toDate": "2025-01-16T00:00:00",
-        "leaveTypeId": 103,
-        "rejected": null,
-        "acceptedAt": null,
-        "acceptedBy": "",
-        "approvedAt": null,
-        "approvedBy": "",
-        "note": "test",
-        "status": "Pending",
-        "isApprovalEscalated": null,
-        "isHalfDayLeave": false,
-        "comments": null,
-        "createdAt": "2025-01-16T11:35:31.413",
-        "createdBy": "Suman",
-        "isLeaveUsed": false,
-        "isDeleted": null,
-        "rejectedAt": null,
-        "rejectedBy": null
-    },
-    {
-        "employeeId": 85,
-        "employeeName": "Suman D",
-        "code": "CIS00054",
-        "employeeLeaveId": 2705,
-        "usedCLsInMonth": 0.0,
-        "usedPLsInMonth": 0.0,
-        "leaveType": "PL",
-        "fromDate": "2025-02-16T00:00:00",
-        "toDate": "2025-02-16T00:00:00",
-        "leaveTypeId": 103,
-        "rejected": null,
-        "acceptedAt": null,
-        "acceptedBy": "",
-        "approvedAt": null,
-        "approvedBy": "",
-        "note": "test",
-        "status": "Pending",
-        "isApprovalEscalated": null,
-        "isHalfDayLeave": false,
-        "comments": null,
-        "createdAt": "2025-01-16T11:34:10.34",
-        "createdBy": "Suman",
-        "isLeaveUsed": false,
-        "isDeleted": null,
-        "rejectedAt": null,
-        "rejectedBy": null
-    }
-]
-
-
-
-bool checkLeaveStatus(List<EmployeeSelfLeaves> empSelfLeaves,
-DateTime? selectedFromDate, DateTime? selectedToDate) {
-// Loop through the list of EmployeeSelfLeaves
-print('Selected dates: $selectedFromDate | $selectedToDate');
-for (var leave in empSelfLeaves) {
-// Ensure the entry is not deleted
-if (leave.isDeleted != true &&
-    (leave.status == 'Pending' || leave.status == 'Accepted')) {
-  // Get the leave date range
-  DateTime? leaveFromDate = leave.fromDate;
-  DateTime? leaveToDate = leave.toDate;
-
-  // Ensure leave dates are not null
-  if (leaveFromDate != null && leaveToDate != null) {
-    // Check for overlap
-    bool isWithinRange = selectedFromDate!
-            .isBefore(leaveToDate.add(const Duration(days: 1))) &&
-        (selectedToDate == null ||
-            selectedToDate.isAfter(
-                leaveFromDate.subtract(const Duration(days: 1))));
-
-    if (isWithinRange) {
-      print(
-          '''Error 1: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
-      return false; // Exit as the leave cannot be applied
-    }
-  }
-}
-
-if (leave.isDeleted != true && leave.status == 'Approved') {
-  // Get the leave date range
-  DateTime? leaveFromDate = leave.fromDate;
-  DateTime? leaveToDate = leave.toDate;
-
-  // Ensure leave dates are not null
-  if (leaveFromDate != null && leaveToDate != null) {
-    // Check for overlap
-    bool isWithinRange = selectedFromDate!
-            .isBefore(leaveToDate.add(const Duration(days: 1))) &&
-        (selectedToDate == null ||
-            selectedToDate.isAfter(
-                leaveFromDate.subtract(const Duration(days: 1))));
-
-    if (isWithinRange) {
-      print(
-          '''Error 2: Selected dates overlap with an existing leave type of '${leave.leaveType}' range of ${leave.fromDate} to ${leave.toDate} with the status of '${leave.status}'.''');
-      return false; // Exit as the leave cannot be applied
-    }
-  }
-}
-}
-
-print(
-  'Success 1: Selected dates do not overlap with any existing leave ranges.');
-return true;
-}
- */

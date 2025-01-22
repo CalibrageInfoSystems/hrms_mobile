@@ -49,7 +49,7 @@ class _apply_leaveeState extends State<apply_leave> {
   bool isTodayHoliday = false;
   bool _isTodayHoliday = false;
   bool isChecked = false;
-  List<Holiday_Model> holidayList = [];
+  List<HolidayResponse> holidayList = [];
   int selectedValue = 0;
   int selectedleaveValue = -1;
   String selectedName = "";
@@ -72,8 +72,6 @@ class _apply_leaveeState extends State<apply_leave> {
   int? DaysToConsiderAsLongLeave;
   List<Map<String, dynamic>> wfhLeavesList = []; // List to store "WFH" leaves
   List<Map<String, dynamic>> otherLeavesList =
-      []; // Create a list for other leave types
-  List<Map<String, dynamic>> CLLeavesList =
       []; // Create a list for other leave types
 
   bool fromDateSelected = false;
@@ -424,70 +422,6 @@ class _apply_leaveeState extends State<apply_leave> {
   //     });
   //   }
   // }// working code hidden by manohar on 9- may -2024
-  // DateTime _getNextSelectableDate(DateTime startDate, int offset) {
-  //   DateTime nextDate = startDate;
-  //   for (int i = 0; i < offset; ) {
-  //     nextDate = nextDate.add(const Duration(days: 1));
-  //     if (nextDate.weekday != DateTime.saturday &&
-  //         nextDate.weekday != DateTime.sunday &&
-  //         !_isHoliday(nextDate)) {
-  //       i++; // Only increment if it's a business day and not a holiday
-  //     }
-  //   }
-  //   return nextDate;
-  // }
-  // DateTime _getNextSelectableDate(DateTime startDate, int offset) {
-  //   DateTime nextDate = startDate;
-  //
-  //   // Skip the start date if it's Saturday or Sunday
-  //   if (nextDate.weekday == DateTime.saturday || nextDate.weekday == DateTime.sunday) {
-  //     // If it's Saturday, move to Monday; if it's Sunday, move to Monday
-  //     nextDate = nextDate.add(Duration(days: nextDate.weekday == DateTime.saturday ? 2 : 1));
-  //   }
-  //
-  //   for (int i = 0; i < offset; ) {
-  //     nextDate = nextDate.add(Duration(days: 1));
-  //
-  //     // Check if the next date is a business day and not a holiday
-  //     if (nextDate.weekday != DateTime.saturday &&
-  //         nextDate.weekday != DateTime.sunday &&
-  //         !_isHoliday(nextDate)) {
-  //       i++; // Only increment if it's a business day and not a holiday
-  //     }
-  //   }
-  //
-  //   return nextDate;
-  // }
-  DateTime _getNextSelectableDate(DateTime startDate, int offset) {
-    DateTime nextDate = startDate;
-
-    // Skip the start date if it's a Saturday, Sunday, or a holiday
-    if (nextDate.weekday == DateTime.saturday ||
-        nextDate.weekday == DateTime.sunday ||
-        _isHoliday(nextDate)) {
-      // Move to the next Monday if it's Saturday or Sunday, or to the next business day if it's a holiday
-      while (nextDate.weekday == DateTime.saturday ||
-          nextDate.weekday == DateTime.sunday ||
-          _isHoliday(nextDate)) {
-        nextDate = nextDate.add(Duration(days: 1));
-      }
-    }
-
-    // Move to the next selectable date based on the offset
-    for (int i = 0; i < offset;) {
-      nextDate = nextDate.add(Duration(days: 1));
-
-      // Check if the next date is a business day and not a holiday
-      if (nextDate.weekday != DateTime.saturday &&
-          nextDate.weekday != DateTime.sunday &&
-          !_isHoliday(nextDate)) {
-        i++; // Only increment if it's a business day and not a holiday
-      }
-    }
-
-    return nextDate;
-  }
-
   Future<void> _selectDate(bool isTodayHoliday) async {
     setState(() {
       _isTodayHoliday = isTodayHoliday;
@@ -499,17 +433,13 @@ class _apply_leaveeState extends State<apply_leave> {
           "Please Select Leave Type To Select From Date", context, 1, 5);
     } else {
       if (widget.buttonName == "CL" || selectedleaveName == "CL") {
-        //selectedDate = DateTime.now().add(Duration(days: 0));
+        selectedDate = DateTime.now().add(Duration(days: 1));
 
-        // DateTime initialDate = selectedDate!;
-        DateTime initialDate = DateTime.now();
+        DateTime initialDate = selectedDate!;
 
-        initialDate = _getNextSelectableDate(initialDate, 3);
         // Adjust the initial date if it doesn't satisfy the selectableDayPredicate
         if (_isTodayHoliday && initialDate.isBefore(DateTime.now())) {
-          initialDate = _getNextSelectableDate(DateTime.now(), 1);
-
-          /// initialDate = DateTime.now().add(const Duration(days: 1));
+          initialDate = DateTime.now().add(const Duration(days: 1));
         }
 
         // Find the next selectable date after the initialDate
@@ -737,34 +667,12 @@ class _apply_leaveeState extends State<apply_leave> {
   // }
 
   //Working code commented by Arun after restricting holiday in both from and to dates and current day blocking
-  // bool selectableDayPredicate(DateTime date) {
-  //   final isToday = date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
-  //
-  //   // Check if it's today and a holiday
-  //   if (isToday && _isTodayHoliday) {
-  //     return false; // Disable selection for today if it's a holiday
-  //   }
-  //
-  //   final saturday = date.weekday == DateTime.saturday;
-  //   final sunday = date.weekday == DateTime.sunday;
-  //
-  //   final isHoliday = holidayList.any((holiday) {
-  //     DateTime holidayFromDate = holiday.fromDate;
-  //     DateTime holidayToDate = holiday.toDate ?? holiday.fromDate;
-  //
-  //     return date.isAfter(holidayFromDate.subtract(Duration(days: 1))) && date.isBefore(holidayToDate.add(Duration(days: 1)));
-  //   });
-  //
-  //   // Return true if it's not Saturday, not Sunday, not a holiday, and not before today
-  //   return !saturday && !sunday && !isHoliday && date.isAfter(DateTime.now().subtract(Duration(days: 1)));
-  // }
-
   bool selectableDayPredicate(DateTime date) {
     final isToday = date.year == DateTime.now().year &&
         date.month == DateTime.now().month &&
         date.day == DateTime.now().day;
 
-    // Check if it's today anda holiday
+    // Check if it's today and a holiday
     if (isToday && _isTodayHoliday) {
       return false; // Disable selection for today if it's a holiday
     }
@@ -779,28 +687,12 @@ class _apply_leaveeState extends State<apply_leave> {
       return date.isAfter(holidayFromDate.subtract(Duration(days: 1))) &&
           date.isBefore(holidayToDate.add(Duration(days: 1)));
     });
-    if (widget.buttonName == "CL" || selectedleaveName == "CL") {
-      // Calculate cutoff date (3 business days ahead)
-      DateTime cutoffDate = _getNextSelectableDate(DateTime.now(), 3);
 
-      // Return true only if the date is after cutoffDate
-      return !saturday &&
-          !sunday &&
-          !isHoliday &&
-          date.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
-          date.isAfter(cutoffDate.subtract(const Duration(days: 1)));
-    } else {
-      // If the condition is false, use your default logic (allowing all dates)
-      return !saturday &&
-          !sunday &&
-          !isHoliday &&
-          date.isAfter(DateTime.now().subtract(Duration(days: 1)));
-    }
-    // Calculate cutoff date (3 business days ahead)
-    // DateTime cutoffDate = _getNextSelectableDate(DateTime.now(), 3);
-    //
-    // // Return true if it's not Saturday, not Sunday, not a holiday, not before today, and after cutoffDate
-    // return !saturday && !sunday && !isHoliday && date.isAfter(DateTime.now().subtract(Duration(days: 1))) && date.isAfter(cutoffDate.subtract(const Duration(days: 1)));
+    // Return true if it's not Saturday, not Sunday, not a holiday, and not before today
+    return !saturday &&
+        !sunday &&
+        !isHoliday &&
+        date.isAfter(DateTime.now().subtract(Duration(days: 1)));
   }
 
   // bool selectableDayPredicate(DateTime date) {//working code i have edited
@@ -878,7 +770,6 @@ class _apply_leaveeState extends State<apply_leave> {
   //     });
   //   }
   // }
-
   Future<void> _selectToDate() async {
     setState(() {
       _isTodayHoliday = isTodayHoliday;
@@ -993,7 +884,7 @@ class _apply_leaveeState extends State<apply_leave> {
       try {
         final url =
             Uri.parse(baseUrl + getleavesapi + empolyeeId + '/$currentYear');
-        print('myLeavesApi$url');
+        print('myLeavesApi $url');
         Map<String, String> headers = {
           'Content-Type': 'application/json',
           'Authorization': '$accessToken',
@@ -1012,24 +903,8 @@ class _apply_leaveeState extends State<apply_leave> {
           wfhLeavesList.clear(); // Clear the WFH list before adding new entries
           otherLeavesList
               .clear(); // Clear the WFH list before adding new entries
-          CLLeavesList.clear();
+
           data.forEach((leave) {
-            print('leave====>${leave['leaveType']}');
-            if (leave['leaveType'] == 'CL' &&
-                leave['status'] == 'Pending' &&
-                leave['rejected'] == null &&
-                leave['isDeleted'] == null) {
-              print('CL====985leave====>${leave['leaveType']}');
-
-              CLLeavesList.add({
-                'fromDate': leave['fromDate'],
-                'toDate': leave['toDate'],
-                'leaveType': leave['leaveType'],
-                'status': leave['status']
-              });
-              print('CLleavelength====993>${CLLeavesList.length}');
-            }
-
             if (leave['leaveType'] == 'WFH' &&
                 (leave['rejected'] == null || !leave['rejected']) &&
                 (leave['isDeleted'] == null || !leave['isDeleted'])) {
@@ -1037,9 +912,7 @@ class _apply_leaveeState extends State<apply_leave> {
                 'fromDate': leave['fromDate'],
                 'toDate': leave['toDate'],
               });
-            }
-
-            if ((leave['status'] == 'Accepted' ||
+            } else if ((leave['status'] == 'Accepted' ||
                     leave['status'] == 'Approved' ||
                     leave['status'] == 'Pending') &&
                 (leave['isDeleted'] == false || leave['isDeleted'] == null)) {
@@ -1057,11 +930,7 @@ class _apply_leaveeState extends State<apply_leave> {
             print('WFH From Date: ${wfhEntry['fromDate']}');
             print('WFH To Date: ${wfhEntry['toDate']}');
           });
-          CLLeavesList.forEach((ClEntry) {
-            print('CL From Date: ${ClEntry['fromDate']}');
-            print('CL To Date: ${ClEntry['toDate']}');
-            print('CL Status: ${ClEntry['status']}');
-          });
+
           // Print all other leave types with Accepted and Approved status
           otherLeavesList.forEach((otherLeave) {
             print(
@@ -1183,6 +1052,7 @@ class _apply_leaveeState extends State<apply_leave> {
   //     });
   //   }
   // }
+
   void disableButton() {
     setState(() {
       isButtonEnabled = false;
@@ -1200,6 +1070,7 @@ class _apply_leaveeState extends State<apply_leave> {
   //     (route) => false,
   //   );
   // }
+
   Future<void> applyleave() async {
     bool confirmedToSplitWFH = false;
     bool isValid = true;
@@ -1291,25 +1162,7 @@ class _apply_leaveeState extends State<apply_leave> {
     //   isLoading = false;
     //   hasValidationFailed = true;
     // }
-    if (widget.buttonName == "PL" ||
-        selectedleaveName == "PL" ||
-        selectedleaveName == "LL" ||
-        selectedleaveName == "LWP" ||
-        selectedleaveName == "WFH") {
-      String currentDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
 
-      _todateController.text = DateFormat('dd-MM-yyyy').format(selectedToDate!);
-      _fromdateController.text = DateFormat('dd-MM-yyyy').format(selectedDate!);
-      if (_todateController.text == currentDate &&
-          _fromdateController.text == currentDate) {
-        Commonutils.showCustomToastMessageLong(
-            'In any Situation Where Leave or Work From Home is Required for the Current date Please Contact the HR Manager or Admin',
-            context,
-            1,
-            6);
-        return;
-      }
-    }
     String fromdate = DateFormat('yyyy-MM-dd').format(selectedDate!);
     String? todate = null;
     print('tosendtodate:$selectedToDate');
@@ -1489,121 +1342,7 @@ class _apply_leaveeState extends State<apply_leave> {
         hasValidationFailed = true;
       }
     }
-    if (widget.buttonName == "CL" || selectedleaveName == "CL") {
-      DateTime? previousClDate;
-      DateTime? selectedToDateLeaves;
-      DateTime? clFromDate;
-      if (selectedToDate == null) {
-        selectedToDateLeaves = selectedDate!;
-      } else {
-        selectedToDateLeaves = selectedToDate!;
-      }
 
-      // Find if there is any pending CL on another date within the same month
-      bool isMatchFound = false;
-
-      for (var ClEntry in CLLeavesList) {
-        String? clFromDateStr = ClEntry['fromDate'];
-        String? clStatus = ClEntry['status'];
-        print('clFromDateStr$clFromDateStr');
-        if (clFromDateStr != null && clStatus == "Pending") {
-          clFromDate = DateTime.parse(clFromDateStr);
-
-          // Check if it is in the same month and year and a different date
-          if (clFromDate.year == selectedToDateLeaves.year &&
-              clFromDate.month == selectedToDateLeaves.month &&
-              clFromDate.day != selectedToDateLeaves.day) {
-            isMatchFound = true;
-            previousClDate = clFromDate;
-            break;
-          }
-        }
-      }
-
-      if (isMatchFound && previousClDate != null) {
-        String formattedMonth = DateFormat("MMMM").format(previousClDate);
-        String formattedDate = DateFormat("d MMM yyyy").format(previousClDate!);
-
-        ShowforCLdialog(context, formattedMonth, formattedDate, clFromDate!,
-            (bool confirmation) {
-          if (confirmation) {
-            // Navigator.of(context).pop();
-            applyclleaveapi(clFromDate!, selectedDate!);
-          } else {
-            fromDateSelected = false;
-            _fromdateController.clear();
-            _todateController.clear();
-            selectedToDate = null;
-            selectedDate = null;
-          }
-        });
-        return;
-        // Show a popup with the previous CL date
-        // showDialog(
-        //   context: context,
-        //
-        //   builder: (BuildContext context) {
-        //     return AlertDialog(
-        //       backgroundColor: Colors.white,
-        //       title:  Text(
-        //         "Confirmation",
-        //         style: TextStyle(
-        //           fontSize: 18,
-        //           fontFamily: 'Calibri',
-        //           color: Color(0xFFf15f22),
-        //         ),
-        //       ),
-        //       content: Text(
-        //         "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${formattedMonth} on this '${formattedDate}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.",
-        //      style: TextStyle(
-        //          fontSize: 15,
-        //        fontFamily: 'Calibri',
-        //        color: Colors.black,
-        //      ), ),
-        //       actions: [
-        //         ElevatedButton(
-        //           onPressed: () {
-        //             //    Navigator.of(context, rootNavigator: true).pop(context);
-        //        applyclleaveapi(clFromDate!,selectedDate!);
-        //          },
-        //           child: Text(
-        //             'Confirm',
-        //             style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
-        //           ),
-        //           style: ElevatedButton.styleFrom(
-        //             primary: Color(0xFFf15f22), // Change to your desired background color
-        //             shape: RoundedRectangleBorder(
-        //               borderRadius: BorderRadius.circular(5), // Set border radius
-        //             ),
-        //           ),
-        //         ),
-        //         SizedBox(
-        //           width: 5.0,
-        //         ),
-        //         ElevatedButton(
-        //           onPressed: () {
-        //             Navigator.of(context).pop();
-        //
-        //           },
-        //           child: Text(
-        //             'Cancel',
-        //             style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
-        //           ),
-        //           style: ElevatedButton.styleFrom(
-        //             primary: Color(0xFFf15f22), // Change to your desired background color
-        //             shape: RoundedRectangleBorder(
-        //               borderRadius: BorderRadius.circular(5), // Set border radius
-        //             ),
-        //           ),
-        //         ),
-        //       ],
-        //     );
-        //   },
-        // );
-        // return;
-      }
-    }
-    print('clleavelist${CLLeavesList.length}');
     if (widget.buttonName == "PL" ||
         selectedleaveName == "PL" ||
         widget.buttonName == "CL" ||
@@ -2070,9 +1809,9 @@ class _apply_leaveeState extends State<apply_leave> {
           "Rejected": null,
           "Comments": null,
           "IsApprovalEscalated": null,
+          //  "URL": "http://182.18.157.215:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
           "URL":
-              "http://182.18.157.215:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
-          //    "URL": "https://hrms.calibrage.in:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
+              "http://hrms.calibrage.in:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
           "EmployeeName": "${widget.employename}",
           // "getLeaveType": null,
           if (widget.buttonName == "test") ...{
@@ -2234,183 +1973,6 @@ class _apply_leaveeState extends State<apply_leave> {
     }
   }
 
-  Future<void> applyclleaveapi(
-      DateTime dateTime, DateTime selecteddateforcl) async {
-    String formattedMonth = DateFormat("MMMM").format(dateTime);
-    String previouslyClDate = DateFormat("EEEE, d MMMM yyyy").format(dateTime);
-    String selectedclDate =
-        DateFormat("EEEE, d MMMM yyyy").format(selecteddateforcl);
-    String fromdate = DateFormat('yyyy-MM-dd').format(selectedDate!);
-    String? todate = null;
-    bool isConnected = await Commonutils.checkInternetConnectivity();
-    if (isConnected) {
-      print('Connected to the internet');
-      print('dateTimepreviouslyapplied:${dateTime}');
-      print('selecteddateforcl:${selecteddateforcl}');
-    } else {
-      Commonutils.showCustomToastMessageLong(
-          'Please Check the Internet Connection', context, 1, 4);
-      FocusScope.of(context).unfocus();
-      print('Not connected to the internet');
-    }
-    print('====>$selectedleaveName');
-    DateTime currentTime = DateTime.now();
-    DateTime formattedlogintime = DateTime.parse(logintime!);
-    // Replace this with your actual login time
-    DateTime loginTime = formattedlogintime /* Replace with your login time */;
-
-    // Calculate the time difference
-    Duration timeDifference = currentTime.difference(loginTime);
-
-    // Check if the time difference is less than or equal to 1 hour (3600 seconds)
-    if (timeDifference.inSeconds <= 3600) {
-      // Login is within the allowed window
-
-      print("Login is within 1 hour of current time.");
-    } else {
-      // Login is outside the allowed window
-      // _showtimeoutdialog(context);
-      print("Login is more than 1 hour from current time.");
-    }
-    isLoading = true;
-    try {
-      final url = Uri.parse(baseUrl + applyleaveapi);
-      print('ApplyLeaveUrl: $url');
-      final request = {
-        "EmployeeId": empolyeid,
-        "FromDate": fromdate,
-        // if (widget.buttonName == 'CL' || selectedleaveName == 'CL') ...{
-        //   "ToDate": fromdate,
-        // } else ...{
-        //   "ToDate": todate,
-        // },
-        if (todate == null) ...{
-          "ToDate": fromdate,
-        } else ...{
-          "ToDate": todate,
-        },
-        "LeaveTypeId": '${widget.lookupDetailId}',
-        "Note": _leavetext.text,
-        "AcceptedBy": null,
-        "AcceptedAt": null,
-        "ApprovedBy": null,
-        "ApprovedAt": null,
-        "Rejected": null,
-        "Comments": null,
-        "IsApprovalEscalated": null,
-        "URL":
-            "http://182.18.157.215:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
-        // "URL": "https://hrms.calibrage.in:/", // In development stage change url to this http://182.18.157.215:///http://hrms.calibrage.in:/
-        "EmployeeName": "${widget.employename}",
-        // "getLeaveType": null,
-        if (widget.buttonName == "test") ...{
-          "GetLeaveType": "$selectedleaveName",
-        } else ...{
-          "GetLeaveType": "${widget.buttonName}",
-        },
-        "IsHalfDayLeave": isChecked,
-        "LeaveReasonId": selectedValue,
-        "IsFromAttendance": false,
-        if (widget.buttonName == "test") ...{
-          "LeaveTypeId": selectedleaveValue,
-          "LeaveReasonId": selectedleaveValue,
-          //   if (selectedleaveName == "WFH")
-          //     "leaveReasonId": selectedValue
-        }
-        // },
-      };
-
-      print('Request Body: ${json.encode(request)}');
-
-      final response = await http.post(
-        url,
-        body: json.encode(request),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': '$accessToken',
-        },
-      );
-
-      print('Applyresponse: ${response.body}');
-      // ProgressDialog progressDialog = ProgressDialog(context);
-
-      // Show the progress dialog
-      //   progressDialog.show();
-      // Parse the JSON response
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseMap = json.decode(response.body);
-
-        if (responseMap.containsKey('isSuccess')) {
-          bool isSuccess = responseMap['isSuccess'];
-          if (isSuccess == true) {
-            isLoading = false;
-            fromDateSelected = false;
-            print('response is success');
-            // Navigator.of(context).pop();
-
-            disableButton();
-
-            Commonutils.showCustomToastMessageLong(
-                'Your request for CL is Submitted for ${selectedclDate}, However the requested CL on ${previouslyClDate} has been declined',
-                context,
-                0,
-                6);
-            setState(() {
-              fromDateSelected = false;
-
-              _fromdateController.clear();
-              _todateController.clear();
-              selectedToDate = null;
-              selectedDate = null;
-            });
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => home_screen()),
-            );
-            //  progressDialog.dismiss();
-          } else {
-            Commonutils.showCustomToastMessageLong(
-                '${responseMap['message']}', context, 1, 4);
-            print('Apply Leave Failed: ${response.body}');
-            // progressDialog.dismiss();
-          }
-        } else {
-          //  progressDialog.dismiss();
-          if (response.body.toLowerCase().contains('invalid token')) {
-            //    progressDialog.dismiss();
-            // Invalid token scenario
-            Commonutils.showCustomToastMessageLong(
-                'Invalid Token. Please Login Again.', context, 1, 4);
-          } else {
-            //   progressDialog.dismiss();
-            // Other scenarios with success status code
-            // Handle as needed, for example, showing the response message
-            String message = responseMap['message'] ?? 'No message provided';
-            Commonutils.showCustomToastMessageLong(
-                '${response.body}', context, 0, 3);
-          }
-        }
-      } else if (response.statusCode == 520) {
-        //  progressDialog.dismiss();
-        // Scenario with status code 520
-        // Show the response body as a toast
-        Commonutils.showCustomToastMessageLong(
-            '${response.body}', context, 0, 3);
-      } else {
-        /// progressDialog.dismiss();
-        // Handle other status codes if needed
-        print(
-            'Failed to send the request. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
   void _sendLeaveRequest(
       bool confirmedToSplitWFH, String fromdate, String todate) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
@@ -2459,9 +2021,9 @@ class _apply_leaveeState extends State<apply_leave> {
         "Rejected": null,
         "Comments": null,
         "IsApprovalEscalated": null,
-        //  "URL": "https://hrms.calibrage.in:/", // In development stage change url to this http://182.18.157.215:/
         "URL":
-            "http://182.18.157.215:/", // In development stage change url to this http://182.18.157.215:/
+            "http://hrms.calibrage.in:/", // In development stage change url to this http://182.18.157.215:/
+        //   "URL": "http://182.18.157.215:/", // In development stage change url to this http://182.18.157.215:/
         "EmployeeName": "${widget.employename}",
         // "getLeaveType": null,
         if (widget.buttonName == "test") ...{
@@ -2605,80 +2167,6 @@ class _apply_leaveeState extends State<apply_leave> {
       });
     }
     //  }
-  }
-
-  void ShowforCLdialog(BuildContext context, String formattedMonth,
-      String formattedDate, DateTime clFromDate, Function(bool) _callback) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text(
-            "Confirmation",
-            style: TextStyle(
-              fontSize: 18,
-              fontFamily: 'Calibri',
-              color: Color(0xFFf15f22),
-            ),
-          ),
-          content: Text(
-            "Kindly confirm whether you wish to retract the previously submitted leave for the month of ${formattedMonth} on this '${formattedDate}', which has not yet approved. Please click 'Confirm' to proceed with the reversion or 'Cancel' to maintain the current application status.",
-            style: TextStyle(
-              fontSize: 15,
-              fontFamily: 'Calibri',
-              color: Colors.black,
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                //    Navigator.of(context, rootNavigator: true).pop(context);
-                // applyclleaveapi(clFromDate!,selectedDate!);
-                _callback(true);
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'Confirm',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Calibri'), // Set text color to white
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(
-                    0xFFf15f22), // Change to your desired background color
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5), // Set border radius
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 5.0,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _callback(false);
-              },
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Calibri'), // Set text color to white
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(
-                    0xFFf15f22), // Change to your desired background color
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5), // Set border radius
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-    return;
   }
 
   bool Validations() {
@@ -2917,6 +2405,14 @@ class _apply_leaveeState extends State<apply_leave> {
       }
     }
 
+    // get all the emp yearly leaves
+
+    return true;
+  }
+
+  bool validateOverlaps() {
+    List value = [1, 2, 3, 4, 2, 3];
+    value.map((item) => print(item));
     return true;
   }
 
@@ -3490,32 +2986,63 @@ class _apply_leaveeState extends State<apply_leave> {
                             onPressed: isLoading
                                 ? null
                                 : () async {
-                                    print('clickedonaddleave');
                                     setState(() {
                                       isLoading = true;
                                     });
                                     if (Validations()) {
-                                      await applyleave();
+                                      checkLeavesAllocation(
+                                              _fromdateController.text.trim(),
+                                              selectedleaveValue)
+                                          .then((int value) {
+                                        switch (value) {
+                                          case 102:
+                                            Commonutils.showCustomToastMessageLong(
+                                                'Please ensure the start and end dates fall within the same year',
+                                                // 'Years must be same while applying a leave',
+                                                context,
+                                                1,
+                                                3);
+                                            break;
+                                          case 200:
+                                            applyleave();
+                                            break;
+                                          case 400:
+                                            Commonutils
+                                                .showCustomToastMessageLong(
+                                                    Constants
+                                                        .plErrorMessage, // Constants.plErrorMessage
+                                                    context,
+                                                    1,
+                                                    3);
+                                            break;
+                                          case 500:
+                                            Commonutils.showCustomToastMessageLong(
+                                                'Something went wrong, please try again', // Constants.plErrorMessage
+                                                context,
+                                                1,
+                                                3);
+                                            break;
+                                        }
+                                      });
                                     }
 
                                     setState(() {
                                       isLoading = false;
-                                      //fromDateSelected = false;
                                     });
                                   },
-                            child: Text(
-                              'Add Leave',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontFamily: 'Calibri'),
-                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4.0),
                               ),
+                            ),
+                            child: const Text(
+                              'Add Leave',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontFamily: 'Calibri'),
                             ),
                           ),
                         ),
@@ -4225,42 +3752,39 @@ class _apply_leaveeState extends State<apply_leave> {
 
       if (response.statusCode == 200) {
         List<dynamic> jsonData = jsonDecode(response.body);
-        print('jsonData: $jsonData');
 
-        List<Holiday_Model> _holidayList = jsonData
+        List<Holiday_Model> holidayList = jsonData
             .where((json) =>
                 json['isActive'] == true) // Filter for active holidays
             .map((json) => Holiday_Model.fromJson(json))
             .toList();
 
-        print('holidays: ${_holidayList.length}');
-        for (final holiday in _holidayList) {
-          // Print the fromDate and toDate for each holiday
-          print('Holiday: ${holiday.title}');
-          print('From Date: ${holiday.fromDate}');
-          print('To Date: ${holiday.toDate ?? holiday.fromDate}');
-        }
-        setState(() {
-          holidayList = _holidayList;
-        });
-
+        print('holidays${holidayList.length}');
         DateTime now = DateTime.now();
         DateTime currentDate = DateTime(now.year, now.month, now.day);
-        for (final holiday in _holidayList) {
+        String formattedDate =
+            DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(currentDate);
+
+        for (final holiday in holidayList) {
           DateTime holidayFromDate = holiday.fromDate;
-          DateTime holidayToDate = holiday.toDate ?? holiday.fromDate;
-          print('holidayToDate: $holidayToDate');
-          if (currentDate
-                  .isAfter(holidayFromDate.subtract(Duration(days: 1))) &&
-              currentDate.isBefore(holidayToDate.add(Duration(days: 1)))) {
-            setState(() {
+          DateTime holidayToDate = holiday.toDate ??
+              holiday
+                  .fromDate; // If toDate is null, assume it's the same as fromDate
+
+          for (DateTime date = holidayFromDate;
+              date.isBefore(holidayToDate.add(Duration(days: 1)));
+              date = date.add(Duration(days: 1))) {
+            // Check if today's date falls within the holiday's date range
+            String holidayDate =
+                DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(date);
+            if (formattedDate == holidayDate) {
               isTodayHoliday = true;
-              print('isTodayHoliday:$isTodayHoliday');
-            });
-            break;
+              print('Today is a holiday: $formattedDate');
+              break; // If a match is found, exit the loop
+            }
           }
         }
-        return _holidayList; // Return the list of holidays
+        return holidayList; // Return the list of holidays
       } else {
         throw Exception('Failed to load holidays: ${response.statusCode}');
       }
@@ -4269,75 +3793,6 @@ class _apply_leaveeState extends State<apply_leave> {
       return []; // Return empty list in case of an error
     }
   }
-
-  // Future<List<Holiday_Model>> fetchHolidayList(String accessToken) async {
-  //   try {
-  //     int currentYear = DateTime.now().year;
-  //
-  //     final url = Uri.parse(baseUrl + GetHolidayList + '$currentYear');
-  //     print('fetchHoliday: $url');
-  //     Map<String, String> headers = {
-  //       'Content-Type': 'application/json',
-  //       'Authorization': '$accessToken',
-  //     };
-  //     final response = await http.get(url, headers: headers);
-  //
-  //     if (response.statusCode == 200) {
-  //       List<dynamic> jsonData = jsonDecode(response.body);
-  //       print('jsonData${jsonData}');
-  //       List<Holiday_Model> holidayList = jsonData
-  //           .where((json) => json['isActive'] == true) // Filter for active holidays
-  //           .map((json) => Holiday_Model.fromJson(json))
-  //           .toList();
-  //       for (final holiday in holidayList) {
-  //         // Print the fromDate and toDate for each holiday
-  //         print('Holiday: ${holiday.title}');
-  //         print('From Date: ${holiday.fromDate}');
-  //         print('To Date: ${holiday.toDate ?? holiday.fromDate}');
-  //       }
-  //       print('holidays${holidayList.length}');
-  //       // DateTime now = DateTime.now();
-  //       // DateTime currentDate = DateTime(now.year, now.month, now.day);
-  //       // String formattedDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(currentDate);
-  //       //
-  //       // for (final holiday in holidayList) {
-  //       //   DateTime holidayFromDate = holiday.fromDate;
-  //       //   DateTime holidayToDate = holiday.toDate ?? holiday.fromDate; // If toDate is null, assume it's the same as fromDate
-  //       //
-  //       //   for (DateTime date = holidayFromDate; date.isBefore(holidayToDate.add(Duration(days: 1))); date = date.add(Duration(days: 1))) {
-  //       //     // Check if today's date falls within the holiday's date range
-  //       //     String holidayDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(date);
-  //       //     print('holidayDate:$holidayDate');
-  //       //     if (formattedDate == holidayDate) {
-  //       //       isTodayHoliday = true;
-  //       //       print('Today is a holiday: $formattedDate');
-  //       //       break; // If a match is found, exit the loop
-  //       //     }
-  //       //   }
-  //       // }
-  //       DateTime now = DateTime.now();
-  //       DateTime currentDate = DateTime(now.year, now.month, now.day);
-  //       for (final holiday in holidayList) {
-  //         DateTime holidayFromDate = holiday.fromDate;
-  //         DateTime holidayToDate = holiday.toDate ?? holiday.fromDate;
-  //         print('holidayToDate:$holidayToDate');
-  //         if (currentDate.isAfter(holidayFromDate.subtract(Duration(days: 1))) &&
-  //             currentDate.isBefore(holidayToDate.add(Duration(days: 1)))) {
-  //           setState(() {
-  //             isTodayHoliday = true;
-  //           });
-  //           break;
-  //         }
-  //       }
-  //       return holidayList; // Return the list of holidays
-  //     } else {
-  //       throw Exception('Failed to load holidays: ${response.statusCode}');
-  //     }
-  //   } catch (error) {
-  //     print('Error in holiday list: $error');
-  //     return []; // Return empty list in case of an error
-  //   }
-  // }
 
   //working for fromdates hiden by manohar to add todates as well
   // Future<List<Holiday_Model>> fetchHolidayList(String accessToken) async {
@@ -4677,7 +4132,7 @@ class _apply_leaveeState extends State<apply_leave> {
               Text(
                 "Confirmation",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontFamily: 'Calibri',
                   color: Color(0xFFf15f22),
                 ),
@@ -4694,13 +4149,7 @@ class _apply_leaveeState extends State<apply_leave> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Your Leave Request is within the WFH Span. will you want to split this, Please confirm this by "Clicking" Confirm else "Cancel"',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontFamily: 'Calibri',
-                  color: Colors.black,
-                ),
-              )
+                  'Your Leave Request is within the WFH Span. will you want to split this, Please confirm this by "Clicking" Confirm else "Cancel"')
             ],
           ),
           actions: [
@@ -4750,5 +4199,149 @@ class _apply_leaveeState extends State<apply_leave> {
         );
       },
     );
+  }
+
+  Future<int> checkLeavesAllocation(String fromDate, int leaveTypeId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final empId = prefs.getString("employeeId") ?? "";
+
+    final apiUrl =
+        '$baseUrl$getleaveStatistics${fromDate.split('-')[2]}/$empId';
+    // 'http://182.18.157.215/HRMS/API/hrmsapi/Attendance/GetLeaveStatistics/2025/176';
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'Authorization': accessToken,
+    };
+
+    final jsonResponse = await http.get(
+      Uri.parse(apiUrl),
+      headers: headers,
+    );
+
+    print('checkLeaves: $apiUrl');
+    print('checkLeaves: $jsonResponse');
+
+    if (selectedDate != null && selectedToDate != null) {
+      if (selectedDate!.year != selectedToDate!.year) {
+        return 102; // years different
+      }
+      /* else {
+        return 200; // years same
+      } */
+    }
+
+    if (jsonResponse.statusCode == 200) {
+      final Map<String, dynamic> response = jsonDecode(jsonResponse.body);
+
+      if (checkForLeavesAvailability(leaveTypeId, response) > 0) {
+        // return true;
+        return 200;
+      }
+      // return false;
+      return 400; // no leaves
+    }
+    // return false;
+    return 500; // api failed
+  }
+
+  double checkForLeavesAvailability(
+      int leaveTypeId, Map<String, dynamic> response) {
+    late double allocatedLeaves;
+    late double usedLeaves;
+    switch (leaveTypeId) {
+      case 102: // CL
+        allocatedLeaves = response['allottedCasualLeaves'] ?? 0.0;
+        usedLeaves = response['usedCasualLeavesInYear'] ?? 0.0;
+        break;
+      case 103: // PL
+        allocatedLeaves = response['allottedPrivilegeLeaves'] ?? 0.0;
+        usedLeaves = response['usedPrivilegeLeavesInYear'] ?? 0.0;
+        break;
+      case 104: // LWP
+        return 1;
+      case 160: // WFH
+        return 1;
+      case 179: // LL
+        return 1;
+    }
+    return allocatedLeaves.toDouble() - usedLeaves.toDouble();
+  }
+}
+
+class ProgressDialog {
+  final BuildContext context;
+  late bool _isShowing;
+
+  ProgressDialog(this.context) {
+    _isShowing = false;
+    show();
+  }
+
+  Future<void> show() async {
+    if (!_isShowing) {
+      _isShowing = true;
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        barrierColor: Colors.transparent,
+        builder: (BuildContext context) {
+          return Center(
+            child: Container(
+              width: MediaQuery.of(context).size.width /
+                  1.8, // Adjust the width as needed
+              height: MediaQuery.of(context).size.height /
+                  4, // Adjust the height as needed
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.rectangle,
+                // gradient: LinearGradient(
+                //   colors: [
+                //     Colors.blue,
+                //     Colors.green,
+                //   ],
+                //   begin: Alignment.topCenter,
+                //   end: Alignment.bottomCenter,
+                // ),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    height: 33.0,
+                    width: 33.0,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: SvgPicture.asset(
+                      'assets/cislogo-new.svg',
+                      height: 30.0,
+                      width: 30.0,
+                    ),
+                  ),
+                  CircularProgressIndicator(
+                    strokeWidth:
+                        3, // Adjust the stroke width of the CircularProgressIndicator
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFFf15f22),
+                    ), // Color for the progress indicator itself
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+      _isShowing =
+          false; // Set isShowing back to false after dialog is dismissed
+    }
+  }
+
+  void dismiss() {
+    if (_isShowing) {
+      _isShowing = false;
+      Navigator.of(context).pop();
+    }
   }
 }
