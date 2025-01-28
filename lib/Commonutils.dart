@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Constants.dart';
 import 'package:hrms/SharedPreferencesHelper.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:hrms/main.dart';
 import 'package:hrms/styles.dart';
 import 'package:hrms/test_projects.dart';
@@ -268,7 +269,7 @@ class Commonutils {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
     Commonutils.showCustomToastMessageLong("Logout Successful", context, 0, 3);
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
   }

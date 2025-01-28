@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -86,7 +87,11 @@ class _personal_screen_screenState extends State<personal_details> {
         //  _checkLoginTime();
       } else {
         print('The Internet Is not  Connected');
-        Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context as BuildContext, 1, 4);
+        Commonutils.showCustomToastMessageLong(
+            'Please Check the Internet Connection',
+            context as BuildContext,
+            1,
+            4);
       }
     });
   }
@@ -107,7 +112,11 @@ class _personal_screen_screenState extends State<personal_details> {
   Future<void> fetchBloodGroups(int bloodlookupid) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context as BuildContext, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection',
+          context as BuildContext,
+          1,
+          4);
       FocusScope.of(context as BuildContext).unfocus();
       return;
     }
@@ -128,10 +137,11 @@ class _personal_screen_screenState extends State<personal_details> {
 
         if (jsonData == 'Token invalid !!!') {
           SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
-          Commonutils.showCustomToastMessageLong("Token is Expired", context as BuildContext, 0, 3);
+          Commonutils.showCustomToastMessageLong(
+              "Token is Expired", context as BuildContext, 0, 3);
 
           Navigator.of(context as BuildContext).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => LoginPage()),
+            MaterialPageRoute(builder: (context) => LoginScreen()),
             (route) => false,
           );
           return;
@@ -139,7 +149,8 @@ class _personal_screen_screenState extends State<personal_details> {
 
         if (jsonData is List<dynamic>) {
           setState(() {
-            lookupDetails = jsonData.map((data) => LookupDetail.fromJson(data)).toList();
+            lookupDetails =
+                jsonData.map((data) => LookupDetail.fromJson(data)).toList();
           });
 
           // Assuming you have the logged-in user's blood group name stored in a variable
@@ -161,13 +172,18 @@ class _personal_screen_screenState extends State<personal_details> {
         }
       } else {
         print('HTTP error: ${response.statusCode}');
-        throw Exception('Failed to load data. Status Code: ${response.statusCode}');
+        throw Exception(
+            'Failed to load data. Status Code: ${response.statusCode}');
       }
     } on SocketException catch (e) {
       print('SocketException: $e');
     } catch (e) {
       print('Error: $e');
-      Commonutils.showCustomToastMessageLong('An unexpected error occurred. Please try again later.', context as BuildContext, 0, 3);
+      Commonutils.showCustomToastMessageLong(
+          'An unexpected error occurred. Please try again later.',
+          context as BuildContext,
+          0,
+          3);
     }
   }
 
@@ -450,12 +466,16 @@ class _personal_screen_screenState extends State<personal_details> {
                   },
                   child: Text(
                     'Ok',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFf15f22), // Change to your desired background color
+                    backgroundColor: Color(
+                        0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Set border radius
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
                     ),
                   ),
                 ),
@@ -469,10 +489,11 @@ class _personal_screen_screenState extends State<personal_details> {
 
   void onConfirmLogout(BuildContext context) {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
-    Commonutils.showCustomToastMessageLong("Logout Successfully", context, 0, 3);
+    Commonutils.showCustomToastMessageLong(
+        "Logout Successfully", context, 0, 3);
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
   }
@@ -549,7 +570,8 @@ class _personal_screen_screenState extends State<personal_details> {
                             children: [
                               Container(
                                 width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height / 3.0,
+                                height:
+                                    MediaQuery.of(context).size.height / 3.0,
                                 child: ClipPath(
                                   clipper: CurvedBottomClipper(),
                                   child: Container(
@@ -557,12 +579,15 @@ class _personal_screen_screenState extends State<personal_details> {
                                       color: Color(0xFFf15f22),
                                     ),
                                     width: MediaQuery.of(context).size.width,
-                                    height: MediaQuery.of(context).size.height / 3.0,
+                                    height: MediaQuery.of(context).size.height /
+                                        3.0,
                                     child: Padding(
                                       padding: EdgeInsets.only(left: 0, top: 5),
                                       child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
                                           // Container(
                                           //   child: Text(
@@ -574,13 +599,21 @@ class _personal_screen_screenState extends State<personal_details> {
                                           Align(
                                             alignment: Alignment.topCenter,
                                             child: Container(
-                                                width: MediaQuery.of(context).size.width,
-                                                height: MediaQuery.of(context).size.height / 3.2,
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height /
+                                                    3.2,
                                                 child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
                                                   children: [
                                                     Row(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
                                                       // alignment: AlignmentDirectional.center,
                                                       children: [
                                                         // if (photoData != null && photoData != "")
@@ -621,47 +654,93 @@ class _personal_screen_screenState extends State<personal_details> {
 
                                                         // _imageFile != null
                                                         //     ?
-                                                        if (_imageFile != null) ...{
+                                                        if (_imageFile !=
+                                                            null) ...{
                                                           Image.file(
                                                             _imageFile!,
-                                                            width: MediaQuery.of(context).size.width / 3.8,
-                                                            height: MediaQuery.of(context).size.height / 6.5,
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width /
+                                                                3.8,
+                                                            height: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .height /
+                                                                6.5,
                                                             fit: BoxFit.fill,
                                                           ),
-                                                        } else if (photoData != null && photoData!.isNotEmpty) ...{
+                                                        } else if (photoData !=
+                                                                null &&
+                                                            photoData!
+                                                                .isNotEmpty) ...{
                                                           // photoData != null && photoData!.isNotEmpty
                                                           //     ?
-                                                          FutureBuilder<Uint8List>(
-                                                            future: _decodeBase64(photoData!),
-                                                            builder: (context, snapshot) {
-                                                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                                          FutureBuilder<
+                                                              Uint8List>(
+                                                            future:
+                                                                _decodeBase64(
+                                                                    photoData!),
+                                                            builder: (context,
+                                                                snapshot) {
+                                                              if (snapshot
+                                                                      .connectionState ==
+                                                                  ConnectionState
+                                                                      .waiting) {
                                                                 return Center(
-                                                                  child: Container(
+                                                                  child:
+                                                                      Container(
                                                                     width: 32,
                                                                     height: 32,
-                                                                    child: CircularProgressIndicator.adaptive(),
+                                                                    child: CircularProgressIndicator
+                                                                        .adaptive(),
                                                                   ), // Optionally, show a message if photoData is empty
                                                                 );
-                                                              } else if (snapshot.hasError) {
-                                                                return getDefaultImage(Gender, context);
+                                                              } else if (snapshot
+                                                                  .hasError) {
+                                                                return getDefaultImage(
+                                                                    Gender,
+                                                                    context);
                                                               } else {
                                                                 return Container(
-                                                                    width: MediaQuery.of(context).size.width / 3.8,
-                                                                    height: MediaQuery.of(context).size.height / 6.5,
-                                                                    padding: EdgeInsets.all(3.0),
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width /
+                                                                        3.8,
+                                                                    height: MediaQuery.of(context)
+                                                                            .size
+                                                                            .height /
+                                                                        6.5,
+                                                                    padding:
+                                                                        EdgeInsets.all(
+                                                                            3.0),
                                                                     decoration: BoxDecoration(
-                                                                        borderRadius: BorderRadius.all(Radius.circular(3.5)), border: Border.all(color: Colors.white, width: 2.0)),
-                                                                    child: ClipRRect(
-                                                                      borderRadius: BorderRadius.circular(4.0), // Adjust the radius as needed
-                                                                      child: Image.memory(
-                                                                        snapshot.data!,
-                                                                        fit: BoxFit.fill,
-                                                                        filterQuality: FilterQuality.high,
+                                                                        borderRadius:
+                                                                            BorderRadius.all(Radius.circular(
+                                                                                3.5)),
+                                                                        border: Border.all(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            width:
+                                                                                2.0)),
+                                                                    child:
+                                                                        ClipRRect(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              4.0), // Adjust the radius as needed
+                                                                      child: Image
+                                                                          .memory(
+                                                                        snapshot
+                                                                            .data!,
+                                                                        fit: BoxFit
+                                                                            .fill,
+                                                                        filterQuality:
+                                                                            FilterQuality.high,
                                                                         // fit: BoxFit.fitWidth,
                                                                       ),
                                                                     ));
-    }
-    },
+                                                              }
+                                                            },
                                                           )
 
                                                           //:  getDefaultImage(Gender, context),
@@ -673,8 +752,10 @@ class _personal_screen_screenState extends State<personal_details> {
                                                           //     child: CircularProgressIndicator.adaptive() ,
                                                           //   ), // Optionally, show a message if photoData is empty
                                                           // ),
-                                                        } else if (photoData == null) ...{
-                                                          getDefaultImage(Gender, context),
+                                                        } else if (photoData ==
+                                                            null) ...{
+                                                          getDefaultImage(
+                                                              Gender, context),
                                                         },
 
                                                         // : photoData != null && photoData != ""
@@ -686,17 +767,25 @@ class _personal_screen_screenState extends State<personal_details> {
 
                                                         // : getDefaultImage(Gender, context),
                                                         Container(
-                                                          height: MediaQuery.of(context).size.height / 6.2,
+                                                          height: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .height /
+                                                              6.2,
                                                           child: Align(
-                                                            alignment: Alignment.bottomRight,
+                                                            alignment: Alignment
+                                                                .bottomRight,
                                                             child: InkWell(
                                                               onTap: () async {
-                                                                await showBottomSheetForImageSelection(context);
+                                                                await showBottomSheetForImageSelection(
+                                                                    context);
                                                               },
                                                               child: Icon(
-                                                                Icons.camera_alt_outlined,
+                                                                Icons
+                                                                    .camera_alt_outlined,
                                                                 size: 22.0,
-                                                                color: Colors.white,
+                                                                color: Colors
+                                                                    .white,
                                                               ),
                                                             ),
                                                           ),
@@ -705,18 +794,31 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     ),
                                                     SizedBox(height: 5.0),
                                                     Container(
-                                                      width: MediaQuery.of(context).size.width / 1.5,
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width /
+                                                              1.5,
                                                       child: Text(
                                                         "$EmployeName",
                                                         softWrap: true,
-                                                        textAlign: TextAlign.center,
-                                                        style: TextStyle(fontSize: 18, color: Colors.white, fontFamily: 'Calibri'),
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                            fontSize: 18,
+                                                            color: Colors.white,
+                                                            fontFamily:
+                                                                'Calibri'),
                                                       ),
                                                     ),
                                                     SizedBox(height: 2.0),
                                                     Text(
                                                       "$employee_designation",
-                                                      style: TextStyle(fontSize: 15, color: Colors.white, fontFamily: 'Calibri'),
+                                                      style: TextStyle(
+                                                          fontSize: 15,
+                                                          color: Colors.white,
+                                                          fontFamily:
+                                                              'Calibri'),
                                                     ),
                                                   ],
                                                 )),
@@ -766,7 +868,8 @@ class _personal_screen_screenState extends State<personal_details> {
                                         padding: EdgeInsets.all(16.0),
                                         child: Card(
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8.0),
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
                                             side: BorderSide(
                                               color: Color(0xFFf15f22),
                                               width: 1.5,
@@ -775,20 +878,32 @@ class _personal_screen_screenState extends State<personal_details> {
                                           child: Padding(
                                             padding: EdgeInsets.all(10.0),
                                             child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Row(
                                                   children: [
                                                     Expanded(
                                                       flex: 4,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           const Padding(
-                                                            padding: EdgeInsets.fromLTRB(12, 5, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(12, 5,
+                                                                    0, 0),
                                                             child: Text(
                                                               "Employee Id",
-                                                              style: TextStyle(color: Color(0xFFf15f22), fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
+                                                              style: TextStyle(
+                                                                  color: Color(
+                                                                      0xFFf15f22),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontFamily:
+                                                                      'Calibri'),
                                                             ),
                                                           ),
                                                         ],
@@ -797,17 +912,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 0,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(
+                                                                    0, 5, 0, 0),
                                                             child: Text(
                                                               ":",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 16,
-                                                                fontFamily: 'Calibri',
-                                                                fontWeight: FontWeight.bold,
+                                                                fontFamily:
+                                                                    'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
                                                               ),
                                                             ),
                                                           ),
@@ -817,17 +940,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 5,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(10, 5, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(10, 5,
+                                                                    0, 0),
                                                             child: Text(
                                                               "$cisid",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 14,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontFamily: 'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontFamily:
+                                                                    'Calibri',
                                                               ),
                                                             ),
                                                           ),
@@ -842,13 +973,24 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 4,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           const Padding(
-                                                            padding: EdgeInsets.fromLTRB(12, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(12, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "Gender",
-                                                              style: TextStyle(color: Color(0xFFf15f22), fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
+                                                              style: TextStyle(
+                                                                  color: Color(
+                                                                      0xFFf15f22),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontFamily:
+                                                                      'Calibri'),
                                                             ),
                                                           ),
                                                         ],
@@ -857,17 +999,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 0,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(
+                                                                    0, 0, 0, 0),
                                                             child: Text(
                                                               ":",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 16,
-                                                                fontFamily: 'Calibri',
-                                                                fontWeight: FontWeight.bold,
+                                                                fontFamily:
+                                                                    'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
                                                               ),
                                                             ),
                                                           ),
@@ -877,17 +1027,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 5,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(10, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "$Gender",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 14,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontFamily: 'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontFamily:
+                                                                    'Calibri',
                                                               ),
                                                             ),
                                                           ),
@@ -902,13 +1060,24 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 4,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           const Padding(
-                                                            padding: EdgeInsets.fromLTRB(12, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(12, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "Office Email Id ",
-                                                              style: TextStyle(color: Color(0xFFf15f22), fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
+                                                              style: TextStyle(
+                                                                  color: Color(
+                                                                      0xFFf15f22),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontFamily:
+                                                                      'Calibri'),
                                                             ),
                                                           ),
                                                         ],
@@ -917,17 +1086,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 0,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(
+                                                                    0, 0, 0, 0),
                                                             child: Text(
                                                               ":",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 16,
-                                                                fontFamily: 'Calibri',
-                                                                fontWeight: FontWeight.bold,
+                                                                fontFamily:
+                                                                    'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
                                                               ),
                                                             ),
                                                           ),
@@ -937,17 +1114,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 5,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(10, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "$OfficeEmailid",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 14,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontFamily: 'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontFamily:
+                                                                    'Calibri',
                                                               ),
                                                             ),
                                                           ),
@@ -962,13 +1147,24 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 4,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           const Padding(
-                                                            padding: EdgeInsets.fromLTRB(12, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(12, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "DOJ",
-                                                              style: TextStyle(color: Color(0xFFf15f22), fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
+                                                              style: TextStyle(
+                                                                  color: Color(
+                                                                      0xFFf15f22),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontFamily:
+                                                                      'Calibri'),
                                                             ),
                                                           ),
                                                         ],
@@ -977,17 +1173,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 0,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(
+                                                                    0, 0, 0, 0),
                                                             child: Text(
                                                               ":",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 16,
-                                                                fontFamily: 'Calibri',
-                                                                fontWeight: FontWeight.bold,
+                                                                fontFamily:
+                                                                    'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
                                                               ),
                                                             ),
                                                           ),
@@ -997,17 +1201,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 5,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(10, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "$formatteddateofjoining",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 14,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontFamily: 'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontFamily:
+                                                                    'Calibri',
                                                               ),
                                                             ),
                                                           ),
@@ -1022,13 +1234,24 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 4,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           const Padding(
-                                                            padding: EdgeInsets.fromLTRB(12, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(12, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "Mobile Number ",
-                                                              style: TextStyle(color: Color(0xFFf15f22), fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
+                                                              style: TextStyle(
+                                                                  color: Color(
+                                                                      0xFFf15f22),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontFamily:
+                                                                      'Calibri'),
                                                             ),
                                                           ),
                                                         ],
@@ -1037,17 +1260,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 0,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(
+                                                                    0, 0, 0, 0),
                                                             child: Text(
                                                               ":",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 16,
-                                                                fontFamily: 'Calibri',
-                                                                fontWeight: FontWeight.bold,
+                                                                fontFamily:
+                                                                    'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
                                                               ),
                                                             ),
                                                           ),
@@ -1057,17 +1288,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 5,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(10, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "$Mobilenum",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 14,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontFamily: 'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontFamily:
+                                                                    'Calibri',
                                                               ),
                                                             ),
                                                           ),
@@ -1082,13 +1321,24 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 4,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           const Padding(
-                                                            padding: EdgeInsets.fromLTRB(12, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(12, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "DOB",
-                                                              style: TextStyle(color: Color(0xFFf15f22), fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
+                                                              style: TextStyle(
+                                                                  color: Color(
+                                                                      0xFFf15f22),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontFamily:
+                                                                      'Calibri'),
                                                             ),
                                                           ),
                                                         ],
@@ -1097,17 +1347,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 0,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(
+                                                                    0, 0, 0, 0),
                                                             child: Text(
                                                               ":",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 16,
-                                                                fontFamily: 'Calibri',
-                                                                fontWeight: FontWeight.bold,
+                                                                fontFamily:
+                                                                    'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
                                                               ),
                                                             ),
                                                           ),
@@ -1117,17 +1375,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 5,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(10, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "$dob",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 14,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontFamily: 'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontFamily:
+                                                                    'Calibri',
                                                               ),
                                                             ),
                                                           ),
@@ -1142,13 +1408,24 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 4,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           const Padding(
-                                                            padding: EdgeInsets.fromLTRB(12, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(12, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "Reporting To",
-                                                              style: TextStyle(color: Color(0xFFf15f22), fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
+                                                              style: TextStyle(
+                                                                  color: Color(
+                                                                      0xFFf15f22),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontFamily:
+                                                                      'Calibri'),
                                                             ),
                                                           ),
                                                         ],
@@ -1157,17 +1434,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 0,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(
+                                                                    0, 0, 0, 0),
                                                             child: Text(
                                                               ":",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 14,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontFamily: 'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontFamily:
+                                                                    'Calibri',
                                                               ),
                                                             ),
                                                           ),
@@ -1177,17 +1462,25 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     Expanded(
                                                       flex: 5,
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(10, 0,
+                                                                    0, 0),
                                                             child: Text(
                                                               "$ReportingTo",
                                                               style: TextStyle(
-                                                                color: Colors.black54,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontSize: 14,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontFamily: 'Calibri',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontFamily:
+                                                                    'Calibri',
                                                               ),
                                                             ),
                                                           ),
@@ -1318,7 +1611,8 @@ class _personal_screen_screenState extends State<personal_details> {
         // Navigate to the home screen
       } else {
         print('response is not success');
-        print('Failed to send the request. Status code: ${response.statusCode}');
+        print(
+            'Failed to send the request. Status code: ${response.statusCode}');
         // Handle error scenarios
       }
     } catch (e) {
@@ -1339,7 +1633,8 @@ class _personal_screen_screenState extends State<personal_details> {
           height: MediaQuery.of(context).size.width / 4,
           padding: const EdgeInsets.all(20),
           decoration: const BoxDecoration(
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20), topRight: Radius.circular(20)),
             color: Color(0xFFF2713B),
           ),
           child: Row(
@@ -1556,7 +1851,8 @@ class _personal_screen_screenState extends State<personal_details> {
     if (response.statusCode == 200) {
       Map<String, dynamic> data = json.decode(response.body);
       setState(() {
-        photoData = data['ImageData']; // Initialize with an empty string if null
+        photoData =
+            data['ImageData']; // Initialize with an empty string if null
         print('photoData==== $photoData');
       });
     } else {
@@ -1568,40 +1864,38 @@ class _personal_screen_screenState extends State<personal_details> {
   Widget getDefaultImage(String gender, BuildContext context) {
     return gender == "Male"
         ? Container(
-
-        width: MediaQuery.of(context).size.width / 3.8,
-        height: MediaQuery.of(context).size.height / 6.5,
-        padding: EdgeInsets.all(3.0),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(4.0)), border: Border.all(color: Colors.white, width: 2.0)),
-      child:  Image.asset(
-        'assets/men_emp.jpg',
-        // width: MediaQuery.of(context).size.width / 4.5,
-        // height: MediaQuery.of(context).size.height / 6.5,
-
-      )
-    )
-
+            width: MediaQuery.of(context).size.width / 3.8,
+            height: MediaQuery.of(context).size.height / 6.5,
+            padding: EdgeInsets.all(3.0),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                border: Border.all(color: Colors.white, width: 2.0)),
+            child: Image.asset(
+              'assets/men_emp.jpg',
+              // width: MediaQuery.of(context).size.width / 4.5,
+              // height: MediaQuery.of(context).size.height / 6.5,
+            ))
         : gender == "Female"
             ? Container(
-      width: MediaQuery.of(context).size.width / 3.8,
-    height: MediaQuery.of(context).size.height / 6.5,
-    padding: EdgeInsets.all(3.0),
-    decoration: BoxDecoration(
-    borderRadius: BorderRadius.all(Radius.circular(4.0)), border: Border.all(color: Colors.white, width: 2.0)),
-    child:   Image.asset(
-      'assets/women-emp.jpg',
-      // width: MediaQuery.of(context).size.width / 3.8,
-     // height: MediaQuery.of(context).size.height / 6.5,
-    ),
-    )
-
+                width: MediaQuery.of(context).size.width / 3.8,
+                height: MediaQuery.of(context).size.height / 6.5,
+                padding: EdgeInsets.all(3.0),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                    border: Border.all(color: Colors.white, width: 2.0)),
+                child: Image.asset(
+                  'assets/women-emp.jpg',
+                  // width: MediaQuery.of(context).size.width / 3.8,
+                  // height: MediaQuery.of(context).size.height / 6.5,
+                ),
+              )
             : Container(
-      width: MediaQuery.of(context).size.width / 3.8,
-      height: MediaQuery.of(context).size.height / 6.5,
-      padding: EdgeInsets.all(3.0),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(4.0)), border: Border.all(color: Colors.white, width: 2.0)),
+                width: MediaQuery.of(context).size.width / 3.8,
+                height: MediaQuery.of(context).size.height / 6.5,
+                padding: EdgeInsets.all(3.0),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                    border: Border.all(color: Colors.white, width: 2.0)),
                 child: Image.asset(
                   'assets/app_logo.png',
                   // width: MediaQuery.of(context).size.width / 3.8,
@@ -1631,7 +1925,8 @@ class _personal_screen_screenState extends State<personal_details> {
   Future<void> uploadimgimageapi(BuildContext context) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       return;
     }
@@ -1675,7 +1970,8 @@ class _personal_screen_screenState extends State<personal_details> {
       ).timeout(Duration(seconds: 15), onTimeout: () {
         apiCallCompleted = false;
         //   progressDialog.dismiss();
-        Commonutils.showCustomToastMessageLong('Something Went Wrong Please Login Again', context, 1, 4);
+        Commonutils.showCustomToastMessageLong(
+            'Something Went Wrong Please Login Again', context, 1, 4);
         return http.Response('Timeout', HttpStatus.requestTimeout);
       });
       print('requestobject ${json.encode(request)}');
@@ -1741,30 +2037,39 @@ class _personal_screen_screenState extends State<personal_details> {
             } else {
               _imageFile == null;
               print('Response parsing resulted in null');
-              Commonutils.showCustomToastMessageLong('Please try again', context, 1, 4);
+              Commonutils.showCustomToastMessageLong(
+                  'Please try again', context, 1, 4);
             }
           } catch (e) {
             apiCallCompleted = false;
             print('Error parsing response as int: $e');
             _imageFile == null;
-            Commonutils.showCustomToastMessageLong('Invalid response format', context, 1, 4);
+            Commonutils.showCustomToastMessageLong(
+                'Invalid response format', context, 1, 4);
           }
         } else {
           print('Response body is null or empty');
           _imageFile == null;
-          Commonutils.showCustomToastMessageLong('No response from server', context, 1, 4);
+          Commonutils.showCustomToastMessageLong(
+              'No response from server', context, 1, 4);
         }
       } else if (response.statusCode == 520) {
         _imageFile == null;
         Commonutils.showCustomToastMessageLong(response.body, context, 1, 3);
       } else {
         _imageFile == null;
-        print('Failed to send the request. Status code: ${response.statusCode}');
-        Commonutils.showCustomToastMessageLong('Failed to send the request. Status code: ${response.statusCode}', context, 1, 4);
+        print(
+            'Failed to send the request. Status code: ${response.statusCode}');
+        Commonutils.showCustomToastMessageLong(
+            'Failed to send the request. Status code: ${response.statusCode}',
+            context,
+            1,
+            4);
       }
     } catch (e) {
       print('Error: $e');
-      Commonutils.showCustomToastMessageLong('An error occurred: $e', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'An error occurred: $e', context, 1, 4);
     }
   }
 }
@@ -1778,12 +2083,14 @@ class CurvedBottomClipper extends CustomClipper<Path> {
     //   final roundingHeight =  size.height ;
 
     // this is top part of path, rectangle without any rounding
-    final filledRectangle = Rect.fromLTRB(0, 0, size.width, size.height - roundingHeight);
+    final filledRectangle =
+        Rect.fromLTRB(0, 0, size.width, size.height - roundingHeight);
 
     // this is rectangle that will be used to draw arc
     // arc is drawn from center of this rectangle, so it's height has to be twice roundingHeight
     // also I made it to go 5 units out of screen on left and right, so curve will have some incline there
-    final roundingRectangle = Rect.fromLTRB(-5, size.height - roundingHeight * 2, size.width + 5, size.height);
+    final roundingRectangle = Rect.fromLTRB(
+        -5, size.height - roundingHeight * 2, size.width + 5, size.height);
 
     final path = Path();
     path.addRect(filledRectangle);
@@ -1824,8 +2131,10 @@ class ProgressDialog {
         builder: (BuildContext context) {
           return Center(
             child: Container(
-              width: MediaQuery.of(context).size.width / 1.8, // Adjust the width as needed
-              height: MediaQuery.of(context).size.height / 4, // Adjust the height as needed
+              width: MediaQuery.of(context).size.width /
+                  1.8, // Adjust the width as needed
+              height: MediaQuery.of(context).size.height /
+                  4, // Adjust the height as needed
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 shape: BoxShape.rectangle,
@@ -1855,7 +2164,8 @@ class ProgressDialog {
                     ),
                   ),
                   CircularProgressIndicator(
-                    strokeWidth: 3, // Adjust the stroke width of the CircularProgressIndicator
+                    strokeWidth:
+                        3, // Adjust the stroke width of the CircularProgressIndicator
                     valueColor: AlwaysStoppedAnimation<Color>(
                       Color(0xFFf15f22),
                     ), // Color for the progress indicator itself
@@ -1866,7 +2176,8 @@ class ProgressDialog {
           );
         },
       );
-      _isShowing = false; // Set isShowing back to false after dialog is dismissed
+      _isShowing =
+          false; // Set isShowing back to false after dialog is dismissed
     }
   }
 

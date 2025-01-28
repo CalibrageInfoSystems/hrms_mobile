@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/api%20config.dart';
 import 'package:hrms/home_screen.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:hrms/personal_details.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,7 +35,7 @@ class HolidaysScreen_screenState extends State<HolidaysScreen> {
   late Future<List<EmployeeLeave>> EmployeeLeaveData;
   DateTime _selectedDate = DateTime.now();
   DateTime _displayDate = DateTime.now();
-late  CalendarController _calendarController;
+  late CalendarController _calendarController;
   String _agendaText = 'No events';
 
   //PageController _pageController = PageController(initialPage: DateTime.now().month - 1);
@@ -51,19 +52,22 @@ late  CalendarController _calendarController;
     Commonutils.checkInternetConnectivity().then((isConnected) {
       if (isConnected) {
         print('The Internet Is Connected');
-        loadAccessToken();getLoginTime();
+        loadAccessToken();
+        getLoginTime();
         _calendarController = CalendarController();
-     //   _calendarController.displayDate = _displayDate;
+        //   _calendarController.displayDate = _displayDate;
       } else {
         print('The Internet Is not  Connected');
       }
     });
   }
+
   void _changeView(CalendarView view) {
     setState(() {
       _calendarController.view = view;
     });
   }
+
   Future<String?> getLoginTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     logintime = prefs.getString('loginTime') ?? 'Unknown';
@@ -132,12 +136,16 @@ late  CalendarController _calendarController;
                   },
                   child: Text(
                     'Ok',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFf15f22), // Change to your desired background color
+                    backgroundColor: Color(
+                        0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Set border radius
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
                     ),
                   ),
                 ),
@@ -151,10 +159,11 @@ late  CalendarController _calendarController;
 
   void onConfirmLogout(BuildContext context) {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
-    Commonutils.showCustomToastMessageLong("Logout Successfully", context, 0, 3);
+    Commonutils.showCustomToastMessageLong(
+        "Logout Successfully", context, 0, 3);
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
   }
@@ -199,7 +208,8 @@ late  CalendarController _calendarController;
     if (isConnected) {
       print('Connected to the internet');
     } else {
-      Commonutils.showCustomToastMessageLong('No Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'No Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       print('Not connected to the internet');
     }
@@ -216,7 +226,9 @@ late  CalendarController _calendarController;
 
       if (response.statusCode == 200) {
         List<dynamic> jsonData = jsonDecode(response.body);
-        List<Holiday_Model> holidayList = jsonData.map((holidayJson) => Holiday_Model.fromJson(holidayJson)).toList();
+        List<Holiday_Model> holidayList = jsonData
+            .map((holidayJson) => Holiday_Model.fromJson(holidayJson))
+            .toList();
         setState(() {
           holidaylist = holidayList;
         });
@@ -230,6 +242,7 @@ late  CalendarController _calendarController;
       return []; // Return empty list in case of an error
     }
   }
+
   void _updateAgendaText(ViewChangedDetails details) {
     // Assuming you have a method to fetch the agenda for the new month
     final DateTime visibleDate = details.visibleDates.first;
@@ -244,22 +257,19 @@ late  CalendarController _calendarController;
     if (ismatchedlogin) {
       Future.microtask(() => _showtimeoutdialog(context));
     }
-  //  final events = Provider.of<EventProvider>(context).events;
-  ///  final CalendarController _calendarControler = CalendarController();
-    return
-      WillPopScope(
+    //  final events = Provider.of<EventProvider>(context).events;
+    ///  final CalendarController _calendarControler = CalendarController();
+    return WillPopScope(
         onWillPop: () async {
           // Navigator.of(context).pushReplacement(
           //   MaterialPageRoute(builder: (context) => home_screen()),
           // ); // Navigate to the previous screen
           return true; // Prevent default back navigation behavior
         },
-        child:
-        Scaffold(
+        child: Scaffold(
             appBar: AppBar(
               elevation: 0,
               backgroundColor: Color(0xFFf15f22),
-
               title: Text(
                 'Holidays',
                 style: TextStyle(color: Colors.white),
@@ -282,21 +292,20 @@ late  CalendarController _calendarController;
               // padding: EdgeInsets.all(10.0),
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height / 0.2,
-              child:
-              SfCalendar(
+              child: SfCalendar(
                 view: CalendarView.month,
-              //  showDatePickerButton: true,
+                //  showDatePickerButton: true,
                 showNavigationArrow: true,
                 todayHighlightColor: Color(0xFFf15f22),
                 // controller: _calendarController,
 
                 initialSelectedDate: _selectedDate,
-          //      onViewChanged: _updateAgendaText,
-todayTextStyle:TextStyle(
-  fontSize: 16,
-  fontWeight: FontWeight.bold,
-  color:Colors.white,
-) ,
+                //      onViewChanged: _updateAgendaText,
+                todayTextStyle: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
                 initialDisplayDate: _displayDate,
                 minDate: DateTime(DateTime.now().year, 1, 1),
                 maxDate: DateTime(DateTime.now().year, 12, 31),
@@ -323,10 +332,8 @@ todayTextStyle:TextStyle(
                   dayFormat: 'EEE',
                   showTrailingAndLeadingDates: false,
                   showAgenda: true,
-
                   agendaItemHeight: 50,
                   agendaStyle: AgendaStyle(
-
                     dateTextStyle: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -337,12 +344,10 @@ todayTextStyle:TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Color(0xFFf15f22),
                     ),
-
                   ),
                 ),
               ),
-            ))
-    );
+            )));
   }
 
   // List<Appointment> _getAppointments() {
@@ -364,15 +369,16 @@ todayTextStyle:TextStyle(
       DateTime? current = holiday.fromDate;
       DateTime? endDate = holiday.toDate;
       if (current != null && endDate != null) {
-        while (current!.isBefore(endDate) || current.isAtSameMomentAs(endDate)) {
+        while (
+            current!.isBefore(endDate) || current.isAtSameMomentAs(endDate)) {
           appointments.add(
             Appointment(
               startTime: current,
               endTime: endDate,
               subject: holiday.title,
               notes: holiday.description,
-            color: Color(0xFFf15f22),
-             // color: Colors.deepOrange.shade700,
+              color: Color(0xFFf15f22),
+              // color: Colors.deepOrange.shade700,
               // Highlight color
               isAllDay: true,
             ),
@@ -393,7 +399,9 @@ todayTextStyle:TextStyle(
         details.date.isAfter(holiday.fromDate!.subtract(Duration(days: 1))) &&
         details.date.isBefore(holiday.toDate!.add(Duration(days: 1))));
 
-    bool isToday = details.date.year == DateTime.now().year && details.date.month == DateTime.now().month && details.date.day == DateTime.now().day;
+    bool isToday = details.date.year == DateTime.now().year &&
+        details.date.month == DateTime.now().month &&
+        details.date.day == DateTime.now().day;
 
     String description = '';
     if (isHoliday) {
@@ -410,7 +418,11 @@ todayTextStyle:TextStyle(
         decoration: BoxDecoration(
           // color: isHoliday ? Color(0xFFf15f22) : Colors.transparent,
           //  color: isToday ? Colors.transparent : (isHoliday ? Color(0xFFf15f22) : Colors.transparent),
-          color: isToday ? Colors.transparent : (isHoliday ? Color(0xFFf15f22) : (isWeekend ? Colors.transparent : Colors.transparent)),
+          color: isToday
+              ? Colors.transparent
+              : (isHoliday
+                  ? Color(0xFFf15f22)
+                  : (isWeekend ? Colors.transparent : Colors.transparent)),
 
           border: Border.all(color: Colors.grey.withOpacity(0.2)),
         ),
@@ -431,7 +443,9 @@ todayTextStyle:TextStyle(
                     fontSize: 16,
                     //    fontWeight: FontWeight.bold,
                     // color: isHoliday ? Colors.white : Colors.black87,
-                    color: isHoliday ? Colors.white : (isWeekend ? Colors.black12 : Colors.black87),
+                    color: isHoliday
+                        ? Colors.white
+                        : (isWeekend ? Colors.black12 : Colors.black87),
                   ),
                 ),
                 // if (isHoliday)

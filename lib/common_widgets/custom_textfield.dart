@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hrms/styles.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -8,7 +9,14 @@ class CustomTextField extends StatelessWidget {
   final int maxLines;
   final Color? fillColor;
   final VoidCallback? onTap;
+  final void Function(String)? onChanged;
   final String? Function(String?)? validator;
+  final List<TextInputFormatter>? inputFormatters;
+  final int? maxLength;
+  final String? counterText;
+  final bool obscureText;
+  final Widget? suffixIcon;
+  final String? errorText;
 
   const CustomTextField({
     super.key,
@@ -19,6 +27,13 @@ class CustomTextField extends StatelessWidget {
     this.onTap,
     this.fillColor = Colors.white,
     this.validator,
+    this.onChanged,
+    this.inputFormatters,
+    this.maxLength,
+    this.counterText = '',
+    this.obscureText = false,
+    this.suffixIcon,
+    this.errorText,
   });
 
   @override
@@ -27,41 +42,48 @@ class CustomTextField extends StatelessWidget {
       controller: controller,
       readOnly: readOnly,
       maxLines: maxLines,
+      obscureText: obscureText,
+
       style: const TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.normal,
       ), // Replace with your custom style
       validator: validator,
+      inputFormatters: inputFormatters,
+      onChanged: onChanged, maxLength: maxLength,
       decoration: InputDecoration(
-        hintText: hintText,
-        filled: true,
-        fillColor: fillColor,
-        hintStyle: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.normal,
-        ), // Replace with your custom hint style
-        border: customBorder(
-          borderColor: Styles.primaryColor,
-        ),
-        focusedErrorBorder: customBorder(
-          borderColor: Styles.primaryColor,
-        ),
-        disabledBorder: customBorder(
-          borderColor: Styles.primaryColor,
-        ),
-        enabledBorder: customBorder(
-          borderColor: Styles.primaryColor,
-        ),
-        focusedBorder: customBorder(
-          borderColor: Styles.primaryColor,
-        ),
-        errorBorder: customBorder(
-          borderColor: Colors.red,
-        ),
-        contentPadding: maxLines != 1
-            ? const EdgeInsets.symmetric(horizontal: 15, vertical: 6)
-            : const EdgeInsets.only(left: 15, top: 6),
-        suffixIcon: maxLines != 1
+          hintText: hintText,
+          errorText: errorText,
+          counterText: counterText,
+          filled: true,
+          fillColor: fillColor,
+          hintStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.normal,
+          ), // Replace with your custom hint style
+          border: customBorder(
+            borderColor: Styles.primaryColor,
+          ),
+          focusedErrorBorder: customBorder(
+            borderColor: Styles.primaryColor,
+          ),
+          disabledBorder: customBorder(
+            borderColor: Styles.primaryColor,
+          ),
+          enabledBorder: customBorder(
+            borderColor: Styles.primaryColor,
+          ),
+          focusedBorder: customBorder(
+            borderColor: Styles.primaryColor,
+          ),
+          errorBorder: customBorder(
+            borderColor: Colors.red,
+          ),
+          contentPadding: maxLines != 1
+              ? const EdgeInsets.symmetric(horizontal: 15, vertical: 6)
+              : const EdgeInsets.only(left: 15, top: 6),
+          suffixIcon: suffixIcon
+          /*  == null
             ? null
             : const Padding(
                 padding: EdgeInsets.all(8.0),
@@ -69,9 +91,8 @@ class CustomTextField extends StatelessWidget {
                   Icons.calendar_today,
                   color: Colors.black54,
                 ),
-              ),
-        // border: InputBorder.none,
-      ),
+              ), */
+          ),
       onTap: onTap,
     );
   }

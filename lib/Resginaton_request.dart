@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:hrms/NotificationReply.dart';
 import 'package:hrms/Resignation.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
@@ -176,7 +177,7 @@ class _Resgination_req_screenState extends State<Resgination_req> {
         "Logout Successfully", context, 0, 3);
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
   }
@@ -286,7 +287,7 @@ class _Resgination_req_screenState extends State<Resgination_req> {
               "Token is Expired", context, 0, 3);
 
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => LoginPage()),
+            MaterialPageRoute(builder: (context) => LoginScreen()),
             (route) => false,
           );
           return;
@@ -445,7 +446,7 @@ class _Resgination_req_screenState extends State<Resgination_req> {
           //     context, MaterialPageRoute(builder: (context) => LoginPage()));
 
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => LoginPage()),
+            MaterialPageRoute(builder: (context) => LoginScreen()),
             (route) => false,
           );
         }

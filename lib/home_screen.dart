@@ -7,6 +7,7 @@ import 'package:hrms/Commonutils.dart';
 import 'package:hrms/Notifications_screen.dart';
 import 'package:hrms/SharedPreferencesHelper.dart';
 import 'package:hrms/apply_leave.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:hrms/personal_details.dart';
 import 'package:hrms/projects_screen.dart';
 import 'package:hrms/test_apply_leave.dart';
@@ -341,7 +342,7 @@ class _home_screenState extends State<home_screen>
                     ),
 
                     //MARK: Test Apply Leave
-                    ListTile(
+                    /* ListTile(
                       leading: SvgPicture.asset(
                         'assets/atten.svg',
                         width: 20,
@@ -387,6 +388,7 @@ class _home_screenState extends State<home_screen>
                         );
                       },
                     ),
+                 */
                   ],
                 ),
               ),
@@ -685,7 +687,7 @@ class _home_screenState extends State<home_screen>
     //     context, MaterialPageRoute(builder: (context) => LoginPage()));
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
   }

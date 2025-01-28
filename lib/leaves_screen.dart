@@ -6,6 +6,7 @@ import 'package:flutter_month_picker/flutter_month_picker.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/holiday_model.dart';
 import 'package:hrms/leave_model.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:hrms/test_apply_leave.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -169,7 +170,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
         "Logout Successfully", context, 0, 3);
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
   }
@@ -367,7 +368,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                                 "test", // Example button name
                                             lookupDetailId: -3,
                                             employename:
-                                                '${EmployeName}', // Pass the lookupDetailId
+                                                '${EmployeName}', // Pass the lookupDetailId 
                                           ); */
                                               const TestApplyLeave();
                                         },
@@ -1429,10 +1430,16 @@ class _leaves_screen_screenState extends State<leaves_screen> {
         print(selectedItem.lookupDetailId);
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => apply_leave(
-              buttonName: buttonName, // Example button name
+            builder: (context) =>
+                /* apply_leave(
+              buttonName: buttonName,
               lookupDetailId: selectedItem.lookupDetailId,
-              employename: '$EmployeName', // Pass the lookupDetailId
+              employename: '$EmployeName',
+            ), */
+                TestApplyLeave(
+              leaveType: buttonName,
+              leaveTypeId: selectedItem.lookupDetailId,
+              employeName: EmployeName,
             ),
           ),
         );

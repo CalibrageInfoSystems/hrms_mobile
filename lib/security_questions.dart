@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Model%20Class/login%20model%20class.dart';
 import 'package:hrms/changepassword.dart';
 import 'package:hrms/home_screen.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:hrms/questions_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -24,7 +25,10 @@ class security_questionsscreen extends StatefulWidget {
   final String newpassword;
   final String confirmpassword;
   final String userid;
-  security_questionsscreen({required this.newpassword, required this.confirmpassword, required this.userid});
+  security_questionsscreen(
+      {required this.newpassword,
+      required this.confirmpassword,
+      required this.userid});
   @override
   _securityscreenscreenState createState() => _securityscreenscreenState();
 }
@@ -53,7 +57,8 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
   Future<void> fetchQuestions() async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       return;
     }
@@ -70,7 +75,8 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
       responseData = json.decode(response.body);
 
       setState(() {
-        questionlist = (responseData).map((item) => questionmodel.fromJson(item)).toList();
+        questionlist =
+            (responseData).map((item) => questionmodel.fromJson(item)).toList();
       });
     } else {
       throw Exception('Failed to load questions');
@@ -136,7 +142,10 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                           width: double.infinity,
                           child: Text(
                             'HRMS',
-                            style: TextStyle(color: Color(0xFFf15f22), fontSize: 18, fontFamily: 'Calibri'),
+                            style: TextStyle(
+                                color: Color(0xFFf15f22),
+                                fontSize: 18,
+                                fontFamily: 'Calibri'),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -145,7 +154,11 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                           width: double.infinity,
                           child: Text(
                             'Security Questions',
-                            style: TextStyle(color: Colors.black, fontSize: 20, fontFamily: 'Calibri', fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                                fontFamily: 'Calibri',
+                                fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -158,20 +171,30 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                               children: [
                                 Text(
                                   'Note:',
-                                  style: TextStyle(color: Color(0xFFf15f22), fontSize: 18, fontFamily: 'Calibri'),
+                                  style: TextStyle(
+                                      color: Color(0xFFf15f22),
+                                      fontSize: 18,
+                                      fontFamily: 'Calibri'),
                                 ),
                                 SizedBox(height: 10.0),
                                 Text(
                                   '1. A Minimum of Two Questions Need To Be Answered Out of 15 to Recover The Password When You Lose It.',
-                                  style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Calibri'),
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontFamily: 'Calibri'),
                                 ),
                                 SizedBox(height: 5.0),
                                 Text(
                                   '2. When You Select More Questions While Recovering a Password, The System Randomly Requests Only 2 Questions.',
-                                  style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Calibri'),
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontFamily: 'Calibri'),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.only(top: 35.0, left: 0.0, right: 0.0),
+                                  padding: EdgeInsets.only(
+                                      top: 35.0, left: 0.0, right: 0.0),
                                   child: Container(
                                     width: double.infinity,
                                     decoration: BoxDecoration(
@@ -186,13 +209,17 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                                       },
                                       child: Text(
                                         'Add Question',
-                                        style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Calibri'),
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontFamily: 'Calibri'),
                                       ),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.transparent,
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(4.0),
+                                          borderRadius:
+                                              BorderRadius.circular(4.0),
                                         ),
                                       ),
                                     ),
@@ -207,15 +234,18 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                             child: FutureBuilder(
                           future: Future.value(),
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return CustomCircularProgressIndicator();
-                            } else if (snapshot.connectionState == ConnectionState.done) {
+                            } else if (snapshot.connectionState ==
+                                ConnectionState.done) {
                               if (selectedQuestionsAndAnswers.isEmpty) {
                                 return Align(
                                     alignment: Alignment.topCenter,
                                     child: Container(
                                       padding: EdgeInsets.only(top: 5.0),
-                                      child: Text('Answered Questions Will Be Displayed Here'),
+                                      child: Text(
+                                          'Answered Questions Will Be Displayed Here'),
                                     ));
                               } else {
                                 return ListView.builder(
@@ -224,16 +254,23 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                                   physics: AlwaysScrollableScrollPhysics(),
                                   //physics: PageScrollPhysics(),
                                   scrollDirection: Axis.vertical,
-                                  itemBuilder: (BuildContext context, int index) {
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
                                     return GestureDetector(
                                       onTap: () {
                                         // Handle tap on item if needed
                                         //  setState(() {
-                                        question_id = int.tryParse(selectedQuestionsAndAnswers[index]['id']!);
-                                        answerinlistview = selectedQuestionsAndAnswers[index]['answer'];
+                                        question_id = int.tryParse(
+                                            selectedQuestionsAndAnswers[index]
+                                                ['id']!);
+                                        answerinlistview =
+                                            selectedQuestionsAndAnswers[index]
+                                                ['answer'];
                                         //  });
-                                        print('answerinlistview:${answerinlistview}');
-                                        print('questionidclicked:${question_id}');
+                                        print(
+                                            'answerinlistview:${answerinlistview}');
+                                        print(
+                                            'questionidclicked:${question_id}');
                                       },
                                       child: Container(
                                         decoration: BoxDecoration(
@@ -241,16 +278,19 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                                             color: Colors.orange,
                                             width: 1.5,
                                           ),
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                           color: Colors.white,
                                         ),
                                         margin: EdgeInsets.only(bottom: 10.0),
                                         padding: EdgeInsets.all(15.0),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Expanded(
                                                   // Wrap the Text widget with Flexible
@@ -261,7 +301,8 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                                                     '${selectedQuestionsAndAnswers[index]['question']}',
                                                     style: TextStyle(
                                                       color: Color(0xFFf15f22),
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       fontFamily: 'Calibri',
                                                     ),
                                                   ),
@@ -303,7 +344,11 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                             child: Container(
                               //        decoration: BoxDecoration(color: Colors.transparent),
                               //   color: Color(0xFFf0ab91),
-                              padding: EdgeInsets.only(top: 12.0, left: 0.0, right: 0.0, bottom: 0.0),
+                              padding: EdgeInsets.only(
+                                  top: 12.0,
+                                  left: 0.0,
+                                  right: 0.0,
+                                  bottom: 0.0),
                               child: Container(
                                 width: double.infinity,
                                 //color: Color(0x00ffffff),
@@ -318,7 +363,10 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                                   },
                                   child: Text(
                                     'Submit Security Questions',
-                                    style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Calibri'),
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontFamily: 'Calibri'),
                                   ),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.transparent,
@@ -460,14 +508,18 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                                   ),
                                 ),
                                 // Filter out answered questions from responseData
-                                ...responseData.where((question) => !answeredQuestionIds.contains(question['questionId'])).map((question) {
+                                ...responseData
+                                    .where((question) => !answeredQuestionIds
+                                        .contains(question['questionId']))
+                                    .map((question) {
                                   return DropdownMenuItem<int>(
                                       value: question['questionId'],
                                       child: Padding(
                                         padding: EdgeInsets.only(left: 10.0),
                                         child: Text(
                                           question['question'],
-                                          style: TextStyle(fontFamily: 'Calibri'),
+                                          style:
+                                              TextStyle(fontFamily: 'Calibri'),
                                         ),
                                       ));
                                 }).toList(),
@@ -553,7 +605,8 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                               color: Colors.black26, // Label text color
                             ),
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 15, horizontal: 15),
                             alignLabelWithHint: true,
                           ),
                           maxLength: 50,
@@ -577,12 +630,16 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                   },
                   child: Text(
                     'Cancel',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFf15f22), // Change to your desired background color
+                    backgroundColor: Color(
+                        0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Set border radius
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
                     ),
                   ),
                 ),
@@ -595,12 +652,16 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
                   },
                   child: Text(
                     'Add Question',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFf15f22), // Change to your desired background color
+                    backgroundColor: Color(
+                        0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Set border radius
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
                     ),
                   ),
                 ),
@@ -615,18 +676,21 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
   void _addQuestion() {
     if (selectedTypeCdId == -1) {
       // Show toast or error message
-      Commonutils.showCustomToastMessageLong('Please Select Question', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Select Question', context, 1, 4);
       return;
     }
 
     if (answercontroller.text.trim().isEmpty) {
       // Show toast or error message
-      Commonutils.showCustomToastMessageLong('Please Enter Answer', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Enter Answer', context, 1, 4);
       return;
     }
 
     setState(() {
-      final selectedQuestion = responseData.firstWhere((question) => question['questionId'] == selectedTypeCdId);
+      final selectedQuestion = responseData
+          .firstWhere((question) => question['questionId'] == selectedTypeCdId);
       selectedQuestionsAndAnswers.add({
         'question': selectedQuestion['question'], // Store the question text
         'questionId': selectedTypeCdId, // Store the question ID
@@ -644,7 +708,9 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
   }
 
   void _removeQuestion(int index) {
-    if (selectedQuestionsAndAnswers.isNotEmpty && index >= 0 && index < selectedQuestionsAndAnswers.length) {
+    if (selectedQuestionsAndAnswers.isNotEmpty &&
+        index >= 0 &&
+        index < selectedQuestionsAndAnswers.length) {
       setState(() {
         final removedQuestion = selectedQuestionsAndAnswers.removeAt(index);
         final removedQuestionId = removedQuestion['questionId'];
@@ -744,7 +810,8 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
   Future<void> sendingQuestion() async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       return;
     }
@@ -753,7 +820,8 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
       print('addquestionstouser $url');
       if (selectedQuestionsAndAnswers.length < 2) {
         print('Error: At least 2 questions and answers are required.');
-        Commonutils.showCustomToastMessageLong('Please Answer Atleast Two Questions', context, 1, 4);
+        Commonutils.showCustomToastMessageLong(
+            'Please Answer Atleast Two Questions', context, 1, 4);
         return;
       }
 
@@ -796,15 +864,18 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
       print('Response: ${response.body}');
 
       if (response.statusCode == 200) {
-        Commonutils.showCustomToastMessageLong('Password Changed Successfully', context, 0, 4);
+        Commonutils.showCustomToastMessageLong(
+            'Password Changed Successfully', context, 0, 4);
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => LoginPage()),
+          MaterialPageRoute(builder: (context) => LoginScreen()),
         );
         // print('api is succeessfull');
         // print('${response}');
       } else {
-        Commonutils.showCustomToastMessageLong('Error ${response.statusCode}', context, 1, 4);
-        print('Failed to send the request. Status code: ${response.statusCode}');
+        Commonutils.showCustomToastMessageLong(
+            'Error ${response.statusCode}', context, 1, 4);
+        print(
+            'Failed to send the request. Status code: ${response.statusCode}');
       }
     } catch (e) {
       print('Error: $e');
@@ -849,7 +920,8 @@ class CustomCircularProgressIndicator extends StatelessWidget {
               ),
             ),
             CircularProgressIndicator(
-              strokeWidth: 3, // Adjust the stroke width of the CircularProgressIndicator
+              strokeWidth:
+                  3, // Adjust the stroke width of the CircularProgressIndicator
               valueColor: AlwaysStoppedAnimation<Color>(
                 Color(0xFFf15f22),
               ), // Color for the progress indicator itself

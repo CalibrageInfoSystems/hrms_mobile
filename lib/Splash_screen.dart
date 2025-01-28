@@ -8,7 +8,7 @@ import 'package:hrms/Constants.dart';
 import 'package:hrms/SharedPreferencesHelper.dart';
 import 'package:hrms/home_screen.dart';
 
-import 'login _screen.dart';
+import 'login_screen.dart';
 import 'main.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -82,7 +82,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   void navigateToLogin() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => LoginPage()), // TestLoginScreen
+      MaterialPageRoute(
+        // builder: (context) => LoginPage(),
+        builder: (context) => const LoginScreen(),
+      ),
     );
   }
 

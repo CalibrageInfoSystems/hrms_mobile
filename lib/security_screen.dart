@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/api%20config.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:http/http.dart' as http;
 
 import 'Commonutils.dart';
@@ -14,7 +15,8 @@ class securityscreen extends StatefulWidget {
   _securityscreenscreenState createState() => _securityscreenscreenState();
 }
 
-class _securityscreenscreenState extends State<securityscreen> with TickerProviderStateMixin {
+class _securityscreenscreenState extends State<securityscreen>
+    with TickerProviderStateMixin {
   int currentstep = 0;
   bool isCompleted = false;
   final TextEditingController _usernamecontroller = TextEditingController();
@@ -29,7 +31,12 @@ class _securityscreenscreenState extends State<securityscreen> with TickerProvid
   List<Map<String, dynamic>> questionsAndAnswers = [];
   List<Map<String, dynamic>> additionalQuestionsAndAnswers = [];
   int noofquestionavaiable = 0;
-  String? Question_1, Question_2, Answer_1, Answer_2, api_answer_1, api_answer_2;
+  String? Question_1,
+      Question_2,
+      Answer_1,
+      Answer_2,
+      api_answer_1,
+      api_answer_2;
   Map<int, TextEditingController> _answerControllers = {};
 
   @override
@@ -65,16 +72,14 @@ class _securityscreenscreenState extends State<securityscreen> with TickerProvid
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           home: Scaffold(
-
             appBar: AppBar(
-backgroundColor:   Colors.transparent,
+              backgroundColor: Colors.transparent,
               elevation: 0,
               title: Column(
                 children: [
                   Align(
                       alignment: Alignment.topLeft,
                       child: Container(
-
                         padding: EdgeInsets.only(left: 10.0, top: 5.0),
                         child: GestureDetector(
                           onTap: () {
@@ -91,7 +96,8 @@ backgroundColor:   Colors.transparent,
                             ),
                             child: Icon(
                               Icons.arrow_back,
-                              color: Color(0xFFF44614), // Change the color as needed
+                              color: Color(
+                                  0xFFF44614), // Change the color as needed
                             ),
                           ),
                         ),
@@ -100,7 +106,8 @@ backgroundColor:   Colors.transparent,
               ),
             ),
             body: Theme(
-              data: Theme.of(context).copyWith(colorScheme: ColorScheme.light(primary: Color(0xFFf15f22))),
+              data: Theme.of(context).copyWith(
+                  colorScheme: ColorScheme.light(primary: Color(0xFFf15f22))),
               child: SingleChildScrollView(
                 child: Container(
                   height: screenHeight,
@@ -153,7 +160,11 @@ backgroundColor:   Colors.transparent,
                         width: double.infinity,
                         child: Text(
                           'Forgot Password',
-                          style: TextStyle(color: Colors.black, fontSize: 20, fontFamily: 'Calibri', fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                              fontFamily: 'Calibri',
+                              fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -163,11 +174,16 @@ backgroundColor:   Colors.transparent,
                         type: StepperType.vertical,
                         currentStep: currentstep,
                         onStepTapped: (step) {
-                          List<bool> completedSteps = List.generate(getSteps().length, (index) => false);
+                          List<bool> completedSteps = List.generate(
+                              getSteps().length, (index) => false);
 
                           //setState(() => currentstep = step);
                           if (step > 0 && !completedSteps[step - 1]) {
-                            Commonutils.showCustomToastMessageLong('Please Complete Previous Steps', context, 1, 4);
+                            Commonutils.showCustomToastMessageLong(
+                                'Please Complete Previous Steps',
+                                context,
+                                1,
+                                4);
                             // You may show a message or take other actions to inform the user
                             // that they need to complete the previous step first.
                             return;
@@ -176,12 +192,14 @@ backgroundColor:   Colors.transparent,
                             // Check if the username field is empty
                             if (_usernamecontroller.text.isEmpty) {
                               // Show a toast message indicating that the username field is required
-                              Commonutils.showCustomToastMessageLong('Complete the Username', context, 1, 4);
+                              Commonutils.showCustomToastMessageLong(
+                                  'Complete the Username', context, 1, 4);
                               return; // Return to prevent proceeding to the next step
                             }
                           }
                         },
-                        controlsBuilder: (BuildContext context, ControlsDetails details) {
+                        controlsBuilder:
+                            (BuildContext context, ControlsDetails details) {
                           // if (currentstep == getSteps().length - 1) {
                           //   return SizedBox(); // Return an empty container if it's the last step
                           // } else {
@@ -191,7 +209,8 @@ backgroundColor:   Colors.transparent,
                               children: <Widget>[
                                 Spacer(),
                                 Padding(
-                                  padding: EdgeInsets.only(top: 10.0, left: 0.0, right: 0.0),
+                                  padding: EdgeInsets.only(
+                                      top: 10.0, left: 0.0, right: 0.0),
                                   child: Container(
                                     height: 35,
                                     decoration: BoxDecoration(
@@ -212,7 +231,8 @@ backgroundColor:   Colors.transparent,
                                         backgroundColor: Colors.transparent,
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(4.0),
+                                          borderRadius:
+                                              BorderRadius.circular(4.0),
                                         ),
                                       ),
                                     ),
@@ -229,7 +249,8 @@ backgroundColor:   Colors.transparent,
                                 //   child: const Text('NEXT'),
                                 // ),
                                 Padding(
-                                  padding: EdgeInsets.only(top: 10.0, left: 0.0, right: 0.0),
+                                  padding: EdgeInsets.only(
+                                      top: 10.0, left: 0.0, right: 0.0),
                                   child: Container(
                                     //  width: double.infinity,
                                     height: 35,
@@ -252,7 +273,8 @@ backgroundColor:   Colors.transparent,
                                         backgroundColor: Colors.transparent,
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(4.0),
+                                          borderRadius:
+                                              BorderRadius.circular(4.0),
                                         ),
                                       ),
                                     ),
@@ -262,7 +284,8 @@ backgroundColor:   Colors.transparent,
                                   width: 25.0,
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.only(top: 10.0, left: 0.0, right: 0.0),
+                                  padding: EdgeInsets.only(
+                                      top: 10.0, left: 0.0, right: 0.0),
                                   child: Container(
                                     //  width: double.infinity,
                                     height: 35,
@@ -285,7 +308,8 @@ backgroundColor:   Colors.transparent,
                                         backgroundColor: Colors.transparent,
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(4.0),
+                                          borderRadius:
+                                              BorderRadius.circular(4.0),
                                         ),
                                       ),
                                     ),
@@ -307,7 +331,8 @@ backgroundColor:   Colors.transparent,
                                 //   child: const Text('NEXT'),
                                 // ),
                                 Padding(
-                                  padding: EdgeInsets.only(top: 10.0, left: 0.0, right: 0.0),
+                                  padding: EdgeInsets.only(
+                                      top: 10.0, left: 0.0, right: 0.0),
                                   child: Container(
                                     //  width: double.infinity,
                                     height: 35,
@@ -330,7 +355,8 @@ backgroundColor:   Colors.transparent,
                                         backgroundColor: Colors.transparent,
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(4.0),
+                                          borderRadius:
+                                              BorderRadius.circular(4.0),
                                         ),
                                       ),
                                     ),
@@ -340,7 +366,8 @@ backgroundColor:   Colors.transparent,
                                   width: 25.0,
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.only(top: 10.0, left: 0.0, right: 0.0),
+                                  padding: EdgeInsets.only(
+                                      top: 10.0, left: 0.0, right: 0.0),
                                   child: Container(
                                     //  width: double.infinity,
                                     height: 35,
@@ -363,7 +390,8 @@ backgroundColor:   Colors.transparent,
                                         backgroundColor: Colors.transparent,
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(4.0),
+                                          borderRadius:
+                                              BorderRadius.circular(4.0),
                                         ),
                                       ),
                                     ),
@@ -393,11 +421,16 @@ backgroundColor:   Colors.transparent,
                               // Call API for Step 1
                               if (_usernamecontroller.text.trim().isEmpty) {
                                 FocusScope.of(context).unfocus();
-                                Commonutils.showCustomToastMessageLong('Please Enter The User Name', context, 1, 4);
+                                Commonutils.showCustomToastMessageLong(
+                                    'Please Enter The User Name',
+                                    context,
+                                    1,
+                                    4);
 
                                 return; // Return to prevent proceeding to the next step
                               } else {
-                                await fetchquestion(_usernamecontroller.text.trim());
+                                await fetchquestion(
+                                    _usernamecontroller.text.trim());
                               }
 
                               // setState(() => currentstep += 1);
@@ -430,7 +463,8 @@ backgroundColor:   Colors.transparent,
                         steps: getSteps(),
                       )),
                       Padding(
-                        padding: EdgeInsets.only(top: 35.0, left: 40.0, right: 40.0),
+                        padding:
+                            EdgeInsets.only(top: 35.0, left: 40.0, right: 40.0),
                         child: Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
@@ -441,7 +475,8 @@ backgroundColor:   Colors.transparent,
                           child: ElevatedButton(
                             onPressed: () async {
                               Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(builder: (context) => LoginPage()),
+                                MaterialPageRoute(
+                                    builder: (context) => LoginScreen()),
                               );
                             },
                             child: Text(
@@ -505,7 +540,8 @@ backgroundColor:   Colors.transparent,
                     color: Colors.black26, // Label text color
                   ),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                   alignLabelWithHint: true,
                   counterText: ""),
               textAlign: TextAlign.start,
@@ -542,7 +578,11 @@ backgroundColor:   Colors.transparent,
                           ),
                           Text(
                             ' $noofquestionavaiable',
-                            style: TextStyle(color: Color(0xFFf15f22), fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Calibri'),
+                            style: TextStyle(
+                                color: Color(0xFFf15f22),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                fontFamily: 'Calibri'),
                             textAlign: TextAlign.start,
                           ),
                         ],
@@ -555,7 +595,8 @@ backgroundColor:   Colors.transparent,
                         setState(() {
                           isLoading = true;
                         });
-                        fetchrefreshquestion(_usernamecontroller.text).then((_) {
+                        fetchrefreshquestion(_usernamecontroller.text)
+                            .then((_) {
                           setState(() {
                             isLoading = false;
                           });
@@ -586,7 +627,10 @@ backgroundColor:   Colors.transparent,
                 children: [
                   Text(
                     '${Question_1}',
-                    style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Calibri'),
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontFamily: 'Calibri'),
                     textAlign: TextAlign.start,
                   ),
                   Padding(
@@ -613,7 +657,8 @@ backgroundColor:   Colors.transparent,
                           color: Colors.black26,
                         ),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                         alignLabelWithHint: true,
                         counterText: "",
                       ),
@@ -635,7 +680,10 @@ backgroundColor:   Colors.transparent,
                 children: [
                   Text(
                     '${Question_2}',
-                    style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Calibri'),
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontFamily: 'Calibri'),
                     textAlign: TextAlign.start,
                   ),
                   Padding(
@@ -662,7 +710,8 @@ backgroundColor:   Colors.transparent,
                           color: Colors.black26,
                         ),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                         alignLabelWithHint: true,
                         counterText: "",
                       ),
@@ -715,13 +764,16 @@ backgroundColor:   Colors.transparent,
                       color: Colors.black26, // Label text color
                     ),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                     alignLabelWithHint: true,
                     counterText: "",
                     suffixIcon: GestureDetector(
                       onTap: _togglePasswordVisibilityconfrim,
                       child: Icon(
-                        _obscureText_confirm ? Icons.visibility_off : Icons.visibility,
+                        _obscureText_confirm
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
                     ),
                   ),
@@ -766,13 +818,16 @@ backgroundColor:   Colors.transparent,
                       color: Colors.black26, // Label text color
                     ),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                     alignLabelWithHint: true,
                     counterText: "",
                     suffixIcon: GestureDetector(
                       onTap: _togglePasswordVisibilityreconfrim,
                       child: Icon(
-                        _obscureText_reconfirm ? Icons.visibility_off : Icons.visibility,
+                        _obscureText_reconfirm
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
                     ),
                   ),
@@ -861,7 +916,8 @@ backgroundColor:   Colors.transparent,
   Future<void> fetchquestion(String username) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       return;
     }
@@ -897,11 +953,14 @@ backgroundColor:   Colors.transparent,
             questionsAndAnswers = List<Map<String, dynamic>>.from(data);
             print('questions${questionsAndAnswers}');
             if (questionsAndAnswers.isNotEmpty) {
-              String questionString = questionsAndAnswers[0]['question'].toString();
-              String questionString_1 = questionsAndAnswers[1]['question'].toString();
+              String questionString =
+                  questionsAndAnswers[0]['question'].toString();
+              String questionString_1 =
+                  questionsAndAnswers[1]['question'].toString();
               api_answer_1 = questionsAndAnswers[0]['answer'].toString();
               api_answer_2 = questionsAndAnswers[1]['answer'].toString();
-              noofquestionavaiable = questionsAndAnswers[0]['userSecureQuestionsCount'];
+              noofquestionavaiable =
+                  questionsAndAnswers[0]['userSecureQuestionsCount'];
               print('noofquestionavailable:$noofquestionavaiable');
               Question_1 = questionString;
               Question_2 = questionString_1;
@@ -919,7 +978,8 @@ backgroundColor:   Colors.transparent,
           print('Invalid username');
         }
       } else {
-        Commonutils.showCustomToastMessageLong('${response.body}', context, 1, 2);
+        Commonutils.showCustomToastMessageLong(
+            '${response.body}', context, 1, 2);
         throw Exception('Failed to load data');
       }
     } catch (e) {
@@ -931,7 +991,8 @@ backgroundColor:   Colors.transparent,
   Future<void> fetchrefreshquestion(String username) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       return;
     }
@@ -967,11 +1028,14 @@ backgroundColor:   Colors.transparent,
             questionsAndAnswers = List<Map<String, dynamic>>.from(data);
             print('questions${questionsAndAnswers}');
             if (questionsAndAnswers.isNotEmpty) {
-              String questionString = questionsAndAnswers[0]['question'].toString();
-              String questionString_1 = questionsAndAnswers[1]['question'].toString();
+              String questionString =
+                  questionsAndAnswers[0]['question'].toString();
+              String questionString_1 =
+                  questionsAndAnswers[1]['question'].toString();
               api_answer_1 = questionsAndAnswers[0]['answer'].toString();
               api_answer_2 = questionsAndAnswers[1]['answer'].toString();
-              noofquestionavaiable = questionsAndAnswers[1]['userSecureQuestionsCount'];
+              noofquestionavaiable =
+                  questionsAndAnswers[1]['userSecureQuestionsCount'];
               Question_1 = questionString;
               Question_2 = questionString_1;
               Answer_1 = api_answer_1;
@@ -1007,7 +1071,8 @@ backgroundColor:   Colors.transparent,
     String answer2 = _answer_2_controller.text.trim();
 
     if (answer1.isEmpty || answer2.isEmpty) {
-      Commonutils.showCustomToastMessageLong('Please Enter Your Answer', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Enter Your Answer', context, 1, 4);
       return;
     }
 
@@ -1019,7 +1084,8 @@ backgroundColor:   Colors.transparent,
       });
     } else {
       // Answers do not match, show an error message
-      Commonutils.showCustomToastMessageLong('Incorrect Answers. Please try again.', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Incorrect Answers. Please try again.', context, 1, 4);
     }
   }
 
@@ -1086,10 +1152,12 @@ backgroundColor:   Colors.transparent,
     // } else
 
     if (password1.trim().isEmpty) {
-      Commonutils.showCustomToastMessageLong('Please Enter New Password', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Enter New Password', context, 1, 4);
       return;
     } else if (password2.trim().isEmpty) {
-      Commonutils.showCustomToastMessageLong('Please Enter Confirm Password', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Enter Confirm Password', context, 1, 4);
       return;
     }
     if (password1.trim() == password2.trim()) {
@@ -1107,20 +1175,23 @@ backgroundColor:   Colors.transparent,
       //   _confirmcontroller.clear(); // Clear the text in the TextEditingController
       //   _reconfirmcontroller.clear(); // Clear the text in the TextEditingController
       // });
-      Commonutils.showCustomToastMessageLong('Passwords do not match Please Correct it', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Passwords do not match Please Correct it', context, 1, 4);
     }
   }
 
   bool isPasswordValid(String password) {
     // Password must contain 1 lowercase, 1 uppercase, numbers, special characters, and be between 8 to 20 characters in length.
-    RegExp passwordRegex = RegExp(r'^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,25}$');
+    RegExp passwordRegex = RegExp(
+        r'^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,25}$');
     return passwordRegex.hasMatch(password);
   }
 
   Future<void> changepasswordapi(String reconfrimpassword) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       return;
     }
@@ -1145,9 +1216,10 @@ backgroundColor:   Colors.transparent,
       print('statusCode=====>${response.statusCode}');
 
       if (response.statusCode == 200) {
-        Commonutils.showCustomToastMessageLong('Password Changed Succesfully!', context, 0, 4);
+        Commonutils.showCustomToastMessageLong(
+            'Password Changed Succesfully!', context, 0, 4);
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => LoginPage()),
+          MaterialPageRoute(builder: (context) => LoginScreen()),
         );
         setState(() {
           //  currentstep += 1;
@@ -1157,7 +1229,8 @@ backgroundColor:   Colors.transparent,
 
         print('response is not success');
 
-        print('Failed to send the request. Status code: ${response.statusCode}');
+        print(
+            'Failed to send the request. Status code: ${response.statusCode}');
       }
     } catch (e) {
       print('Error: $e');

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Model%20Class/projectmodel.dart';
 import 'package:hrms/home_screen.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:hrms/personal_details.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
@@ -754,7 +755,7 @@ class _ProjectsScreenState extends State<projects_screen> {
     //     context, MaterialPageRoute(builder: (context) => LoginPage()));
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
   }

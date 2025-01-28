@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Model%20Class/projectmodel.dart';
 import 'package:hrms/api%20config.dart';
 import 'package:hrms/home_screen.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:hrms/shared_keys.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
@@ -569,7 +570,7 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
     Commonutils.showCustomToastMessageLong("Logout Successful", context, 0, 3);
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
   }

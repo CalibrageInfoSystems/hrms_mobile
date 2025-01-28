@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/api%20config.dart';
 import 'package:hrms/home_screen.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:hrms/personal_details.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,6 +53,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
       }
     });
   }
+
   Future<String?> getLoginTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     logintime = prefs.getString('loginTime') ?? 'Unknown';
@@ -120,12 +122,16 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                   },
                   child: Text(
                     'Ok',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFf15f22), // Change to your desired background color
+                    backgroundColor: Color(
+                        0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Set border radius
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
                     ),
                   ),
                 ),
@@ -139,11 +145,12 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
 
   void onConfirmLogout(BuildContext context) {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
-    Commonutils.showCustomToastMessageLong("Logout Successfully", context, 0, 3);
+    Commonutils.showCustomToastMessageLong(
+        "Logout Successfully", context, 0, 3);
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
-          (route) => false,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+      (route) => false,
     );
   }
 
@@ -196,7 +203,8 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
     if (isConnected) {
       print('Connected to the internet');
     } else {
-      Commonutils.showCustomToastMessageLong('No Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'No Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       print('Not connected to the internet');
     }
@@ -220,7 +228,8 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
 
     if (accessToken != null) {
       try {
-        final url = Uri.parse(baseUrl + getleavesapi + empolyeid + '/$currentYear');
+        final url =
+            Uri.parse(baseUrl + getleavesapi + empolyeid + '/$currentYear');
         print('myleavesapi$url');
         Map<String, String> headers = {
           'Content-Type': 'application/json',
@@ -255,7 +264,8 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
           print('API Response leaveData: ${leaveData.length}');
           return leaveData;
         } else {
-          Commonutils.showCustomToastMessageLong('Error: ${response.body}', context, 1, 4);
+          Commonutils.showCustomToastMessageLong(
+              'Error: ${response.body}', context, 1, 4);
           // Handle error if the request was not successful
           print('Error: ${response.statusCode} - ${response.reasonPhrase}');
         }
@@ -401,11 +411,13 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                         final borderColor = _getStatusBorderColor(leave.status);
                         String? leavetodate;
                         DateTime from_date = DateTime.parse(leave.fromDate);
-                        String leavefromdate = DateFormat('dd MMM yyyy').format(from_date);
+                        String leavefromdate =
+                            DateFormat('dd MMM yyyy').format(from_date);
                         if (leave.toDate != null) {
                           todate = leave.toDate!;
                           DateTime to_date = DateTime.parse(todate);
-                          leavetodate = DateFormat('dd MMM yyyy').format(to_date);
+                          leavetodate =
+                              DateFormat('dd MMM yyyy').format(to_date);
                         } else {
                           leavetodate = leavefromdate;
                         }
@@ -413,14 +425,18 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                         //     ? Color(0xFFfbf2ed) // Default color
                         //     : Colors.grey.shade300;
                         Color backgroundColor = leave.isMarkedForDeletion
-                            ? Colors.grey.shade300 // Grey background if marked for deletion
-                            : leave.isDeleted == null || leave.isDeleted == false
+                            ? Colors.grey
+                                .shade300 // Grey background if marked for deletion
+                            : leave.isDeleted == null ||
+                                    leave.isDeleted == false
                                 ? Color(0xFFfbf2ed) // Default color
                                 : Colors.grey.shade300;
 
-                        DateTime from_datefordelete = DateFormat('yyyy-MM-dd').parse(leave.fromDate);
+                        DateTime from_datefordelete =
+                            DateFormat('yyyy-MM-dd').parse(leave.fromDate);
 
-                        bool hideDeleteIcon = from_datefordelete.isBefore(DateTime.now());
+                        bool hideDeleteIcon =
+                            from_datefordelete.isBefore(DateTime.now());
 
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -428,14 +444,16 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                             decoration: BoxDecoration(
                               color: backgroundColor,
                               borderRadius: BorderRadius.circular(16.0),
-                              border: Border.all(color: borderColor, width: 1.5),
+                              border:
+                                  Border.all(color: borderColor, width: 1.5),
                             ),
                             child: ListTile(
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsets.only(top: 5.0, bottom: 0.0),
+                                    padding:
+                                        EdgeInsets.only(top: 5.0, bottom: 0.0),
                                     child: Row(
                                       children: [
                                         Text(
@@ -490,7 +508,8 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                             fontFamily: 'Calibri',
                                           ),
                                         ),
-                                        leave.isHalfDayLeave == null || leave.isHalfDayLeave == false
+                                        leave.isHalfDayLeave == null ||
+                                                leave.isHalfDayLeave == false
                                             ? Text(
                                                 ' No',
                                                 style: TextStyle(
@@ -519,13 +538,17 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                         children: [
                                           TextSpan(
                                             text: 'Leave Status :',
-                                            style:
-                                                TextStyle(color: Color(0xFFf37345), fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
+                                            style: TextStyle(
+                                                color: Color(0xFFf37345),
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: 'Calibri'),
                                           ),
                                           TextSpan(
                                             text: ' ${leave.status}',
                                             style: TextStyle(
-                                                color: _getStatusColor(leave.status),
+                                                color: _getStatusColor(
+                                                    leave.status),
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w700,
                                                 fontFamily: 'Calibri'),
@@ -567,7 +590,9 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                             ),
                                           ),
                                           TextSpan(
-                                            text: {leavetodate} != null ? leavetodate : '${leavefromdate}',
+                                            text: {leavetodate} != null
+                                                ? leavetodate
+                                                : '${leavefromdate}',
                                             style: TextStyle(
                                               color: Color(0xFF000000),
                                               fontWeight: FontWeight.w700,
@@ -586,13 +611,19 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                         children: [
                                           TextSpan(
                                             text: 'Leave Description : ',
-                                            style:
-                                                TextStyle(color: Color(0xFFF44614), fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
+                                            style: TextStyle(
+                                                color: Color(0xFFF44614),
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: 'Calibri'),
                                           ),
                                           TextSpan(
                                             text: '${leave.note}',
-                                            style:
-                                                TextStyle(color: Color(0xFF000000), fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Calibri'),
+                                            style: TextStyle(
+                                                color: Color(0xFF000000),
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                fontFamily: 'Calibri'),
                                           ),
                                         ],
                                       ),
@@ -625,8 +656,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                   return Text('Error: Unable to fetch data');
                 }
               },
-            )
-        ));
+            )));
   }
 
   Color _getStatusBorderColor(String status) {
@@ -695,28 +725,50 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                   ),
                 ],
               ),
-              content: Column(
+              content:
+                  /* Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width,
-                    child: Row(
-                      // crossAxisAlignment: CrossAxisAlignment.start,
-                      // mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Image.asset(
-                          'assets/caution-sign.png',
-                          height: 30,
-                          width: 30,
-                        ),
-                        SizedBox(
-                          width: 8.0,
-                        ),
-                        Text('Are You Sure You Want To Delete?')
-                      ],
-                    ),
+                  Row(
+                    // crossAxisAlignment: CrossAxisAlignment.start,
+                    // mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Image.asset(
+                        'assets/caution-sign.png',
+                        height: 30,
+                        width: 30,
+                      ),
+                      SizedBox(
+                        width: 8.0,
+                      ),
+                      Text('Are You Sure You Want To Delete?')
+                    ],
                   )
                 ],
+              ), */
+
+                  SizedBox(
+                height: 50,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Image.asset(
+                      'assets/caution-sign.png',
+                      height: 30,
+                      width: 30,
+                    ),
+                    SizedBox(
+                      width: 8.0,
+                    ),
+                    Flexible(
+                      child: Text(
+                        'Are You Sure You Want To Delete?',
+                        style:
+                            TextStyle(fontSize: 16), // Add any desired styling
+                      ),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 ElevatedButton(
@@ -726,12 +778,16 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                   },
                   child: Text(
                     'Yes',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFf15f22), // Change to your desired background color
+                    backgroundColor: Color(
+                        0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Set border radius
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
                     ),
                   ),
                 ),
@@ -741,12 +797,16 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                   },
                   child: Text(
                     'No',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFf15f22), // Change to your desired background color
+                    backgroundColor: Color(
+                        0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Set border radius
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
                     ),
                   ),
                 ),
@@ -769,7 +829,8 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
   Future<void> deleteapi(int leaveid) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (!isConnected) {
-      Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
       return;
     }
@@ -793,7 +854,8 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
         bool isSuccess = responseData['isSuccess'];
         String message = responseData['message'];
         if (isSuccess) {
-          int index = leaveData.indexWhere((leave) => leave.employeeLeaveId == leaveid);
+          int index =
+              leaveData.indexWhere((leave) => leave.employeeLeaveId == leaveid);
 
           if (index != -1) {
             // Mark the item for deletion
@@ -808,7 +870,8 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                 MaterialPageRoute(builder: (context) => Myleaveslist()),
               );
             } else {
-              Commonutils.showCustomToastMessageLong('Please Check Your Internet Connection', context, 1, 4);
+              Commonutils.showCustomToastMessageLong(
+                  'Please Check Your Internet Connection', context, 1, 4);
             }
           });
           // Close dialog
@@ -869,7 +932,8 @@ class CustomCircularProgressIndicator extends StatelessWidget {
               ),
             ),
             CircularProgressIndicator(
-              strokeWidth: 3, // Adjust the stroke width of the CircularProgressIndicator
+              strokeWidth:
+                  3, // Adjust the stroke width of the CircularProgressIndicator
               valueColor: AlwaysStoppedAnimation<Color>(
                 Color(0xFFf15f22),
               ), // Color for the progress indicator itself

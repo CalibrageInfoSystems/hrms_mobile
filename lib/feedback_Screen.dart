@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/leave_model.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
@@ -43,6 +44,7 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
       }
     });
   }
+
   Future<String?> getLoginTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     logintime = prefs.getString('loginTime') ?? 'Unknown';
@@ -111,12 +113,16 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
                   },
                   child: Text(
                     'Ok',
-                    style: TextStyle(color: Colors.white, fontFamily: 'Calibri'), // Set text color to white
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFf15f22), // Change to your desired background color
+                    backgroundColor: Color(
+                        0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Set border radius
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
                     ),
                   ),
                 ),
@@ -130,11 +136,12 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
 
   void onConfirmLogout(BuildContext context) {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
-    Commonutils.showCustomToastMessageLong("Logout Successfully", context, 0, 3);
+    Commonutils.showCustomToastMessageLong(
+        "Logout Successfully", context, 0, 3);
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
-          (route) => false,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+      (route) => false,
     );
   }
 
@@ -163,6 +170,7 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
       print("Login is more than 1 hour from current time.");
     }
   }
+
   Future<void> loadAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -223,7 +231,8 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
                   child: Container(
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height,
-                    padding: EdgeInsets.only(top: 15.0, left: 15.0, right: 15.0, bottom: 20.0),
+                    padding: EdgeInsets.only(
+                        top: 15.0, left: 15.0, right: 15.0, bottom: 20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -257,7 +266,8 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
                               direction: Axis.horizontal,
                               allowHalfRating: true,
                               itemCount: 5,
-                              itemPadding: EdgeInsets.symmetric(horizontal: 1.0),
+                              itemPadding:
+                                  EdgeInsets.symmetric(horizontal: 1.0),
                               itemBuilder: (context, _) => Icon(
                                 Icons.star,
                                 color: Colors.amber,
@@ -270,14 +280,16 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
                               },
                             )),
                         Padding(
-                          padding: EdgeInsets.only(left: 0, top: 10.0, right: 0),
+                          padding:
+                              EdgeInsets.only(left: 0, top: 10.0, right: 0),
                           child: GestureDetector(
                             onTap: () async {},
                             child: Container(
                               height: 180,
                               width: MediaQuery.of(context).size.width,
                               decoration: BoxDecoration(
-                                border: Border.all(color: Color(0xFFf15f22), width: 1.5),
+                                border: Border.all(
+                                    color: Color(0xFFf15f22), width: 1.5),
                                 borderRadius: BorderRadius.circular(5.0),
                                 color: Colors.white,
                               ),
@@ -310,7 +322,8 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(top: 20.0, left: 0.0, right: 0.0),
+                          padding:
+                              EdgeInsets.only(top: 20.0, left: 0.0, right: 0.0),
                           child: Container(
                             width: double.infinity,
                             decoration: BoxDecoration(
@@ -323,7 +336,10 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
                               },
                               child: Text(
                                 'Submit',
-                                style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Calibri'),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontFamily: 'Calibri'),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
@@ -349,20 +365,23 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
     bool isValid = true;
     bool hasValidationFailed = false;
     if (rating_star != null && rating_star <= 0.0) {
-      Commonutils.showCustomToastMessageLong('Please Share Us Your Valuable Feedback', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Share Us Your Valuable Feedback', context, 1, 4);
       isValid = false;
       hasValidationFailed = true;
       FocusScope.of(context).unfocus();
     }
 
     if (isValid && _commentstexteditcontroller.text.trim().isEmpty) {
-      Commonutils.showCustomToastMessageLong('Please Enter Comment', context, 1, 4);
+      Commonutils.showCustomToastMessageLong(
+          'Please Enter Comment', context, 1, 4);
       isValid = false;
       hasValidationFailed = true;
       FocusScope.of(context).unfocus();
     }
     if (isValid) {
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
       String? storedEmployeeId = sharedPreferences.getString("employeeId");
       print('employidinfeedback$storedEmployeeId');
       String comments = _commentstexteditcontroller.text.toString();
@@ -373,7 +392,8 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
       print('employeid$employeid');
       bool isConnected = await Commonutils.checkInternetConnectivity();
       if (!isConnected) {
-        Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+        Commonutils.showCustomToastMessageLong(
+            'Please Check the Internet Connection', context, 1, 4);
         FocusScope.of(context).unfocus();
         return;
       }
@@ -407,32 +427,38 @@ class _feedback_Screen_screenState extends State<feedback_Screen> {
           if (responseMap.containsKey('isSuccess')) {
             bool isSuccess = responseMap['isSuccess'];
             if (isSuccess == true) {
-              Commonutils.showCustomToastMessageLong('Thankyou For Your Valuable Feedback', context, 0, 4);
+              Commonutils.showCustomToastMessageLong(
+                  'Thankyou For Your Valuable Feedback', context, 0, 4);
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => home_screen()),
               );
             } else {
-              Commonutils.showCustomToastMessageLong('${responseMap['message']}', context, 1, 4);
+              Commonutils.showCustomToastMessageLong(
+                  '${responseMap['message']}', context, 1, 4);
               print('Feedback Failed: ${response.body}');
             }
           } else {
             if (response.body.toLowerCase().contains('invalid token')) {
               // Invalid token scenario
-              Commonutils.showCustomToastMessageLong('Invalid Token. Please Login Again.', context, 1, 4);
+              Commonutils.showCustomToastMessageLong(
+                  'Invalid Token. Please Login Again.', context, 1, 4);
             } else {
               // Other scenarios with success status code
               // Handle as needed, for example, showing the response message
               String message = responseMap['message'] ?? 'No message provided';
-              Commonutils.showCustomToastMessageLong('${response.body}', context, 0, 3);
+              Commonutils.showCustomToastMessageLong(
+                  '${response.body}', context, 0, 3);
             }
           }
         } else if (response.statusCode == 520) {
           // Scenario with status code 520
           // Show the response body as a toast
-          Commonutils.showCustomToastMessageLong('${response.body}', context, 0, 3);
+          Commonutils.showCustomToastMessageLong(
+              '${response.body}', context, 0, 3);
         } else {
           // Handle other status codes if needed
-          print('Failed to send the request. Status code: ${response.statusCode}');
+          print(
+              'Failed to send the request. Status code: ${response.statusCode}');
         }
         // if (response.statusCode == 200) {
         //   Map<String, dynamic> responseMap = json.decode(response.body);

@@ -45,12 +45,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class LoginPage extends StatefulWidget {
+/* 
+class LoginScreen2 extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _LoginScreen2State createState() => _LoginScreen2State();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginScreen2State extends State<LoginScreen2> {
   final TextEditingController _usernamecontroller = TextEditingController();
   final TextEditingController _passwordcontroller = TextEditingController();
   String? selectedPhoneNumber;
@@ -671,7 +672,7 @@ class _LoginPageState extends State<LoginPage> {
     prefs.setInt('leavereasons', LeaveReasons);
   }
 }
-
+ */
 // class AuthService {
 //   static Future<void> saveAuthData(
 //       String accessToken, String refreshToken, String employeeId) async {

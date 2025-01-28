@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Commonutils.dart';
 import 'package:hrms/home_screen.dart';
 import 'package:hrms/leaves_screen.dart';
+import 'package:hrms/login_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -191,7 +192,7 @@ class _apply_leaveeState extends State<apply_leave> {
         "Logout Successfully", context, 0, 3);
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
   }
@@ -489,7 +490,7 @@ class _apply_leaveeState extends State<apply_leave> {
             //   selectedToDate = pickedDate.add(Duration(days: 7));
             // } else {
             //   selectedDate = pickedDate;
-            //   _fromdateController.text = DateFormat('dd-MM-yyyy').format(selectedDate);
+            //    _fromdateController.text = DateFormat('dd-MM-yyyy').format(selectedDate);
             // }
             // if (selectedleaveName == 'LL') {
             //   selectedDate = pickedDate;
@@ -3010,7 +3011,7 @@ class _apply_leaveeState extends State<apply_leave> {
                                             Commonutils
                                                 .showCustomToastMessageLong(
                                                     Constants
-                                                        .plErrorMessage, // Constants.plErrorMessage
+                                                        .futureDatesErrMsg, // Constants.plErrorMessage
                                                     context,
                                                     1,
                                                     3);
