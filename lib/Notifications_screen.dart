@@ -286,26 +286,19 @@ class _Notifications_screenState extends State<Notifications> {
                 future: apiData,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                        child: CircularProgressIndicator.adaptive());
+                    return const Expanded(
+                      child:
+                          Center(child: CircularProgressIndicator.adaptive()),
+                    );
                   } else if (snapshot.hasError) {
                     return Center(
                         child: Text('snapshot.hasError ${snapshot.error}'));
                   } else {
                     List<List<Notification_model>> snapShot = snapshot.data!;
                     List<Notification_model> notifyData = snapShot[0];
-                    print('notifyData=====>${notifyData.length}');
                     List<Notification_model> birthdayNotifyData = snapShot[1];
-                    print(
-                        'birthdayNotifyData=====>${birthdayNotifyData.length}');
                     if (snapShot.isNotEmpty) {
-                      return Container(
-                          // width: MediaQuery.of(context).size.width,
-                          // height: MediaQuery.of(context).size.height/0.2,
-                          // child: SingleChildScrollView(
-                          // width: MediaQuery.of(context).size.width,
-                          // height: MediaQuery.of(context).size.height,
-                          child: Column(
+                      return Column(
                         children: [
                           SizedBox(
                             width: MediaQuery.of(context).size.width,
@@ -313,9 +306,9 @@ class _Notifications_screenState extends State<Notifications> {
                             child: Column(
                               children: [
                                 CustomExpansionTile(
-                                  title: Row(
+                                  title: const Row(
                                     children: [
-                                      const Text(
+                                      Text(
                                         "HR Notifications",
                                         style: TextStyle(color: Colors.white),
                                         maxLines: 2,
@@ -1038,10 +1031,7 @@ class _Notifications_screenState extends State<Notifications> {
                             ),
                           )
                         ],
-                      )
-                          //   ),
-                          //  ),
-                          );
+                      );
                     } else {
                       return const Center(
                         child: Text('No Notifications'),
@@ -1820,7 +1810,8 @@ class _Notifications_screenState extends State<Notifications> {
       userid = prefs.getString("UserId") ?? "";
       loademployeid();
       final url = Uri.parse(baseUrl + getnotification);
-      print('fetchNotifications url: $url');
+      print(
+          'fetchNotifications url: $url'); // http://182.18.157.215/HRMS/API/hrmsapi/Notification/GetNotifications
       print('fetchNotifications accessToken: $accessToken');
 
       final response = await http.get(
@@ -1843,8 +1834,8 @@ class _Notifications_screenState extends State<Notifications> {
         //  List<Notification_model> notifyData = data.where((notification) => notification.messageType != 'Birthday').toList();
         //    List<Notification_model> notifyData = data.where((notification) => notification.messageType != 'Birthday').toList();
         List<Notification_model> notifyData = data
-            .where((notification) =>
-                notification.messageType == 'Company Anniversary Day')
+            .where((notification) => notification.messageType != 'Birthday')
+            // notification.messageType == 'Company Anniversary Day')
             .toList();
         // List<Notification_model> notifyData = data.where((notification) => notification.messageTypeId == 147).toList();
 

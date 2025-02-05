@@ -210,8 +210,6 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
     }
     // Specify the API endpoint
     // final String apiUrl =
-    //     'http://182.18.157.215/HRMS/API/hrmsapi/Attendance/GetLeavesForSelfEmployee/' + '$empolyeid';
-    // print('API apiUrl: $apiUrl');
 
     // final url = Uri.parse(baseUrl + getleavesapi + empolyeid);
     // print('myleavesapi$url');
@@ -282,7 +280,6 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
   // void _loadleaveslist(String empolyeid) async {
   //   // Specify the API endpoint
   //   // final String apiUrl =
-  //   //     'http://182.18.157.215/HRMS/API/hrmsapi/Attendance/GetLeavesForSelfEmployee/' + '$empolyeid';
   //   // print('API apiUrl: $apiUrl');
   //
   //   // final url = Uri.parse(baseUrl + getleavesapi + empolyeid);

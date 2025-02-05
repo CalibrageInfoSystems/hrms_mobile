@@ -17,6 +17,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,11 +39,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
 
-    // _userNameController.text = 'BakiHanm';
-    // _passwordController.text = 'Test@123';
+    // _userNameController.text = 'CIS00000';
+    // _passwordController.text = 'Live@291024';
 
-    _userNameController.text = 'CIS00054';
-    _passwordController.text = 'Ranjith@469';
+    // _userNameController.text = 'CIS00033';
+    // _passwordController.text = 'Ranjith@469';
   }
 
   @override
@@ -95,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: 2.0),
         const Text(
-          'TEST HRMS',
+          'HRMS',
           style: TextStyle(
             color: Color(0xFFf15f22),
             fontSize: 26.0,
@@ -234,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> signIn() async {
     FocusScope.of(context).unfocus();
-    ProgressDialog progressDialog = ProgressDialog(context);
+    // ProgressDialog progressDialog = ProgressDialog(context);
     try {
       final isConnected = await Commonutils.checkInternetConnectivity();
       if (!isConnected) {
@@ -243,9 +244,9 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      setState(() {
+      /* setState(() {
         progressDialog.show();
-      });
+      }); */
 
       String username = _userNameController.text.toString().trim();
       String password = _passwordController.text.toString().trim();
@@ -279,11 +280,10 @@ class _LoginScreenState extends State<LoginScreen> {
         prefs.setString(SharedKeys.employeeId, employeeId!);
         prefs.setString(SharedKeys.userId, userid!);
 
-        empolyelogin(
-            employeeId!, isFirstTimeLogin, userid, progressDialog, accessToken);
+        empolyelogin(employeeId!, isFirstTimeLogin, userid, accessToken);
       } else {
         setState(() {
-          progressDialog.dismiss();
+          // progressDialog.dismiss();
           isRequestProcessing = false;
           _commonError = true;
           _commonErrorMsg = 'Invalid Username or Password ';
@@ -293,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       setState(() {
-        progressDialog.dismiss();
+        // progressDialog.dismiss();
         isRequestProcessing = false;
       });
 
@@ -303,7 +303,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> empolyelogin(String empolyeid, String isfirstTime, String userid,
-      ProgressDialog progressDialog, String? accessToken) async {
+      String? accessToken) async {
     try {
       final url = Uri.parse(baseUrl + getselfempolyee + empolyeid);
       final response = await http.get(
@@ -313,7 +313,7 @@ class _LoginScreenState extends State<LoginScreen> {
         },
       );
       setState(() {
-        progressDialog.dismiss();
+        // progressDialog.dismiss();
         isRequestProcessing = false;
       });
       if (response.statusCode == 200) {
@@ -349,7 +349,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       setState(() {
-        progressDialog.dismiss();
+        // progressDialog.dismiss();
         isRequestProcessing = false;
       });
       print('catch: $e');
@@ -382,4 +382,26 @@ class _LoginScreenState extends State<LoginScreen> {
           'Failed to load Lookup Keys. Status Code: ${response.statusCode}');
     }
   }
+}
+
+class AuthService {
+  static final AuthService _instance = AuthService._internal();
+  factory AuthService() => _instance;
+  AuthService._internal();
+
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  String? _token;
+
+  // Method to save and load the token
+  Future<void> setToken(String? token) async {
+    if (token != null) {
+      _token = token;
+      await _secureStorage.write(key: "auth_token", value: token);
+    } else {
+      _token = await _secureStorage.read(key: "auth_token");
+    }
+  }
+
+  // Getter to retrieve the token
+  String? get token => _token;
 }

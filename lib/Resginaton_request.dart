@@ -1071,9 +1071,9 @@ class _Resgination_req_screenState extends State<Resgination_req> {
       "description": desc,
       "otherReason": otherdesc,
       "isActive": true,
-      "url": 'http://182.18.157.215:/',
+      // "url": leaveApplyURL,
       // "url": 'https://182.18.157.215:/',
-      // "url": "https://hrms.calibrage.in", // live url
+      "url": leaveApplyURL, // live url
 
       //"url": 'http://hrms.calibrage.in:/',
     };

@@ -1838,7 +1838,6 @@ class _personal_screen_screenState extends State<personal_details> {
       empolyeid = prefs.getString("employeeId") ?? "";
     });
     print("empolyeidinapplyleave:$empolyeid");
-    // final response = await http.get('http://182.18.157.215/HRMS/API/hrmsapi/Employee/GetEmployeePhoto/91');
     final url = Uri.parse(baseUrl + GetEmployeePhoto + '$empolyeid');
     print('loademployeeimage  $url');
     final response = await http.get(

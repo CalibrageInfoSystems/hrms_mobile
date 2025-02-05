@@ -1,13 +1,15 @@
 library APIConstants;
 
-var baseUrl = "http://182.18.157.215/HRMS/API"; //  test
+// var baseUrl = "http://182.18.157.215/HRMS/API"; //  test
 //var baseUrl = "http://182.18.157.215/BHRMS/API"; // beta version url
-// var baseUrl = "https://hrms.calibrage.in/api"; // live url
-var getlogin = "/hrmsapi/Security/Login"; // login url post api
+var baseUrl = "https://hrms.calibrage.in/api"; // live url
 
+// const leaveApplyURL = 'http://182.18.157.215:/';
+const leaveApplyURL = 'https://hrms.calibrage.in:/';
+
+var getlogin = "/hrmsapi/Security/Login"; // login url post api
 var getselfempolyee =
     "/hrmsapi/Employee/GetSelfEmployeeData/"; // need to pass the empolyeeid
-//http://182.18.157.215/HRMS/API/hrmsapi/Attendance/CreateEmployeeLeave
 var applyleaveapi = "/hrmsapi/Attendance/CreateEmployeeLeave"; //post api
 var getquestions =
     '/hrmsapi/Security/ValidateUserQuestions/'; // pass the username
@@ -38,8 +40,5 @@ var WithdrawResignation = '/hrmsapi/Resignation/RejectResignationRequest';
 var uploadimage = '/hrmsapi/Employee/UpdateEmployeeBasicDetails';
 var getemployedata = '/hrmsapi/Employee/GetEmployeeBasedOnId/';
 var getleaveStatistics = '/hrmsapi/Attendance/GetLeaveStatistics/';
-const leaveApplyURL = 'http://182.18.157.215:/';
-// const leaveApplyURL = 'https://hrms.calibrage.in:/';
-
 /* const testLeaveApplyURL = 'http://182.18.157.215:/';
 const uatLeaveApplyURL = 'https://hrms.calibrage.in:/'; */

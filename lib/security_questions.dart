@@ -62,7 +62,6 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
       FocusScope.of(context).unfocus();
       return;
     }
-    //  String apiUrl = 'http://182.18.157.215/HRMS/API/hrmsapi/Security/SecureQuestions';
     final response = await http.get(Uri.parse(baseUrl + fetchquestion));
     print('url>>>$response');
     // final response = await http.get(Uri.parse(apiUrl));

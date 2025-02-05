@@ -630,7 +630,8 @@ class _home_screenState extends State<home_screen>
         bodyContent = personal_details();
         break;
       case 1:
-        bodyContent = projects_screen();
+        bodyContent = const TestProjectsScreen();
+        // bodyContent = projects_screen();
         break;
       case 2:
         bodyContent = leaves_screen();

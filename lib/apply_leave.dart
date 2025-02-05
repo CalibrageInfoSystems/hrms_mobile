@@ -4208,7 +4208,6 @@ class _apply_leaveeState extends State<apply_leave> {
 
     final apiUrl =
         '$baseUrl$getleaveStatistics${fromDate.split('-')[2]}/$empId';
-    // 'http://182.18.157.215/HRMS/API/hrmsapi/Attendance/GetLeaveStatistics/2025/176';
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',

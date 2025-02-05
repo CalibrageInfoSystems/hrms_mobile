@@ -13,7 +13,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Commonutils.dart';
 import 'Constants.dart';
 import 'SharedPreferencesHelper.dart';
-import 'main.dart';
 
 class TestProjectsScreen extends StatefulWidget {
   const TestProjectsScreen({super.key});
@@ -64,8 +63,6 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
 
       final apiUrl = Uri.parse('$baseUrl$getselfempolyee$employeid');
 //  final apiUrl = Uri.parse(baseUrl + getselfempolyee + empolyeid);
-      /*  final apiUrl = Uri.parse(
-        'http://182.18.157.215/HRMS/API/hrmsapi/Employee/GetSelfEmployeeData/176'); */
       final jsonResponse = await http.get(
         apiUrl,
         headers: {
@@ -146,15 +143,14 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: () async {
-          /*  Navigator.of(context).pushReplacement(
+      onWillPop: () async {
+        /*  Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => home_screen()),
           ); */
-          return true;
-        },
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: Scaffold(
+        return true;
+      },
+      child: Scaffold(
+        /*  
             appBar: AppBar(
               backgroundColor: Colors.white,
               title: const Text(
@@ -174,63 +170,70 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
                 },
               ),
             ),
-            body: Stack(
-              children: [
-                Image.asset(
-                  'assets/background_layer_2.png',
-                  fit: BoxFit.cover,
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 40.0),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Assigned Projects',
-                          style: TextStyle(
-                              fontSize: 26,
-                              color: Colors.black,
-                              fontFamily: 'Calibri'),
-                        ),
-                        const SizedBox(
-                          height: 25.0,
-                        ),
-                        Expanded(
-                            child: FutureBuilder(
-                                future: futureProjects,
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  } else if (snapshot.hasError) {
-                                    if (snapshot.error is NetworkException) {
-                                      return Center(
-                                        child: Text(
-                                            (snapshot.error as NetworkException)
-                                                .message),
-                                      );
-                                    }
-                                    return Center(
-                                      child: Text(
-                                        snapshot.error
-                                            .toString()
-                                            .replaceFirst('Exception: ', ''),
-                                        style: const TextStyle(
-                                            fontSize: 18,
-                                            color: Colors.black,
-                                            fontFamily: 'Calibri'),
-                                      ),
-                                    );
-                                  }
-                                  final projectList =
-                                      snapshot.data as List<projectmodel>;
-                                  return projectsGrid(projectList);
-                                  /*  return ListView.builder(
+            */
+
+        body: Stack(
+          children: [
+            Image.asset(
+              'assets/background_layer_2.png',
+              fit: BoxFit.cover,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10.0,
+                //  vertical: 40.0
+              ),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      height: 25.0,
+                    ),
+                    const Text(
+                      'Assigned Projects',
+                      style: TextStyle(
+                          fontSize: 26,
+                          color: Colors.black,
+                          fontFamily: 'Calibri'),
+                    ),
+                    const SizedBox(
+                      height: 25.0,
+                    ),
+                    Expanded(
+                        child: FutureBuilder(
+                            future: futureProjects,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              } else if (snapshot.hasError) {
+                                if (snapshot.error is NetworkException) {
+                                  return Center(
+                                    child: Text(
+                                        (snapshot.error as NetworkException)
+                                            .message),
+                                  );
+                                }
+                                return Center(
+                                  child: Text(
+                                    snapshot.error
+                                        .toString()
+                                        .replaceFirst('Exception: ', ''),
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.black,
+                                        fontFamily: 'Calibri'),
+                                  ),
+                                );
+                              }
+                              final projectList =
+                                  snapshot.data as List<projectmodel>;
+                              return projectsGrid(projectList);
+                              /*  return ListView.builder(
                                     itemCount: projectList.length,
                                     itemBuilder:
                                         (BuildContext context, int index) {
@@ -240,13 +243,13 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
                                       );
                                     },
                                   ); */
-                                }))
-                      ]),
-                ),
-              ],
+                            }))
+                  ]),
             ),
-          ),
-        ));
+          ],
+        ),
+      ),
+    );
   }
 
   Widget projectsGrid(List<projectmodel> projectlist) {
@@ -329,7 +332,7 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
                   ),
                   const SizedBox(height: 8.0),
                   Text(
-                    "${project.projectname}",
+                    project.projectname,
                     style: const TextStyle(
                       fontSize: 16.0,
                       color: Colors.black,

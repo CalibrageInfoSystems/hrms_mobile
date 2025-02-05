@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -39,6 +41,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     FlutterNativeSplash.remove();
     return MaterialApp(
+      builder: (context, child) {
+        final originalTextScaleFactor = MediaQuery.of(context).textScaleFactor;
+        final boldText = MediaQuery.boldTextOf(context);
+
+        final newMediaQueryData = MediaQuery.of(context).copyWith(
+          textScaleFactor: originalTextScaleFactor.clamp(0.8, 1.0),
+          boldText: boldText,
+        );
+
+        return MediaQuery(
+          data: newMediaQueryData,
+          child: child!,
+        );
+      },
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),
     );
@@ -249,8 +265,6 @@ class _LoginScreen2State extends State<LoginScreen2> {
     // });
     try {
       final url = Uri.parse(baseUrl + getselfempolyee + empolyeid);
-      print(
-          'xyz: $url'); // http://182.18.157.215/HRMS/API/hrmsapi/Employee/GetSelfEmployeeData/131
 
       final response = await http.get(
         url,
@@ -593,7 +607,6 @@ class _LoginScreen2State extends State<LoginScreen2> {
 
   // Future<List<dynamic>> fetchLookupKeys() async {
   //   final response = await http.get(Uri.parse(baseUrl + lookupkeys));
-  //   // final response = await http.get(Uri.parse('http://182.18.157.215/HRMS/API/hrmsapi/Lookup/LookupKeys'));
   //
   //   if (response.statusCode == 200) {
   //     // Parse the JSON response

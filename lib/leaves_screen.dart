@@ -1483,7 +1483,6 @@ class _leaves_screen_screenState extends State<leaves_screen> {
       },
     );
 
-    // final response = await http.get(Uri.parse('http://182.18.157.215/HRMS/API/hrmsapi/Lookup/LookupDetails/44'));
     // if (response.statusCode == 200) {
     //   List<dynamic> jsonData = json.decode(response.body);
     //
