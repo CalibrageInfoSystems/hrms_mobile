@@ -42,8 +42,11 @@ class _LoginScreenState extends State<LoginScreen> {
     // _userNameController.text = 'CIS00000';
     // _passwordController.text = 'Live@291024';
 
-    // _userNameController.text = 'CIS00033';
+    // _userNameController.text = 'CIS00054';
     // _passwordController.text = 'Ranjith@469';
+
+    // _userNameController.text = 'BakiHanm';
+    // _passwordController.text = 'Test@123';
   }
 
   @override
@@ -129,11 +132,18 @@ class _LoginScreenState extends State<LoginScreen> {
             borderRadius: BorderRadius.circular(4.0),
           ),
         ),
-        child: const Text(
-          'Sign in',
-          style: TextStyle(
-              color: Colors.white, fontSize: 15, fontFamily: 'Calibri'),
-        ),
+        child: isRequestProcessing
+            ? const SizedBox(
+                width: 25,
+                height: 25,
+                child: CircularProgressIndicator(
+                  color: Styles.primaryColor,
+                ))
+            : const Text(
+                'Sign in',
+                style: TextStyle(
+                    color: Colors.white, fontSize: 15, fontFamily: 'Calibri'),
+              ),
       ),
     );
   }
@@ -289,7 +299,21 @@ class _LoginScreenState extends State<LoginScreen> {
           _commonErrorMsg = 'Invalid Username or Password ';
         });
         Commonutils.showCustomToastMessageLong(
-            'Invalid Username or Password ', context, 1, 4);
+            'Invalid Username or Password', context, 1, 4);
+      }
+    } on http.ClientException catch (e) {
+      setState(() {
+        isRequestProcessing = false;
+      });
+      if (e.message.contains('SocketException')) {
+        Commonutils.showCustomToastMessageLong(
+            'No internet connection. Please check your network.',
+            context,
+            1,
+            4);
+      } else {
+        Commonutils.showCustomToastMessageLong(
+            'Something went wrong. Please try again.', context, 1, 4);
       }
     } catch (e) {
       setState(() {

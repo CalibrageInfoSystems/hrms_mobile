@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:hrms/NotificationReply.dart';
 import 'package:hrms/Resignation.dart';
 import 'package:hrms/login_screen.dart';
+import 'package:hrms/styles.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
@@ -58,6 +59,9 @@ class _Resgination_req_screenState extends State<Resgination_req> {
   bool checkwithdrawbtn = false;
   bool dropdownDisabled = false;
   bool ismatchedlogin = false;
+
+  bool isRequestProcessing = false;
+
   String RegStatus = "";
   @override
   void initState() {
@@ -79,7 +83,6 @@ class _Resgination_req_screenState extends State<Resgination_req> {
         print('The Internet Is not  Connected');
       }
     });
-    // TODO: implement initState
   }
 
   Future<String?> getLoginTime() async {
@@ -851,27 +854,42 @@ class _Resgination_req_screenState extends State<Resgination_req> {
                               onPressed: dropdownDisabled
                                   ? null
                                   : () async {
+                                      setState(() {
+                                        isRequestProcessing = true;
+                                      });
                                       if (Validations()) {
                                         ApplyResignation();
+                                      } else {
+                                        setState(() {
+                                          isRequestProcessing = false;
+                                        });
                                       }
                                     },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: dropdownDisabled
-                                    ? Colors.grey
-                                    : const Color(
-                                        0xFFf15f22), // Match the background color
+                                backgroundColor: isRequestProcessing
+                                    ? Colors.grey.shade400
+                                    : (dropdownDisabled
+                                        ? Colors.grey.shade400
+                                        : Styles.primaryColor),
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(6.0),
                                 ),
                               ),
-                              child: const Text(
-                                'Submit',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontFamily: 'Calibri'),
-                              ),
+                              child: isRequestProcessing
+                                  ? const SizedBox(
+                                      width: 25,
+                                      height: 25,
+                                      child: CircularProgressIndicator(
+                                        color: Styles.primaryColor,
+                                      ))
+                                  : const Text(
+                                      'Submit',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontFamily: 'Calibri'),
+                                    ),
                             ),
                           ),
                         ),
@@ -1010,7 +1028,8 @@ class _Resgination_req_screenState extends State<Resgination_req> {
               actions: [
                 ElevatedButton(
                   onPressed: () async {
-                    FocusScope.of(context).unfocus(); // Hide the keyboard
+                    FocusScope.of(context).unfocus();
+                    Navigator.of(context).pop();
                     await withdrawApi(
                         matchingResignation); // Pass the matchingResignation data
                   },
@@ -1052,69 +1071,79 @@ class _Resgination_req_screenState extends State<Resgination_req> {
   }
 
   Future<void> ApplyResignation() async {
-    bool isConnected = await Commonutils.checkInternetConnectivity();
-    if (!isConnected) {
-      Commonutils.showCustomToastMessageLong(
-          'Please Check the Internet Connection', context, 1, 4);
-      FocusScope.of(context).unfocus();
-      return;
-    }
-    final url = Uri.parse(baseUrl + applyResignation);
-    print('CheckResignation :$url');
-    String desc = _Desctext.text.trim().toString();
-    String otherdesc = _otherreasontext.text.trim().toString();
-    final request = {
-      "resignationId": 0,
-      "employeeId": empolyeid,
-      "employeeName": EmployeName,
-      "reasonId": selectedleaveTypeId,
-      "description": desc,
-      "otherReason": otherdesc,
-      "isActive": true,
-      // "url": leaveApplyURL,
-      // "url": 'https://182.18.157.215:/',
-      "url": leaveApplyURL, // live url
-
-      //"url": 'http://hrms.calibrage.in:/',
-    };
-    print('body${json.encode(request)}');
-    final response = await http.post(
-      url,
-      body: json.encode(request),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': '$accessToken',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final dynamic jsonData = json.decode(response.body);
-      print('response:$jsonData');
-      print('response:${response.body}');
-      _Desctext.clear();
-      _otherreasontext.clear();
-
-      //  Commonutils.showCustomToastMessageLong('Resignation Added Successfully', context, 1, 4);
-      bool isSuccess = json.decode(response.body);
-
-      if (isSuccess) {
+    try {
+      bool isConnected = await Commonutils.checkInternetConnectivity();
+      if (!isConnected) {
         Commonutils.showCustomToastMessageLong(
-            'Resignation Added Successfully', context, 0, 2);
-
-        // Close the dialog
-        //  Navigator.of(context).pop();
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        setState(() {
-          accessToken = prefs.getString("accessToken") ?? "";
-          CheckResignation(accessToken!);
-        });
-        // Refresh the screen
-        // await CheckResignation($accessToken);
+            'Please Check the Internet Connection', context, 1, 4);
+        FocusScope.of(context).unfocus();
+        return;
       }
-    } else {
-      print('HTTP error: ${response.statusCode}');
-      throw Exception(
-          'Failed to load data. Status Code: ${response.statusCode}');
+      final url = Uri.parse(baseUrl + applyResignation);
+      print('CheckResignation :$url');
+      String desc = _Desctext.text.trim().toString();
+      String otherdesc = _otherreasontext.text.trim().toString();
+      final request = {
+        "resignationId": 0,
+        "employeeId": empolyeid,
+        "employeeName": EmployeName,
+        "reasonId": selectedleaveTypeId,
+        "description": desc,
+        "otherReason": otherdesc,
+        "isActive": true,
+        // "url": leaveApplyURL,
+        // "url": 'https://182.18.157.215:/',
+        "url": leaveApplyURL, // live url
+
+        //"url": 'http://hrms.calibrage.in:/',
+      };
+      print('body${json.encode(request)}');
+      final response = await http.post(
+        url,
+        body: json.encode(request),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': '$accessToken',
+        },
+      );
+
+      setState(() {
+        isRequestProcessing = false;
+      });
+      if (response.statusCode == 200) {
+        final dynamic jsonData = json.decode(response.body);
+        print('response:$jsonData');
+        print('response:${response.body}');
+        _Desctext.clear();
+        _otherreasontext.clear();
+
+        //  Commonutils.showCustomToastMessageLong('Resignation Added Successfully', context, 1, 4);
+        bool isSuccess = json.decode(response.body);
+
+        if (isSuccess) {
+          Commonutils.showCustomToastMessageLong(
+              'Resignation Added Successfully', context, 0, 2);
+
+          // Close the dialog
+          //  Navigator.of(context).pop();
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          setState(() {
+            accessToken = prefs.getString("accessToken") ?? "";
+            CheckResignation(accessToken!);
+          });
+          // Refresh the screen
+          // await CheckResignation($accessToken);
+        }
+      } else {
+        print('HTTP error: ${response.statusCode}');
+        throw Exception(
+            'Failed to load data. Status Code: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        isRequestProcessing = false;
+      });
+      rethrow;
     }
   }
 
@@ -1170,18 +1199,6 @@ class _Resgination_req_screenState extends State<Resgination_req> {
           Commonutils.showCustomToastMessageLong(
               'Resignation Withdrawn Successfully', context, 0, 2);
 
-          // Close the dialog
-          Navigator.of(context).pop();
-
-          // // Refresh the screen
-          // SharedPreferences prefs = await SharedPreferences.getInstance();
-          // setState(() {
-          //   accessToken = prefs.getString("accessToken") ?? "";
-          //   print('accessToken: ${accessToken}');
-          //   CheckResignation(accessToken!);
-          // });
-
-          // Navigate to the home screen
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => home_screen()),
           );

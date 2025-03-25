@@ -240,7 +240,20 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   Future<void> getLoginTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     logintime = prefs.getString('loginTime') ?? 'Unknown';
-    login(logintime!);
+    DateTime currentTime = DateTime.now();
+    DateTime formattedlogintime = DateTime.parse(logintime!);
+    DateTime loginTime = formattedlogintime /* Replace with your login time */;
+
+    // Calculate the time difference
+    Duration timeDifference = currentTime.difference(loginTime);
+
+    // Check if the time difference is less than or equal to 1 hour (3600 seconds)
+    if (timeDifference.inSeconds > 3600) {
+      print("Login is more than 1 hour from current time.");
+      setState(() {
+        ismatchedlogin = true;
+      });
+    }
   }
 
   void login(String logintime) {
@@ -778,11 +791,18 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
             borderRadius: BorderRadius.circular(4.0),
           ),
         ),
-        child: const Text(
-          'Apply Leave',
-          style: TextStyle(
-              color: Colors.white, fontSize: 15, fontFamily: 'Calibri'),
-        ),
+        child: isRequestProcessing
+            ? const SizedBox(
+                width: 25,
+                height: 25,
+                child: CircularProgressIndicator(
+                  color: Styles.primaryColor,
+                ))
+            : const Text(
+                'Apply Leave',
+                style: TextStyle(
+                    color: Colors.white, fontSize: 15, fontFamily: 'Calibri'),
+              ),
       ),
     );
   }
@@ -1332,6 +1352,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
             onChanged: (bool? value) {
               setState(() {
                 isHalfDayLeave = value;
+                selectedToDate = null;
               });
             },
             activeColor: Styles.primaryColor,
@@ -1384,6 +1405,12 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
               child: Text('Loading Leaves..'),
             );
           } else if (snapshot.hasError) {
+            if (snapshot.error.toString().contains('SocketException')) {
+              return Padding(
+                padding: const EdgeInsets.only(left: 14),
+                child: Text('No Leave Types Found'),
+              );
+            }
             return Padding(
               padding: const EdgeInsets.only(left: 14),
               child: Text(
@@ -1889,9 +1916,36 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       return false;
     }
 
-    if ((selectedFromDate != null && selectedToDate != null) &&
+    /* if ((selectedFromDate != null && selectedToDate != null) &&
         selectedDropdownLeaveName == 'PL') {
       int leaveDuration = selectedToDate!.difference(selectedFromDate!).inDays;
+
+      if (leaveDuration > 6) {
+        Commonutils.showCustomToastMessageLong(
+            'PL must be less than 6 days.', context, 1, 5);
+        return false;
+      }
+
+      if (countOfLeaves <= 6) {
+        Commonutils.showCustomToastMessageLong(
+            'You have only $countOfLeaves PL\'s available', context, 1, 5);
+        return false;
+      }
+    } */
+    if ((selectedFromDate != null && selectedToDate != null) &&
+        selectedDropdownLeaveName == 'PL') {
+      int totalDays = selectedToDate!.difference(selectedFromDate!).inDays + 1;
+      int weekendDays = 0;
+
+      for (int i = 0; i < totalDays; i++) {
+        DateTime currentDate = selectedFromDate!.add(Duration(days: i));
+        if (currentDate.weekday == DateTime.saturday ||
+            currentDate.weekday == DateTime.sunday) {
+          weekendDays++;
+        }
+      }
+
+      int leaveDuration = totalDays - weekendDays;
 
       if (leaveDuration > 6) {
         Commonutils.showCustomToastMessageLong(
@@ -1979,9 +2033,11 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
           'Please select From Date and To Date', context, 1, 4);
       return false;
     }
+    print(
+        'llLeaveCondition: $maxLongLeavesToApply | ${selectedToDate!.difference(selectedFromDate!).inDays + 1}');
     if (maxLongLeavesToApply != null &&
         maxLongLeavesToApply >
-            selectedToDate!.difference(selectedFromDate!).inDays) {
+            selectedToDate!.difference(selectedFromDate!).inDays + 1) {
       Commonutils.showCustomToastMessageLong(
           'Long Leave must be at least 7 days.', context, 1, 4);
       return false;

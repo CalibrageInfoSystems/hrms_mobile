@@ -1,11 +1,11 @@
 library APIConstants;
 
-// var baseUrl = "http://182.18.157.215/HRMS/API"; //  test
+var baseUrl = "http://182.18.157.215/HRMS/API"; //  test
 //var baseUrl = "http://182.18.157.215/BHRMS/API"; // beta version url
-var baseUrl = "https://hrms.calibrage.in/api"; // live url
+// var baseUrl = "https://hrms.calibrage.in/api"; // live url
 
-// const leaveApplyURL = 'http://182.18.157.215:/';
-const leaveApplyURL = 'https://hrms.calibrage.in:/';
+const leaveApplyURL = 'http://182.18.157.215:/';
+// const leaveApplyURL = 'https://hrms.calibrage.in:/';
 
 var getlogin = "/hrmsapi/Security/Login"; // login url post api
 var getselfempolyee =
