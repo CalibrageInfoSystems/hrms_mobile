@@ -5,6 +5,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hrms/common_widgets/common_styles.dart';
 import 'package:hrms/personal_details.dart';
+import 'package:hrms/ui_screens/AddLeads.dart';
+import 'package:hrms/ui_screens/ViewLeads.dart';
 import 'package:intl/intl.dart';
 
 class TestHrms extends StatefulWidget {
@@ -15,6 +17,8 @@ class TestHrms extends StatefulWidget {
 }
 
 class _TestHrmsState extends State<TestHrms> {
+  bool isButtonEnabled = false;
+
   @override
   Widget build(BuildContext context) {
     /*  if (ismatchedlogin) {
@@ -39,45 +43,207 @@ class _TestHrmsState extends State<TestHrms> {
         body: Stack(
           children: [
             backgroundGredient(context),
-            Column(
-              children: [
-                headerSection(context),
-                const SizedBox(height: 10),
-                SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column(
-                      children: [
-                        Row(
+            Positioned.fill(
+              child: Column(
+                children: [
+                  headerSection(context),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
                           children: [
-                            Expanded(
-                              child: customBox(title: 'Custom Box 1', data: 1),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child:
+                                      customBox(title: 'Custom Box 1', data: 1),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child:
+                                      customBox(title: 'Custom Box 2', data: 2),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: customBox(title: 'Custom Box 2', data: 2),
+                            const SizedBox(height: 10),
+                            statisticsSection(),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child:
+                                      customBox(title: 'Custom Box 3', data: 3),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child:
+                                      customBox(title: 'Custom Box 4', data: 4),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: customBtn(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const AddLeads()),
+                                      );
+                                    },
+                                    child: const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.add,
+                                          size: 18,
+                                          color: CommonStyles.whiteColor,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Add Client Visit',
+                                          style: CommonStyles.txStyF14CwFF5,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: customBtn(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const ViewLeads(),
+                                        ),
+                                      );
+                                    },
+                                    child: const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.view_list_rounded,
+                                          size: 18,
+                                          color: CommonStyles.whiteColor,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'View Client Visits',
+                                          style: CommonStyles.txStyF14CwFF5,
+                                        ),
+                                      ],
+                                    ),
+                                    backgroundColor:
+                                        CommonStyles.btnBlueBgColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: customBtn(
+                                onPressed: () {},
+                                backgroundColor: isButtonEnabled
+                                    ? CommonStyles.btnRedBgColor
+                                    : CommonStyles.hintTextColor,
+                                // Set background color based on enabled/disabled state
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.sync,
+                                      size: 18,
+                                      color: isButtonEnabled
+                                          ? CommonStyles.whiteColor
+                                          : CommonStyles
+                                              .disabledTextColor, // Adjust icon color when disabled
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Sync Data',
+                                      style: isButtonEnabled
+                                          ? CommonStyles.txStyF14CwFF5
+                                          : CommonStyles.txStyF14CwFF5.copyWith(
+                                              color: CommonStyles
+                                                  .disabledTextColor), // Adjust text color when disabled
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 5,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Work hours",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "09:00 to 18:00",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[700]),
+                                      ),
+                                    ],
+                                  ),
+                                  ElevatedButton.icon(
+                                    onPressed: () {},
+                                    icon:
+                                        const Icon(Icons.play_arrow, size: 18),
+                                    label: const Text("Punch In"),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 10),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
-                        statisticsSection(),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: customBox(title: 'Custom Box 3', data: 3),
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: customBox(title: 'Custom Box 4', data: 4),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -125,6 +291,22 @@ class _TestHrmsState extends State<TestHrms> {
     );
   }
 
+  ElevatedButton customBtn(
+      {Color? backgroundColor = CommonStyles.btnRedBgColor,
+      required Widget child,
+      void Function()? onPressed}) {
+    return ElevatedButton(
+      onPressed: () {
+        onPressed?.call();
+      },
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        backgroundColor: backgroundColor,
+      ),
+      child: child,
+    );
+  }
+
   Widget statisticsSection() {
     return Row(
       children: [
@@ -157,14 +339,14 @@ class _TestHrmsState extends State<TestHrms> {
                 initialDate: DateTime.now(),
               );
             },
-            child: Row(
+            child: const Row(
               children: [
                 Text(
                   'dd/MM/yyyy',
                   style: CommonStyles.txStyF14CbFF5,
                 ),
-                const SizedBox(width: 5),
-                const Icon(
+                SizedBox(width: 5),
+                Icon(
                   Icons.calendar_today_outlined,
                   size: 16,
                 ),
