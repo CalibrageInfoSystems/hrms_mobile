@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:intl/intl.dart';
 
-
 class CommonStyles {
   // colors
 
@@ -16,6 +15,7 @@ class CommonStyles {
   static const dataTextColor = Color(0xff818181);
   static const bottomNavBgColor = Color(0xffe8f4ff);
   static const appBarBgColor = Color(0xffe3f2f7);
+  static const primaryColor = Color(0xFFf15f22);
 
   static const statusBlueBg = Color(0xffc3c8cc);
   static const statusBlueText = Color(0xFF11528f);
@@ -31,7 +31,7 @@ class CommonStyles {
 
   static const blackColor = Colors.black;
   static const blackColorShade = Color(0xFF5f5f5f);
-  static const primaryColor = Color(0xFAF5F5F5);
+  // static const primaryColor = Color(0xFAF5F5F5);
   static const disabledTextColor = Color(0xFAF5F5F5);
   static const loginTextColor = Color(0xFFEE3618);
   static const buttonbg = Color(0xFF317DA6); //background: #317DA6;
@@ -404,8 +404,6 @@ class CommonStyles {
     );
   }
 
-
-
   static String? formatDateString(String? date) {
     print('date: $date');
     if (date != null && date.isNotEmpty) {
@@ -413,7 +411,6 @@ class CommonStyles {
     }
     return date;
   }
-
 
   static void showHorizontalDotsLoadingDialog(BuildContext context,
       {String message = "Please Wait...", int dotCount = 5}) {
@@ -453,50 +450,51 @@ class CommonStyles {
     Navigator.of(context).pop();
   }
 
-  static void showCustomToastMessageLong(String message, BuildContext context, int backgroundColorType,
-      int length) {final double screenWidth = MediaQuery.of(context).size.width;
-  final double textWidth = screenWidth / 1.5; // Adjust multiplier as needed
+  static void showCustomToastMessageLong(String message, BuildContext context,
+      int backgroundColorType, int length) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double textWidth = screenWidth / 1.5; // Adjust multiplier as needed
 
-  final double toastWidth = textWidth + 32.0; // Adjust padding as needed
-  final double toastOffset = (screenWidth - toastWidth) / 2;
+    final double toastWidth = textWidth + 32.0; // Adjust padding as needed
+    final double toastOffset = (screenWidth - toastWidth) / 2;
 
-  OverlayEntry overlayEntry;
-  overlayEntry = OverlayEntry(
-    builder: (BuildContext context) => Positioned(
-      bottom: 16.0,
-      left: toastOffset,
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8.0),
-        child: Container(
-          width: toastWidth,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: backgroundColorType == 0 ? Colors.green : Colors.red,
-              width: 2.0,
+    OverlayEntry overlayEntry;
+    overlayEntry = OverlayEntry(
+      builder: (BuildContext context) => Positioned(
+        bottom: 16.0,
+        left: toastOffset,
+        child: Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.0),
+          child: Container(
+            width: toastWidth,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: backgroundColorType == 0 ? Colors.green : Colors.red,
+                width: 2.0,
+              ),
+              borderRadius: BorderRadius.circular(8.0),
             ),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Padding(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-            child: Center(
-              child: Text(
-                message,
-                style: const TextStyle(fontSize: 16.0, color: Colors.black),
-                textAlign: TextAlign.center,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+              child: Center(
+                child: Text(
+                  message,
+                  style: const TextStyle(fontSize: 16.0, color: Colors.black),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
 
-  Overlay.of(context).insert(overlayEntry);
-  Future.delayed(Duration(seconds: length)).then((value) {
-    overlayEntry.remove();
-  });
+    Overlay.of(context).insert(overlayEntry);
+    Future.delayed(Duration(seconds: length)).then((value) {
+      overlayEntry.remove();
+    });
   }
 }
 

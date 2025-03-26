@@ -1,4 +1,4 @@
-     import 'dart:math';
+import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +12,7 @@ import 'package:hrms/personal_details.dart';
 import 'package:hrms/projects_screen.dart';
 import 'package:hrms/test_apply_leave.dart';
 import 'package:hrms/test_projects.dart';
+import 'package:hrms/ui_screens/test_hrms.dart';
 import 'package:ntp/ntp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -161,8 +162,8 @@ class _home_screenState extends State<home_screen>
             home: Scaffold(
               appBar: AppBar(
                 elevation: 0,
-                backgroundColor: Color(0xFFf15f22),
-                title: Text(
+                backgroundColor: const Color(0xFFf15f22),
+                title: const Text(
                   'HRMS',
                   style: TextStyle(color: Colors.white),
                 ),
@@ -173,16 +174,16 @@ class _home_screenState extends State<home_screen>
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => Notifications()),
+                            builder: (context) => const Notifications()),
                       );
                     },
-                    child: Icon(
+                    child: const Icon(
                       Icons.notification_important,
                       //  size: 15.0,
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 15.0,
                   )
                 ],
@@ -191,7 +192,7 @@ class _home_screenState extends State<home_screen>
                 child: ListView(
                   children: [
                     DrawerHeader(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                           // Remove the DecorationImage with AssetImage
                           ),
                       child: SvgPicture.asset(
@@ -208,7 +209,7 @@ class _home_screenState extends State<home_screen>
                         fit: BoxFit.contain,
                         color: Colors.black,
                       ),
-                      title: Text(
+                      title: const Text(
                         'My Profile',
                         style: TextStyle(
                           color: Colors.black,
@@ -231,7 +232,7 @@ class _home_screenState extends State<home_screen>
                         fit: BoxFit.contain,
                         color: Colors.black,
                       ),
-                      title: Text(
+                      title: const Text(
                         'My Leaves',
                         style: TextStyle(
                           color: Colors.black,
@@ -247,11 +248,11 @@ class _home_screenState extends State<home_screen>
                       },
                     ),
                     ListTile(
-                      leading: Icon(
+                      leading: const Icon(
                         Icons.star,
                         color: Colors.black,
                       ), // Change the icon as needed
-                      title: Text(
+                      title: const Text(
                         'Feedback',
                         style: TextStyle(
                           color: Colors.black,
@@ -274,7 +275,7 @@ class _home_screenState extends State<home_screen>
                         height: 22,
                         color: Colors.black,
                       ),
-                      title: Text(
+                      title: const Text(
                         'Holidays',
                         style: TextStyle(
                           color: Colors.black,
@@ -290,7 +291,7 @@ class _home_screenState extends State<home_screen>
                       },
                     ),
                     ListTile(
-                      leading: Icon(
+                      leading: const Icon(
                         Icons.notification_important,
                         color: Colors.black,
                         weight: 20,
@@ -302,7 +303,7 @@ class _home_screenState extends State<home_screen>
                       //   fit: BoxFit.contain,
                       //   color: Colors.black,
                       // ),
-                      title: Text(
+                      title: const Text(
                         'Notifications',
                         style: TextStyle(
                           color: Colors.black,
@@ -313,12 +314,12 @@ class _home_screenState extends State<home_screen>
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => Notifications()),
+                              builder: (context) => const Notifications()),
                         );
                       },
                     ),
                     ListTile(
-                      leading: Icon(
+                      leading: const Icon(
                         Icons.copy,
                         color: Colors.black,
                         weight: 20,
@@ -330,7 +331,7 @@ class _home_screenState extends State<home_screen>
                       //   fit: BoxFit.contain,
                       //   color: Colors.black,
                       // ),
-                      title: Text(
+                      title: const Text(
                         'Resignation Request',
                         style: TextStyle(
                           color: Colors.black,
@@ -341,17 +342,17 @@ class _home_screenState extends State<home_screen>
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => Resgination_req()),
+                              builder: (context) => const Resgination_req()),
                         );
                       },
                     ),
 
                     ListTile(
-                      leading: Icon(
+                      leading: const Icon(
                         Icons.logout,
                         color: Colors.black,
                       ), // Change the icon as needed
-                      title: Text(
+                      title: const Text(
                         'Logout',
                         style: TextStyle(
                           color: Colors.black,
@@ -361,6 +362,26 @@ class _home_screenState extends State<home_screen>
                       onTap: () {
                         logOutDialog();
                         // Handle the onTap action for Logout
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.logout,
+                        color: Colors.black,
+                      ),
+                      title: const Text(
+                        'Test',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'hind_semibold',
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const TestHrms()),
+                        );
                       },
                     ),
 
@@ -420,7 +441,8 @@ class _home_screenState extends State<home_screen>
                 elevation: 0,
                 //   mini: true,
                 child: Image.asset(
-                  'assets/user_1.png',
+                  'assets/app_logo.png',
+                  // 'assets/user_1.png',
                   width: 18,
                   height: 23,
                   color: Colors.white,
@@ -431,10 +453,10 @@ class _home_screenState extends State<home_screen>
                     //_selectTab(0);
                   });
                 },
-                backgroundColor: Color(0xFFf15f22),
+                backgroundColor: const Color(0xFFf15f22),
                 // Set the background color to orange
                 shape: RoundedRectangleBorder(
-                  side: BorderSide(
+                  side: const BorderSide(
                       color: Colors.white,
                       width: 3.0), // Set border color and width
                   borderRadius:
@@ -445,8 +467,8 @@ class _home_screenState extends State<home_screen>
                   FloatingActionButtonLocation.centerDocked,
               bottomNavigationBar: BottomAppBar(
                 height: 58,
-                shape: CircularNotchedRectangle(),
-                padding: EdgeInsets.only(bottom: 10.0),
+                shape: const CircularNotchedRectangle(),
+                padding: const EdgeInsets.only(bottom: 10.0),
                 notchMargin: currentTab == 0 ? 8 : 0,
                 child: Column(
                   children: [
@@ -464,7 +486,7 @@ class _home_screenState extends State<home_screen>
                             child: Container(
                               width: MediaQuery.of(context).size.width / 3 / 1,
                               //    padding: EdgeInsets.only(left: 25.0),
-                              margin: EdgeInsets.only(left: 25.0),
+                              margin: const EdgeInsets.only(left: 25.0),
                               child: GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -492,14 +514,16 @@ class _home_screenState extends State<home_screen>
                                                 MainAxisAlignment.start,
                                             children: [
                                               Container(
-                                                padding: EdgeInsets.all(14.0),
+                                                padding:
+                                                    const EdgeInsets.all(14.0),
                                                 child: SvgPicture.asset(
                                                   'assets/2560114.svg', // Replace with the actual path to your SVG icon
                                                   height:
                                                       20, // Adjust the height as needed
                                                   width:
                                                       20, // Adjust the width as needed
-                                                  color: Color(0xFFf15f22),
+                                                  color:
+                                                      const Color(0xFFf15f22),
                                                 ),
                                               ),
                                               const Text(
@@ -523,7 +547,7 @@ class _home_screenState extends State<home_screen>
                                           height: 4,
                                           child: Container(
                                             color: currentTab == 1
-                                                ? Color(0xFFf15f22)
+                                                ? const Color(0xFFf15f22)
                                                 : Colors.transparent,
                                           ),
                                         ),
@@ -544,7 +568,7 @@ class _home_screenState extends State<home_screen>
                           },
                           child: Container(
                             width: MediaQuery.of(context).size.width / 2.7 / 1,
-                            padding: EdgeInsets.only(right: 15.0),
+                            padding: const EdgeInsets.only(right: 15.0),
                             child: GestureDetector(
                               onTap: () {
                                 setState(() {
@@ -564,14 +588,15 @@ class _home_screenState extends State<home_screen>
                                               MainAxisAlignment.start,
                                           children: [
                                             Container(
-                                              padding: EdgeInsets.all(13.0),
+                                              padding:
+                                                  const EdgeInsets.all(13.0),
                                               child: SvgPicture.asset(
                                                 'assets/leave_8.svg', // Replace with the actual path to your SVG icon
                                                 height:
                                                     22, // Adjust the height as needed
                                                 width:
                                                     20, // Adjust the width as needed
-                                                color: Color(0xFFf15f22),
+                                                color: const Color(0xFFf15f22),
                                               ),
                                             ),
                                             const Text(
@@ -594,7 +619,7 @@ class _home_screenState extends State<home_screen>
                                           height: 4,
                                           child: Container(
                                             color: currentTab == 2
-                                                ? Color(0xFFf15f22)
+                                                ? const Color(0xFFf15f22)
                                                 : Colors.transparent,
                                           ),
                                         ),
@@ -650,7 +675,7 @@ class _home_screenState extends State<home_screen>
     Widget bodyContent;
     switch (currentTab) {
       case 0:
-        bodyContent = HomeScreen();
+        bodyContent = const HomeScreen();
         break;
       case 1:
         bodyContent = const TestProjectsScreen();
@@ -681,21 +706,21 @@ class _home_screenState extends State<home_screen>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Logout'),
-          content: Text('Are You Sure You Want to Logout?'),
+          title: const Text('Logout'),
+          content: const Text('Are You Sure You Want to Logout?'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
                 onConfirmLogout(); // Perform logout action
               },
-              child: Text('Logout'),
+              child: const Text('Logout'),
             ),
           ],
         );
@@ -711,7 +736,7 @@ class _home_screenState extends State<home_screen>
     //     context, MaterialPageRoute(builder: (context) => LoginPage()));
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
       (route) => false,
     );
   }
