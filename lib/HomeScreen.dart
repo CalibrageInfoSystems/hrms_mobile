@@ -263,103 +263,107 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                               const SizedBox(height: 20),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: customBtn(
-                                      onPressed: () {
-
-                                        //startTransactionSync(context);
-                                      },
-                                      child: const Row(
-                                        mainAxisAlignment: MainAxisAlignment
-                                            .center,
-                                        children: [
-                                          Icon(
-                                            Icons.add,
-                                            size: 18,
-                                            color: CommonStyles.whiteColor,
-                                          ),
-                                          SizedBox(width: 8),
-                                          Text(
-                                            'Get Sync Data',
-                                            style: CommonStyles.txStyF14CwFF5,
-                                          ),
-                                        ],
-                                      ),
-                                      backgroundColor: CommonStyles
-                                          .btnBlueBgColor,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Expanded(
-                                    child: customBtn(
-                                      onPressed: () {
-                                        // _showBottomSheet(
-                                        //     context); // Show bottom sheet on button press
-                                      },
-                                      child: const Row(
-                                        mainAxisAlignment: MainAxisAlignment
-                                            .center,
-                                        children: [
-                                          Icon(
-                                            Icons.view_list_rounded,
-                                            size: 18,
-                                            color: CommonStyles.whiteColor,
-                                          ),
-                                          SizedBox(width: 8),
-                                          Text(
-                                            'Mark AS',
-                                            style: CommonStyles.txStyF14CwFF5,
-                                          ),
-                                        ],
-                                      ),
-                                      //backgroundColor: CommonStyles.btnBlueBgColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-
-                              // SizedBox(
-                              //   width: double.infinity,
-                              //   child: customBtn(
-                              //     onPressed: isButtonEnabled
-                              //         ? () =>
-                              //         Navigator.push(
-                              //           context,
-                              //           MaterialPageRoute(
-                              //               builder: (context) => SyncScreen()),
-                              //         )
-                              //         : null,
-                              //     // Navigate if enabled
-                              //     backgroundColor: isButtonEnabled
-                              //         ? CommonStyles.btnRedBgColor
-                              //         : CommonStyles.hintTextColor,
-                              //     // Set background color based on enabled/disabled state
-                              //     child: Row(
-                              //       mainAxisAlignment: MainAxisAlignment.center,
-                              //       children: [
-                              //         Icon(
-                              //           Icons.sync,
-                              //           size: 18,
-                              //           color: isButtonEnabled ? CommonStyles
-                              //               .whiteColor : CommonStyles
-                              //               .disabledTextColor, // Adjust icon color when disabled
+                              // Row(
+                              //   children: [
+                              //     Expanded(
+                              //       child: customBtn(
+                              //         onPressed: () {
+                              //
+                              //           //startTransactionSync(context);
+                              //         },
+                              //         child: const Row(
+                              //           mainAxisAlignment: MainAxisAlignment
+                              //               .center,
+                              //           children: [
+                              //             Icon(
+                              //               Icons.add,
+                              //               size: 18,
+                              //               color: CommonStyles.whiteColor,
+                              //             ),
+                              //             SizedBox(width: 8),
+                              //             Text(
+                              //               'Get Sync Data',
+                              //               style: CommonStyles.txStyF14CwFF5,
+                              //             ),
+                              //           ],
                               //         ),
-                              //         SizedBox(width: 8),
-                              //         Text(
-                              //           'Sync Data',
-                              //           style: isButtonEnabled ? CommonStyles
-                              //               .txStyF14CwFF5 : CommonStyles
-                              //               .txStyF14CwFF5.copyWith(
-                              //               color: CommonStyles
-                              //                   .disabledTextColor), // Adjust text color when disabled
-                              //         ),
-                              //       ],
+                              //         backgroundColor: CommonStyles
+                              //             .btnBlueBgColor,
+                              //       ),
                               //     ),
-                              //   ),
+                              //     const SizedBox(width: 20),
+                              //     Expanded(
+                              //       child: customBtn(
+                              //         onPressed: () {
+                              //           // _showBottomSheet(
+                              //           //     context); // Show bottom sheet on button press
+                              //         },
+                              //         child: const Row(
+                              //           mainAxisAlignment: MainAxisAlignment
+                              //               .center,
+                              //           children: [
+                              //             Icon(
+                              //               Icons.view_list_rounded,
+                              //               size: 18,
+                              //               color: CommonStyles.whiteColor,
+                              //             ),
+                              //             SizedBox(width: 8),
+                              //             Text(
+                              //               'Mark AS',
+                              //               style: CommonStyles.txStyF14CwFF5,
+                              //             ),
+                              //           ],
+                              //         ),
+                              //         //backgroundColor: CommonStyles.btnBlueBgColor,
+                              //       ),
+                              //     ),
+                              //   ],
                               // ),
+                              // const SizedBox(height: 20),
+
+                              SizedBox(
+                                width: double.infinity,
+                                child: customBtn(
+                                    onPressed: () {
+                                      //
+                                      //           //startTransactionSync(context);
+                                              },
+                                  // onPressed: isButtonEnabled
+                                  //     ? () =>
+                                  //     Navigator.push(
+                                  //       context,
+                                  //       MaterialPageRoute(
+                                  //           builder: (context) => SyncScreen()),
+                                  //     )
+                                  //     : null,
+                                  // Navigate if enabled
+                                  backgroundColor: isButtonEnabled
+                                      ? CommonStyles.btnRedBgColor
+                                      : CommonStyles.hintTextColor,
+                                  // Set background color based on enabled/disabled state
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.sync,
+                                        size: 18,
+                                        color: isButtonEnabled ? CommonStyles
+                                            .whiteColor : CommonStyles
+                                            .disabledTextColor, // Adjust icon color when disabled
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Sync Data',
+                                        style: isButtonEnabled ? CommonStyles
+                                            .txStyF14CwFF5 : CommonStyles
+                                            .txStyF14CwFF5.copyWith(
+                                            color: CommonStyles
+                                                .disabledTextColor), // Adjust text color when disabled
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                               const SizedBox(height: 20),
                               // const Text(
                               //   'Today Client Visits',

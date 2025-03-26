@@ -4,9 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:hrms/Constants.dart';
 import 'package:hrms/SharedPreferencesHelper.dart';
 import 'package:hrms/home_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'database/HRMSDatabaseHelper.dart';
 import 'login_screen.dart';
@@ -23,15 +25,19 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _animation;
   late bool isLogin;
   late bool welcome;
+  bool isLocationEnabled = false;
+  bool _isRequestingPermission = false;
   HRMSDatabaseHelper? _hrmsDatabaseHelper;
   @override
   void initState() {
     super.initState();
-    _initializeApp();
+  //  _initializeApp();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ]);
+    checkLocationEnabled();
+    _requestPermissions();
 
     _animationController = AnimationController(
       vsync: this,
@@ -150,6 +156,102 @@ class _SplashScreenState extends State<SplashScreen>
       await _hrmsDatabaseHelper!.createDatabase();
     } catch (e) {
       print("Error initializing database: $e");
+    }
+  }
+
+  Future<void> checkLocationEnabled() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    setState(() {
+      isLocationEnabled = serviceEnabled;
+    });
+    if (!serviceEnabled) {
+      // If location services are disabled, prompt the user to enable them
+      await _promptUserToEnableLocation();
+    }
+  }
+
+  Future<void> _promptUserToEnableLocation() async {
+    bool locationEnabled = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Location Services Disabled"),
+          content:
+          const Text("Please enable location services to use this app."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text("Enable"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (locationEnabled) {
+      // Redirect the user to the device settings to enable location services
+      await Geolocator.openLocationSettings();
+    }
+  }
+  void _requestPermissions() async {
+    if (_isRequestingPermission) {
+      print("Permission request already in progress. Please wait.");
+      return; // Exit if a request is already in progress
+    }
+
+    _isRequestingPermission = true; // Set the flag to true
+
+    try {
+      // Request storage permission
+      Map<Permission, PermissionStatus> storageStatuses = await [
+        Permission.storage,
+        // Permission.manageExternalStorage,
+        Permission.camera
+      ].request();
+
+      var storagePermission = storageStatuses[Permission.storage];
+      // var manageExternalStoragePermission = storageStatuses[Permission.manageExternalStorage];
+
+      var status = await Permission.location.request();
+      if (status.isGranted) {
+        var backgroundStatus = await Permission.locationAlways.status;
+        if (backgroundStatus.isGranted) {
+          print('Background location permission is granted');
+        } else {
+          print('Requesting background location permission');
+          await Permission.locationAlways.request();
+        }
+      } else {
+        print('Requesting foreground location permission');
+        await Permission.location.request();
+      }
+
+      try {
+        _initializeApp();
+      } catch (e) {
+        print('Error while getting master data: ${e.toString()}');
+      }
+      /*  if (storagePermission!.isGranted || manageExternalStoragePermission!.isGranted) {
+        // Storage permissions granted, do something
+        try {
+          palm3FoilDatabase = await Palm3FoilDatabase.getInstance();
+          await palm3FoilDatabase!.createDatabase();
+        startMasterSync(); //todo
+        } catch (e) {
+          print('Error while getting master data: ${e.toString()}');
+        }
+      } else {
+        // Storage permissions not granted, handle accordingly
+        openAppSettings();
+      } */
+    } catch (e) {
+      print("Error during permission request: $e");
+    } finally {
+      _isRequestingPermission = false; // Reset the flag after request
     }
   }
 }
