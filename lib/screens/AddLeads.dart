@@ -2,32 +2,24 @@ import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:hrms/Database/HRMSDatabaseHelper.dart';
-import 'package:hrms/database/HRMSDatabaseHelper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hrms/database/DataAccessHandler.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-
 import '../Database/SyncService.dart';
-import '../HomeScreen.dart';
+import 'home/HomeScreen.dart';
 import '../common_widgets/common_styles.dart';
 import '../common_widgets/custom_textfield.dart';
+import '../database/DataAccessHandler.dart';
 import '../styles.dart';
-
-
 
 class AddLeads extends StatefulWidget {
   const AddLeads({super.key});
@@ -58,7 +50,6 @@ class _AddLeadScreenState extends State<AddLeads>
   String? Username;
   String? empCode;
 
-
   void _pickFile() async {
     if (_images.length + _files.length < 3) {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -69,7 +60,8 @@ class _AddLeadScreenState extends State<AddLeads>
 
       if (result != null) {
         int availableSlots = 3 - (_images.length + _files.length);
-        List<PlatformFile> selectedFiles = result.files.take(availableSlots).toList();
+        List<PlatformFile> selectedFiles =
+            result.files.take(availableSlots).toList();
 
         for (PlatformFile file in selectedFiles) {
           String? fileExtension = file.extension?.toLowerCase();
@@ -90,16 +82,17 @@ class _AddLeadScreenState extends State<AddLeads>
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('You can upload a maximum of 3 files and images combined.')));
+          content: Text(
+              'You can upload a maximum of 3 files and images combined.')));
     }
   }
-
 
   void _deleteFile(int index) {
     setState(() {
       _files.removeAt(index);
     });
   }
+
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -109,7 +102,9 @@ class _AddLeadScreenState extends State<AddLeads>
     if (!serviceEnabled) {
       CommonStyles.showCustomToastMessageLong(
         'Location Services (GPS) are Disabled. Please Turn On Your Location Services.',
-        context, 1, 2,
+        context,
+        1,
+        2,
       );
 
       // Do not return error, continue with null location
@@ -124,7 +119,9 @@ class _AddLeadScreenState extends State<AddLeads>
       if (permission == LocationPermission.denied) {
         CommonStyles.showCustomToastMessageLong(
           'Location permission is required to get current location.',
-          context, 1, 2,
+          context,
+          1,
+          2,
         );
         _currentPosition = null;
         return;
@@ -134,7 +131,9 @@ class _AddLeadScreenState extends State<AddLeads>
     if (permission == LocationPermission.deniedForever) {
       CommonStyles.showCustomToastMessageLong(
         'Location permission is permanently denied. Enable it from app settings.',
-        context, 1, 2,
+        context,
+        1,
+        2,
       );
       _currentPosition = null;
       return;
@@ -190,32 +189,29 @@ class _AddLeadScreenState extends State<AddLeads>
 
     getuserdata();
     _getCurrentLocation();
-
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-    appBar: AppBar(
-      elevation: 0,
-      backgroundColor: Color(0xFFf15f22),
-      title: Text(
-        'Add Client Visits',
-        style: TextStyle(color: Colors.white, fontFamily: 'Calibri'),
-      ),
-      centerTitle: true,
-      leading: IconButton(
-        icon: Icon(
-          Icons.arrow_back,
-          color: Colors.white,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Color(0xFFf15f22),
+        title: Text(
+          'Add Client Visits',
+          style: TextStyle(color: Colors.white, fontFamily: 'Calibri'),
         ),
-        onPressed: () {
-          Navigator.pop(context);
-
-        },
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
-    ),
       // AppBar(
       //   backgroundColor: Colors.lightBlue[50], // Background color
       //   elevation: 0, // Remove the shadow under the AppBar
@@ -326,7 +322,7 @@ class _AddLeadScreenState extends State<AddLeads>
                       controller: _phoneNumberController,
                       hintText: "Enter Phone Number",
                       readOnly: false,
-                    keyboardType: TextInputType.phone,
+                      keyboardType: TextInputType.phone,
                       maxLength: 10,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
@@ -353,13 +349,12 @@ class _AddLeadScreenState extends State<AddLeads>
                         if (value == null || value.isEmpty) {
                           return 'Please Enter Email';
                         } else if (!RegExp(
-                            r"^[a-zA-Z][a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*@[a-zA-Z0-9]+\.[a-zA-Z]+$")
+                                r"^[a-zA-Z][a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*@[a-zA-Z0-9]+\.[a-zA-Z]+$")
                             .hasMatch(value)) {
                           return 'Please enter a valid email address';
                         }
                         return null;
                       },
-
                     ),
                     const SizedBox(height: 10),
                     CustomTextField(
@@ -394,9 +389,9 @@ class _AddLeadScreenState extends State<AddLeads>
                                       alignment: Alignment.center,
                                       child: Column(
                                         mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                            MainAxisAlignment.center,
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                            CrossAxisAlignment.center,
                                         children: [
                                           SvgPicture.asset(
                                             "assets/add_a_photo.svg",
@@ -430,9 +425,9 @@ class _AddLeadScreenState extends State<AddLeads>
                                       alignment: Alignment.center,
                                       child: Column(
                                         mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                            MainAxisAlignment.center,
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                            CrossAxisAlignment.center,
                                         children: [
                                           SvgPicture.asset(
                                             "assets/fileuploadicon.svg",
@@ -517,9 +512,9 @@ class _AddLeadScreenState extends State<AddLeads>
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           border:
-                                          Border.all(color: Colors.blue),
+                                              Border.all(color: Colors.blue),
                                           borderRadius:
-                                          BorderRadius.circular(8),
+                                              BorderRadius.circular(8),
                                           color: Colors.grey[100],
                                         ),
                                         child: Row(
@@ -533,7 +528,7 @@ class _AddLeadScreenState extends State<AddLeads>
                                                 style: const TextStyle(
                                                     fontSize: 14,
                                                     overflow:
-                                                    TextOverflow.ellipsis),
+                                                        TextOverflow.ellipsis),
                                               ),
                                             ),
                                           ],
@@ -613,11 +608,12 @@ class _AddLeadScreenState extends State<AddLeads>
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       FocusScope.of(context).unfocus();
-  //  await _getCurrentLocation(); // Fetch location
+      //  await _getCurrentLocation(); // Fetch location
       showLoadingDialog(context);
       _validateTotalItems();
 
-      final dataAccessHandler = Provider.of<DataAccessHandler>(context, listen: false);
+      final dataAccessHandler =
+          Provider.of<DataAccessHandler>(context, listen: false);
 
       if (empCode == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -633,7 +629,8 @@ class _AddLeadScreenState extends State<AddLeads>
     FROM Leads WHERE DATE(CreatedDate) = '$currentDate'
     ''';
 
-      int? maxSerialNumber = await dataAccessHandler.getOnlyOneIntValueFromDb(maxNumQuery);
+      int? maxSerialNumber =
+          await dataAccessHandler.getOnlyOneIntValueFromDb(maxNumQuery);
       int serialNumber = (maxSerialNumber != null) ? maxSerialNumber + 1 : 1;
       String formattedSerialNumber = serialNumber.toString().padLeft(3, '0');
       String leadCode = 'L$empCode$formattedDate-$formattedSerialNumber';
@@ -665,7 +662,8 @@ class _AddLeadScreenState extends State<AddLeads>
           // ScaffoldMessenger.of(context).showSnackBar(
           //   const SnackBar(content: Text('Failed to insert lead data.')),
           // );
-          CommonStyles.showCustomToastMessageLong('Failed to Add Client Visit Data.', context, 1, 2);
+          CommonStyles.showCustomToastMessageLong(
+              'Failed to Add Client Visit Data.', context, 1, 2);
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -722,7 +720,8 @@ class _AddLeadScreenState extends State<AddLeads>
         bool isConnected = await CommonStyles.checkInternetConnectivity();
         if (isConnected) {
           final syncService = SyncService(dataAccessHandler);
-          syncService.performRefreshTransactionsSync(context, 3)
+          syncService
+              .performRefreshTransactionsSync(context, 3)
               .whenComplete(() {
             Navigator.push(
               context,
@@ -730,7 +729,8 @@ class _AddLeadScreenState extends State<AddLeads>
             );
           });
         } else {
-          CommonStyles.showCustomToastMessageLong('Client Visit added successfully.', context, 0, 2);
+          CommonStyles.showCustomToastMessageLong(
+              'Client Visit added successfully.', context, 0, 2);
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -800,7 +800,7 @@ class _AddLeadScreenState extends State<AddLeads>
         // Specify folder path with 'documents' inside 'SmartGeoTrack'
         const String folderName = 'SmartGeoTrack/documents';
         // Directory appDocDir =  Directory(Constants.originPath);;
-        Directory appDocDir =  await getApplicationDocumentsDirectory();
+        Directory appDocDir = await getApplicationDocumentsDirectory();
         // Check if the directory exists, if not, create it
         if (!await appDocDir.exists()) {
           await appDocDir.create(recursive: true);
@@ -817,7 +817,8 @@ class _AddLeadScreenState extends State<AddLeads>
 
         setState(() {
           _images.add(imageData); // Add image data to the list
-          _imagepath.add(XFile(savedImage.path)); // Update image path to persistent location
+          _imagepath.add(XFile(
+              savedImage.path)); // Update image path to persistent location
         });
 
         print('Image saved to: $appDocPath/$fileName');
@@ -855,7 +856,7 @@ class _AddLeadScreenState extends State<AddLeads>
     if (_images.length + _files.length > 3) {
       setState(() {
         _errorMessage =
-        'You can upload a maximum of 3 images and files combined.';
+            'You can upload a maximum of 3 images and files combined.';
       });
     } else {
       setState(() {
@@ -866,10 +867,10 @@ class _AddLeadScreenState extends State<AddLeads>
 
   Future<void> getuserdata() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    userID= 101;
+    userID = 101;
     Username = "Roja";
     empCode = "CIS100095";
-     //TODO
+    //TODO
     // userID = prefs.getInt('userID');
     // Username = prefs.getString('username') ?? '';
     // empCode = prefs.getString('empCode') ?? '';
@@ -886,6 +887,7 @@ class _AddLeadScreenState extends State<AddLeads>
     final String year = (now.year % 100).toString().padLeft(2, '0');
     return '$day$month$year';
   }
+
   String getCurrentDateInDDMMYYHHMMSS() {
     final DateTime now = DateTime.now();
 
@@ -901,7 +903,8 @@ class _AddLeadScreenState extends State<AddLeads>
   }
 
   Future<String?> fetchEmpCode(String username, BuildContext context) async {
-    final dataAccessHandler = Provider.of<DataAccessHandler>(context, listen: false);
+    final dataAccessHandler =
+        Provider.of<DataAccessHandler>(context, listen: false);
 
     // Use parameterized query to avoid SQL injection
     String empCodeQuery = 'SELECT EmpCode FROM UserInfos WHERE UserName = ?';
@@ -920,12 +923,12 @@ class _AddLeadScreenState extends State<AddLeads>
     return empCode; // Optionally return the EmpCode
   }
 
-
   Future<String> _moveFileToCustomDirectory(PlatformFile file) async {
     try {
-      const String folderName = 'SmartGeoTrack/documents'; // Add 'documents' folder
+      const String folderName =
+          'SmartGeoTrack/documents'; // Add 'documents' folder
       // Directory appDocDir =  Directory(Constants.originPath);;
-      Directory appDocDir =   await getApplicationDocumentsDirectory();
+      Directory appDocDir = await getApplicationDocumentsDirectory();
       print('appDocDir: $appDocDir');
       // Check if the directory exists, if not, create it
       if (!await appDocDir.exists()) {

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Database/HRMSDatabaseHelper.dart';
-import 'package:hrms/ui_screens/view_leads_info.dart';
+import 'package:hrms/screens/view_leads_info.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -18,8 +18,6 @@ import '../Model Class/LeadsModel.dart';
 import '../common_widgets/common_styles.dart';
 import '../common_widgets/custom_lead_template.dart';
 import '../common_widgets/custom_textfield.dart';
-
-
 
 class ViewLeads extends StatefulWidget {
   const ViewLeads({super.key});
@@ -87,15 +85,18 @@ class _ViewLeadsState extends State<ViewLeads> {
             filterAndSearch(),
             Expanded(
               child: FutureBuilder(
-                future: futureLeads,
+                  future: futureLeads,
                   builder: (context, snapshot) {
                     // Check if there's an error
                     if (snapshot.hasError) {
                       return Text(
-                        snapshot.error.toString().replaceFirst('Exception: ', ''),
+                        snapshot.error
+                            .toString()
+                            .replaceFirst('Exception: ', ''),
                         style: CommonStyles.txStyF16CpFF5,
                       );
-                    } else if (snapshot.connectionState == ConnectionState.done) {
+                    } else if (snapshot.connectionState ==
+                        ConnectionState.done) {
                       // When the future is completed
                       final leads = snapshot.data as List<LeadsModel>;
 
@@ -120,13 +121,15 @@ class _ViewLeadsState extends State<ViewLeads> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ViewLeadsInfo(code: lead.code!),
+                                    builder: (context) =>
+                                        ViewLeadsInfo(code: lead.code!),
                                   ),
                                 );
                               },
                             );
                           },
-                          separatorBuilder: (context, index) => const SizedBox(height: 0),
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 0),
                         );
                       }
                     }
@@ -135,49 +138,49 @@ class _ViewLeadsState extends State<ViewLeads> {
                     return Container(); // or return SizedBox.shrink();
                   }
 
-                //   builder: (context, snapshot) {
-                //   if (snapshot.connectionState == ConnectionState.waiting) {
-                //     return loading;
-                //   } else if (snapshot.hasError) {
-                //     return Text(
-                //         snapshot.error
-                //             .toString()
-                //             .replaceFirst('Exception: ', ''),
-                //         style: CommonStyles.txStyF16CpFF5);
-                //   } else {
-                //     final leads = snapshot.data as List<LeadsModel>;
-                //
-                //     if (leads.isEmpty) {
-                //       return const Center(
-                //         child: Text('No Client Visits Found',
-                //             style: CommonStyles.txStyF16CpFF5),
-                //       );
-                //     } else {
-                //       return ListView.separated(
-                //         itemCount: leads.length,
-                //         itemBuilder: (context, index) {
-                //           final lead = leads[index];
-                //
-                //           return CustomLeadTemplate(
-                //               index: index,
-                //               lead: lead,
-                //               onTap: () {
-                //                 Navigator.push(
-                //                   context,
-                //                   MaterialPageRoute(
-                //                     builder: (context) =>
-                //                         ViewLeadsInfo(code: lead.code!),
-                //                   ),
-                //                 );
-                //               });
-                //         },
-                //         separatorBuilder: (context, index) =>
-                //             const SizedBox(height: 0),
-                //       );
-                //     }
-                //   }
-                // },
-              ),
+                  //   builder: (context, snapshot) {
+                  //   if (snapshot.connectionState == ConnectionState.waiting) {
+                  //     return loading;
+                  //   } else if (snapshot.hasError) {
+                  //     return Text(
+                  //         snapshot.error
+                  //             .toString()
+                  //             .replaceFirst('Exception: ', ''),
+                  //         style: CommonStyles.txStyF16CpFF5);
+                  //   } else {
+                  //     final leads = snapshot.data as List<LeadsModel>;
+                  //
+                  //     if (leads.isEmpty) {
+                  //       return const Center(
+                  //         child: Text('No Client Visits Found',
+                  //             style: CommonStyles.txStyF16CpFF5),
+                  //       );
+                  //     } else {
+                  //       return ListView.separated(
+                  //         itemCount: leads.length,
+                  //         itemBuilder: (context, index) {
+                  //           final lead = leads[index];
+                  //
+                  //           return CustomLeadTemplate(
+                  //               index: index,
+                  //               lead: lead,
+                  //               onTap: () {
+                  //                 Navigator.push(
+                  //                   context,
+                  //                   MaterialPageRoute(
+                  //                     builder: (context) =>
+                  //                         ViewLeadsInfo(code: lead.code!),
+                  //                   ),
+                  //                 );
+                  //               });
+                  //         },
+                  //         separatorBuilder: (context, index) =>
+                  //             const SizedBox(height: 0),
+                  //       );
+                  //     }
+                  //   }
+                  // },
+                  ),
             ),
           ],
         ));
@@ -333,7 +336,7 @@ class _ViewLeadsState extends State<ViewLeads> {
     );
   }
 
- // Timer? _debounce;
+  // Timer? _debounce;
   // @override
   // void dispose() {
   //   _debounce?.cancel();
@@ -347,8 +350,8 @@ class _ViewLeadsState extends State<ViewLeads> {
       filterLeadsBasedOnCompanyNameAndEmail(input);
     });
   }
-  void filterLeadsBasedOnCompanyNameAndEmail(String input) {
 
+  void filterLeadsBasedOnCompanyNameAndEmail(String input) {
     setState(() {
       futureLeads = Future.value(copyLeads
           .where((item) =>

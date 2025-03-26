@@ -5,8 +5,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hrms/common_widgets/common_styles.dart';
 import 'package:hrms/personal_details.dart';
-import 'package:hrms/ui_screens/AddLeads.dart';
-import 'package:hrms/ui_screens/ViewLeads.dart';
+import 'package:hrms/screens/AddLeads.dart';
+import 'package:hrms/screens/ViewLeads.dart';
 import 'package:intl/intl.dart';
 
 class TestHrms extends StatefulWidget {
