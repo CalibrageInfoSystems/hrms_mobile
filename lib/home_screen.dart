@@ -12,14 +12,14 @@ import 'package:hrms/personal_details.dart';
 import 'package:hrms/projects_screen.dart';
 import 'package:hrms/test_apply_leave.dart';
 import 'package:hrms/test_projects.dart';
-import 'package:hrms/ui_screens/test_hrms.dart';
+import 'package:hrms/screens/test_hrms.dart';
 import 'package:ntp/ntp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Constants.dart';
 
 import 'Holiday_screen.dart';
-import 'HomeScreen.dart';
+import 'screens/home/HomeScreen.dart';
 import 'Myleaveslist.dart';
 import 'Resginaton_request.dart';
 import 'feedback_Screen.dart';

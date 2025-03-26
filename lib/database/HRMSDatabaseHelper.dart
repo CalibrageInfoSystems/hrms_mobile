@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hrms/screens/home/HomeScreen.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../HomeScreen.dart';
 import '../Model Class/FileRepositoryModel.dart';
 import '../Model Class/GeoBoundariesModel.dart';
 import '../Model Class/LeadsModel.dart';
@@ -94,8 +94,8 @@ class HRMSDatabaseHelper {
     print("Database written successfully.");
   }
 
-  Future<void> insertData(String tableName,
-      List<Map<String, dynamic>> dataList) async {
+  Future<void> insertData(
+      String tableName, List<Map<String, dynamic>> dataList) async {
     final db = await database;
     print("Inserting data into table: $tableName");
 
@@ -127,8 +127,8 @@ class HRMSDatabaseHelper {
     }
   }
 
-  Future<void> deleteRow(String tableName, String columnName,
-      String value) async {
+  Future<void> deleteRow(
+      String tableName, String columnName, String value) async {
     final db = await database;
     print("Deleting from table: $tableName");
     print("Condition: $columnName = $value");
@@ -147,8 +147,8 @@ class HRMSDatabaseHelper {
     print("Fetching list of tables...");
 
     try {
-      List<Map<String, dynamic>> tables = await db.rawQuery(
-          "SELECT name FROM sqlite_master WHERE type='table'");
+      List<Map<String, dynamic>> tables = await db
+          .rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
       print("Tables in database:");
       for (var table in tables) {
         print(" - ${table['name']}");
@@ -200,18 +200,22 @@ class HRMSDatabaseHelper {
           textColor: Colors.white,
           fontSize: 16.0);
       print('Failed to insert location values: $e');
-      appendLog( 'Failed to insert location values: ${e.toString()}');
+      appendLog('Failed to insert location values: ${e.toString()}');
     }
   }
+
   Future<void> insertOrUpdateData(
       String tableName, List<Map<String, dynamic>> data, String idField) async {
     final db = await database;
     await db.transaction((txn) async {
       for (var item in data) {
         print('Processing item: ${item.toString()}');
-        print('Processing item serverUpdatedStatus: ${item['serverUpdatedStatus']}');
+        print(
+            'Processing item serverUpdatedStatus: ${item['serverUpdatedStatus']}');
         // Check if serverUpdatedStatus is 0, then update it to 1
-        if (item.containsKey('serverUpdatedStatus') && item['serverUpdatedStatus'] == 0 &&  item['serverUpdatedStatus'] == 'false') {
+        if (item.containsKey('serverUpdatedStatus') &&
+            item['serverUpdatedStatus'] == 0 &&
+            item['serverUpdatedStatus'] == 'false') {
           item['serverUpdatedStatus'] = 1;
         }
 
@@ -221,7 +225,8 @@ class HRMSDatabaseHelper {
           where: '$idField = ?',
           whereArgs: [item[idField]],
         );
-        print('Updated existing record in $tableName with $idField = ${item[idField]}');
+        print(
+            'Updated existing record in $tableName with $idField = ${item[idField]}');
         if (existingRecord.isNotEmpty) {
           // If the record exists, update it
           await txn.update(
@@ -230,16 +235,17 @@ class HRMSDatabaseHelper {
             where: '$idField = ?',
             whereArgs: [item[idField]],
           );
-          print('Updated existing record in $tableName with $idField = ${item[idField]}');
+          print(
+              'Updated existing record in $tableName with $idField = ${item[idField]}');
         } else {
           // If the record does not exist, insert it
           await txn.insert(tableName, item);
-          print('Inserted new record into $tableName with $idField = ${item[idField]}');
+          print(
+              'Inserted new record into $tableName with $idField = ${item[idField]}');
         }
       }
     });
   }
-
 
   Future<void> insertOrUpdateweekxrefData(
       String tableName, List<Map<String, dynamic>> data, String idField) async {
@@ -283,8 +289,6 @@ class HRMSDatabaseHelper {
     });
   }
 
-
-
   Future<int> insertLead(Map<String, dynamic> leadData) async {
     final db = await database;
     // Validate lead data before insertion
@@ -292,20 +296,19 @@ class HRMSDatabaseHelper {
     //   throw Exception("Invalid lead data");
     // }
 
-      try {
-        return await db.insert(
-          'Leads',
-          leadData,
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      } catch (e) {
-        // Log or handle the error as needed
-        print("Insert failed: $e");
-        return -1; // Return an error code or handle it differently
-      }
+    try {
+      return await db.insert(
+        'Leads',
+        leadData,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (e) {
+      // Log or handle the error as needed
+      print("Insert failed: $e");
+      return -1; // Return an error code or handle it differently
+    }
     // Fallback value in case of unexpected null.
   }
-
 
   Future<int> insertFileRepository(Map<String, dynamic> fileData) async {
     final db = await database;
@@ -316,11 +319,13 @@ class HRMSDatabaseHelper {
     );
   }
 
-  Future<int?> getOnlyOneIntValueFromDb(String query, ) async {
+  Future<int?> getOnlyOneIntValueFromDb(
+    String query,
+  ) async {
     debugPrint("@@@ query $query");
     try {
       List<Map<String, dynamic>> result =
-      await (await database).rawQuery(query);
+          await (await database).rawQuery(query);
       if (result.isNotEmpty) {
         return result.first.values.first as int;
       }
@@ -357,8 +362,6 @@ class HRMSDatabaseHelper {
     return genericData; // Return updated list
   }
 
-
-
   Future<String?> getOnlyOneStringValueFromDb(
       String query, List<dynamic> params) async {
     List<Map<String, dynamic>> result;
@@ -381,9 +384,10 @@ class HRMSDatabaseHelper {
     final db = await database;
     String query = 'SELECT * FROM Leads WHERE CreatedByUserId = ?';
     List<Map<String, dynamic>> results =
-    await db.rawQuery(query, [createdByUserId]);
+        await db.rawQuery(query, [createdByUserId]);
     return results;
   }
+
   Future<List<Map<String, dynamic>>> getTodayLeadsuser(
       String today, int? userID) async {
     final db = await database;
@@ -391,7 +395,8 @@ class HRMSDatabaseHelper {
         'SELECT * FROM Leads WHERE DATE(CreatedDate) = ? AND CreatedByUserId = ?';
     print('Executing Query: $query with parameters: $today, $userID');
 
-    List<Map<String, dynamic>> results = await db.rawQuery(query, [today, userID]);
+    List<Map<String, dynamic>> results =
+        await db.rawQuery(query, [today, userID]);
 
     print('Query Results:');
     for (var row in results) {
@@ -400,8 +405,6 @@ class HRMSDatabaseHelper {
 
     return results;
   }
-
-
 
   Future<List<Map<String, dynamic>>> getTodayLeads(String today) async {
     final db = await database;
@@ -450,7 +453,6 @@ class HRMSDatabaseHelper {
     }
   }
 
-
   Future<List<Map<String, dynamic>>> getLeadDocsByCode(
       String leadsCode, List<String> fileExtensions) async {
     try {
@@ -482,7 +484,7 @@ class HRMSDatabaseHelper {
 
     if (result.isNotEmpty) {
       return result.first['FileName']
-      as String; // Assuming FileName contains Base64
+          as String; // Assuming FileName contains Base64
     }
     return null; // Return null if no image found
   }
@@ -502,7 +504,8 @@ class HRMSDatabaseHelper {
 
   Future<List<Map<String, dynamic>>> getDataFromQuery(String query) async {
     final db = await database;
-    return await db.rawQuery(query); // Execute the raw query and return the result
+    return await db
+        .rawQuery(query); // Execute the raw query and return the result
   }
 
   Future<List<Map<String, double>>> fetchLatLongsFromDatabase(
@@ -549,8 +552,12 @@ class HRMSDatabaseHelper {
 
     // Convert result to List<Map<String, double>>
     List<Map<String, double>> latLongList = queryResult.map((row) {
-      double lat = row['Latitude'] is double ? row['Latitude'] : (row['Latitude'] as num).toDouble();
-      double lng = row['Longitude'] is double ? row['Longitude'] : (row['Longitude'] as num).toDouble();
+      double lat = row['Latitude'] is double
+          ? row['Latitude']
+          : (row['Latitude'] as num).toDouble();
+      double lng = row['Longitude'] is double
+          ? row['Longitude']
+          : (row['Longitude'] as num).toDouble();
 
       print('Processed lat/lng: $lat, $lng');
       return {'lat': lat, 'lng': lng};
@@ -559,7 +566,6 @@ class HRMSDatabaseHelper {
     print('Final lat/long list: $latLongList');
     return latLongList;
   }
-
 
 // Method to check if GeoBoundary has a point for the current date
   Future<bool> hasPointForToday() async {
@@ -571,15 +577,16 @@ class HRMSDatabaseHelper {
 
     // Print the query and the parameter (formattedDate)
     print("Executing query: $query with parameter: $currentDate");
-    appendLog("Executing query hasPointForToday: $query with parameter: $currentDate ");
+    appendLog(
+        "Executing query hasPointForToday: $query with parameter: $currentDate ");
 
     // Query the GeoBoundary table for points on the current date
-    final List<Map<String, dynamic>> result = await db.rawQuery(query, [currentDate]);
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery(query, [currentDate]);
 
     // If the result is not empty, a point exists for today
     return result.isNotEmpty;
   }
-
 
   Future<bool> checkIfExcludedDate() async {
     // Get a reference to the database
@@ -588,14 +595,17 @@ class HRMSDatabaseHelper {
     String currentDate = getCurrentDate();
 
     // SQL query to check if the current date is a holiday and is active
-    String query = 'SELECT * FROM HolidayConfiguration WHERE DATE(Date) = ? AND IsActive = 1';
+    String query =
+        'SELECT * FROM HolidayConfiguration WHERE DATE(Date) = ? AND IsActive = 1';
 
     // Print the query and the parameter (currentDate)
     print("Executing query: $query with parameter: $currentDate");
-    appendLog("Executing query _checkIfExcludedDate: $query with parameter: $currentDate");
+    appendLog(
+        "Executing query _checkIfExcludedDate: $query with parameter: $currentDate");
 
     // Query the HolidayConfiguration table for the current date
-    final List<Map<String, dynamic>> result = await db.rawQuery(query, [currentDate]);
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery(query, [currentDate]);
 
     // If the result is not empty, the current date is a holiday (excluded)
     return result.isNotEmpty;
@@ -607,8 +617,11 @@ class HRMSDatabaseHelper {
     // Assuming userID is retrieved from SharedPreferences or passed as an argument
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? userID = prefs.getInt('userID');
-    final List<Map<String, dynamic>> result = await db.rawQuery('SELECT TrackFromTime FROM UserInfos WHERE id = ?', [userID]);
-    return result.isNotEmpty ? result.first['TrackFromTime'] : '09:00';  // Default to '09:00' if no result
+    final List<Map<String, dynamic>> result = await db
+        .rawQuery('SELECT TrackFromTime FROM UserInfos WHERE id = ?', [userID]);
+    return result.isNotEmpty
+        ? result.first['TrackFromTime']
+        : '09:00'; // Default to '09:00' if no result
   }
 
 // Fetch the ShiftToTime from the UserInfos table
@@ -616,30 +629,41 @@ class HRMSDatabaseHelper {
     final db = await database;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? userID = prefs.getInt('userID');
-    final List<Map<String, dynamic>> result = await db.rawQuery('SELECT TrackToTime FROM UserInfos WHERE id = ?', [userID]);
-    return result.isNotEmpty ? result.first['TrackToTime'] : '19:00';  // Default to '19:00' if no result
+    final List<Map<String, dynamic>> result = await db
+        .rawQuery('SELECT TrackToTime FROM UserInfos WHERE id = ?', [userID]);
+    return result.isNotEmpty
+        ? result.first['TrackToTime']
+        : '19:00'; // Default to '19:00' if no result
   }
+
   Future<String> getweekoffs() async {
     final db = await database;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? userID = prefs.getInt('userID');
-    final List<Map<String, dynamic>> result = await db.rawQuery('SELECT weekOffs FROM UserInfos WHERE id = ?', [userID]);
-    return result.isNotEmpty ? result.first['weekOffs'] : 'sunday';  // Default to 'sunday' if no result
+    final List<Map<String, dynamic>> result = await db
+        .rawQuery('SELECT weekOffs FROM UserInfos WHERE id = ?', [userID]);
+    return result.isNotEmpty
+        ? result.first['weekOffs']
+        : 'sunday'; // Default to 'sunday' if no result
   }
+
   Future<bool> hasleaveday(String weekOffDate) async {
     // Get a reference to the database
     final db = await database;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? userID = prefs.getInt('userID');
     // SQL query with additional conditions for IsActive and UserId
-    String query = "SELECT * FROM UserWeekOffXref WHERE DATE(Date) = ? AND IsActive = 1 AND UserId = ?";
+    String query =
+        "SELECT * FROM UserWeekOffXref WHERE DATE(Date) = ? AND IsActive = 1 AND UserId = ?";
 
     // Print the query and parameters
     print("Executing query: $query with parameters: $weekOffDate, $userID");
-    appendLog("Executing query hasleaveday: $query with parameters: $weekOffDate, $userID");
+    appendLog(
+        "Executing query hasleaveday: $query with parameters: $weekOffDate, $userID");
 
     // Query the UserWeekOffXref table for the given weekOffDate, IsActive, and UserId
-    final List<Map<String, dynamic>> result = await db.rawQuery(query, [weekOffDate, userID]);
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery(query, [weekOffDate, userID]);
 
     // If the result is not empty, a leave exists for that date
     return result.isNotEmpty;
@@ -652,18 +676,22 @@ class HRMSDatabaseHelper {
     int? userID = prefs.getInt('userID');
     String currentDate = getCurrentDate();
     // SQL query with additional conditions for IsActive and UserId
-    String query = "SELECT * FROM UserWeekOffXref WHERE DATE(Date) = ? AND IsActive = 1 AND UserId = ?";
+    String query =
+        "SELECT * FROM UserWeekOffXref WHERE DATE(Date) = ? AND IsActive = 1 AND UserId = ?";
 
     // Print the query and parameters
     print("Executing query: $query with parameters: $currentDate, $userID");
-    appendLog("Executing query hasleaveForToday: $query with parameters: $currentDate, $userID");
+    appendLog(
+        "Executing query hasleaveForToday: $query with parameters: $currentDate, $userID");
 
     // Query the GeoBoundaries table for points on the current date, IsActive, and UserId
-    final List<Map<String, dynamic>> result = await db.rawQuery(query, [currentDate, userID]);
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery(query, [currentDate, userID]);
 
     // If the result is not empty, a point exists for today
     return result.isNotEmpty;
   }
+
   Future<List<GeoBoundariesModel>> getGeoBoundariesDetails() async {
     final db = await database;
     final List<Map<String, dynamic>> result = await db.query(

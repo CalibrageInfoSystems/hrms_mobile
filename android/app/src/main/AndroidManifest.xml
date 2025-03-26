@@ -78,6 +78,18 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
+
+
+            <service
+                android:name="com.google.android.gms.location.FusedLocationProviderService"
+                android:permission="android.permission.BIND_JOB_SERVICE"
+                android:foregroundServiceType="location"/>
+
+                
+            <meta-data
+                android:name="com.google.android.geo.API_KEY"
+                android:value="AIzaSyDM_EX7DuCaR11slflB7dLbyaARP9z11KY" />
+
         <service
             android:name=".BackgroundService"
             android:enabled="true"

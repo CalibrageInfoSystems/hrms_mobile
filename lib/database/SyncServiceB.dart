@@ -1,11 +1,10 @@
-
 import 'dart:convert';
 
 import 'package:geocoding/geocoding.dart';
 import 'package:hrms/database/DataAccessHandler.dart';
+import 'package:hrms/screens/home/HomeScreen.dart';
 
 import 'package:http/http.dart' as http;
-import '../HomeScreen.dart';
 import '../Model Class/GeoBoundariesModel.dart';
 import '../api config.dart';
 
@@ -35,8 +34,8 @@ class SyncServiceB {
 
   Future<void> getRefreshSyncTransDataMap() async {
     // Fetch geoBoundaries data
-    List<GeoBoundariesModel> geoBoundariesList = await _fetchData(
-        dbHelper.getGeoBoundariesDetails, 'GeoBoundaries');
+    List<GeoBoundariesModel> geoBoundariesList =
+        await _fetchData(dbHelper.getGeoBoundariesDetails, 'GeoBoundaries');
 
     // If data is available, process and update the map
     if (geoBoundariesList.isNotEmpty) {
@@ -53,7 +52,8 @@ class SyncServiceB {
           updatedGeoBoundariesList.map((model) => model.toMap()).toList();
       print(
           'Updated geoBoundariesTable map: ${refreshTransactionsDataMap[geoBoundariesTable]}');
-      appendLog('Updated geoBoundariesTable map: ${refreshTransactionsDataMap[geoBoundariesTable]}');
+      appendLog(
+          'Updated geoBoundariesTable map: ${refreshTransactionsDataMap[geoBoundariesTable]}');
     }
 
     // Check if the map is still empty
@@ -94,9 +94,13 @@ class SyncServiceB {
           headers: {"Content-Type": "application/json"},
           body: data,
         );
-        print('Syncing table data for $tableName: ${jsonEncode({tableName: tableData})}');
+        print('Syncing table data for $tableName: ${jsonEncode({
+              tableName: tableData
+            })}');
         print('statusCode: ${response.statusCode}');
-        appendLog('Syncing table data for $tableName: ${jsonEncode({tableName: tableData})}');
+        appendLog('Syncing table data for $tableName: ${jsonEncode({
+              tableName: tableData
+            })}');
         appendLog('statusCode: ${response.statusCode}');
         // If sync is successful, update the sync status in the local database
         if (response.statusCode == 200) {
@@ -106,10 +110,10 @@ class SyncServiceB {
             await _updateServerUpdatedStatus(tableName);
             print("Sync is successful!");
             appendLog('Sync is successful!');
-          }
-          else {
+          } else {
             // If isSuccess is false, handle the error
-            String errorMessage = responseBody['endUserMessage'] ?? "Sync failed with no error message";
+            String errorMessage = responseBody['endUserMessage'] ??
+                "Sync failed with no error message";
             print("Sync failed for $tableName: $errorMessage");
             appendLog('Sync failed for $tableName: $errorMessage');
             //_showSnackBar(context, "Sync failed for $tableName: $errorMessage");
@@ -141,7 +145,7 @@ class SyncServiceB {
       double latitude, double longitude) async {
     try {
       List<Placemark> placemarks =
-      await placemarkFromCoordinates(latitude, longitude);
+          await placemarkFromCoordinates(latitude, longitude);
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
         return "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
