@@ -1,4 +1,4 @@
-import 'dart:math';
+     import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Constants.dart';
 
 import 'Holiday_screen.dart';
+import 'HomeScreen.dart';
 import 'Myleaveslist.dart';
 import 'Resginaton_request.dart';
 import 'feedback_Screen.dart';
@@ -199,7 +200,29 @@ class _home_screenState extends State<home_screen>
                         height: 100, // Adjust the height as needed
                       ),
                     ),
-
+                    ListTile(
+                      leading: SvgPicture.asset(
+                        'assets/atten.svg',
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        'My Profile',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'hind_semibold',
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => personal_details()),
+                        );
+                      },
+                    ),
                     ListTile(
                       leading: SvgPicture.asset(
                         'assets/atten.svg',
@@ -627,7 +650,7 @@ class _home_screenState extends State<home_screen>
     Widget bodyContent;
     switch (currentTab) {
       case 0:
-        bodyContent = personal_details();
+        bodyContent = HomeScreen();
         break;
       case 1:
         bodyContent = const TestProjectsScreen();

@@ -42,8 +42,8 @@ class _LoginScreenState extends State<LoginScreen> {
     // _userNameController.text = 'CIS00000';
     // _passwordController.text = 'Live@291024';
 
-    // _userNameController.text = 'CIS00054';
-    // _passwordController.text = 'Ranjith@469';
+    _userNameController.text = 'CIS00054';
+    _passwordController.text = 'Ranjith@469';
 
     // _userNameController.text = 'BakiHanm';
     // _passwordController.text = 'Test@123';

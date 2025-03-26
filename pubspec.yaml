@@ -58,6 +58,36 @@ dependencies:
   shared_preferences: ^2.2.2
   syncfusion_flutter_calendar: ^21.2.3
   timeago: ^3.3.0
+  sqflite: ^2.3.0  # Ensure you're using the latest version
+  # Background services
+  flutter_background_service: ^2.4.6
+  flutter_background_service_android: ^3.0.3
+  # State management (BLoC)
+  flutter_bloc: ^8.1.2
+
+
+  # Local notifications
+  flutter_local_notifications: ^17.2.3
+
+  # Toast notifications
+  fluttertoast: ^8.2.4
+
+  # Geolocation services
+  geolocator: ^10.1.0
+
+  # Background task scheduler
+  workmanager: ^0.5.1
+
+  # Prevent screen from sleeping
+  wakelock_plus: ^1.2.4
+
+  equatable: ^2.0.5
+  geocoding: ^3.0.0
+  android_intent_plus: ^5.1.0
+  dotted_border: ^2.1.0
+  file_picker: ^8.1.2
+  photo_view: ^0.15.0
+  url_launcher: ^6.3.0
 
 flutter_native_splash:
   # background color for the splash screen
@@ -129,6 +159,13 @@ flutter:
     - assets/cake.png
     - assets/cakedecoration.png
     - assets/holiday.png
+    - assets/ic_add.png
+    - assets/header_bg_image.jpg
+    - assets/bg_image1.jpg
+    - assets/bg_image2.jpg
+    - assets/add_a_photo.svg
+    - assets/fileuploadicon.svg
+    - assets/hrmsgeotrack.sqlite
 
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see

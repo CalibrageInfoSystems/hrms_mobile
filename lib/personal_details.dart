@@ -529,23 +529,35 @@ class _personal_screen_screenState extends State<personal_details> {
     if (ismatchedlogin) {
       Future.microtask(() => _showtimeoutdialog(context));
     }
-    return
-        // WillPopScope(
-        //   onWillPop: () async {
-        //     // Navigator.of(context).pushReplacement(
-        //     //   MaterialPageRoute(builder: (context) => home_screen()),
-        //     // );
-        //
-        //
-        //     // Handle back button press here
-        //     // You can add any custom logic before closing the app
-        //   return false; // Return true to allow back button press and close the app
-        //   },
-        //   child:
-        MaterialApp(
-      debugShowCheckedModeBanner: false,
-      scrollBehavior: ScrollBehavior(),
-      home: Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => home_screen()),
+        ); // Navigate to the previous screen
+        return true; // Prevent default back navigation behavior
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Color(0xFFf15f22),
+          title: Text(
+            'HRMS',
+            style: TextStyle(color: Colors.white),
+          ),
+          centerTitle: true,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => home_screen()),
+              );
+              // Implement your logic to navigate back
+            },
+          ),
+        ),
         body:
             // SingleChildScrollView(
             //   physics: NeverScrollableScrollPhysics(),

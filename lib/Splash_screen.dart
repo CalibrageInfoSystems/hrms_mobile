@@ -8,6 +8,7 @@ import 'package:hrms/Constants.dart';
 import 'package:hrms/SharedPreferencesHelper.dart';
 import 'package:hrms/home_screen.dart';
 
+import 'database/HRMSDatabaseHelper.dart';
 import 'login_screen.dart';
 import 'main.dart';
 
@@ -22,9 +23,11 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _animation;
   late bool isLogin;
   late bool welcome;
+  HRMSDatabaseHelper? _hrmsDatabaseHelper;
   @override
   void initState() {
     super.initState();
+    _initializeApp();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
@@ -139,5 +142,14 @@ class _SplashScreenState extends State<SplashScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _initializeApp() async {
+    try {
+      _hrmsDatabaseHelper = HRMSDatabaseHelper();
+      await _hrmsDatabaseHelper!.createDatabase();
+    } catch (e) {
+      print("Error initializing database: $e");
+    }
   }
 }
