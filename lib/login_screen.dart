@@ -18,13 +18,6 @@ import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-import 'package:image_picker/image_picker.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:path_provider/path_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,13 +35,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _commonError = false;
   String? _commonErrorMsg;
 
-  File? _imageFile;
-  String _latitude = "Fetching...";
-  String _longitude = "Fetching...";
-  String _address = "Fetching address...";
-  String _time = "";
-  String? _savedImagePath;
-
   @override
   void initState() {
     super.initState();
@@ -56,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // _userNameController.text = 'CIS00000';
     // _passwordController.text = 'Live@291024';
 
-    _userNameController.text = 'CIS00054'; // CIS00033
+    _userNameController.text = 'CIS00054';
     _passwordController.text = 'Ranjith@469';
 
     // _userNameController.text = 'BakiHanm';
@@ -125,168 +111,21 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> _getCurrentLocation() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          setState(() {
-            _address = "Location permission denied";
-            _time = "N/A";
-          });
-          return;
-        }
-      }
-      if (permission == LocationPermission.deniedForever) {
-        setState(() {
-          _address = "Location permanently denied.";
-          _time = "N/A";
-        });
-        return;
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
-
-      Placemark place = placemarks.first;
-      String currentTime =
-          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
-
-      setState(() {
-        _latitude = position.latitude.toString();
-        _longitude = position.longitude.toString();
-        _address =
-            "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
-        _time = currentTime;
-      });
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> _captureAndProcessImage() async {
-    try {
-      // Open camera and capture image
-      final ImagePicker picker = ImagePicker();
-      final XFile? pickedFile =
-          await picker.pickImage(source: ImageSource.camera);
-
-      if (pickedFile == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No image captured!")),
-        );
-        return;
-      }
-
-      // Get location and time
-      await _getCurrentLocation();
-
-      // Read captured image
-      final File imageFile = File(pickedFile.path);
-      final ui.Image capturedImage =
-          await decodeImageFromList(await imageFile.readAsBytes());
-
-      // Create canvas for editing image
-      ui.PictureRecorder recorder = ui.PictureRecorder();
-      Canvas canvas = Canvas(recorder);
-      canvas.drawImage(capturedImage, Offset.zero, Paint());
-
-      // Define text style
-      double textStyleHeight = capturedImage.height * 0.09;
-      TextStyle textStyle = TextStyle(
-        color: Colors.white,
-        fontSize: textStyleHeight * 0.16,
-        fontWeight: FontWeight.bold,
-        shadows: const [
-          Shadow(offset: Offset(2, 2), blurRadius: 4, color: Colors.black),
-        ],
-      );
-
-      // Prepare text content
-      String textContent =
-          "Time: $_time\nLocation: $_latitude, $_longitude\n$_address";
-
-      // Measure text height dynamically
-      TextPainter textPainter = TextPainter(
-        text: TextSpan(text: textContent, style: textStyle),
-        textDirection: ui.TextDirection.ltr,
-        textAlign: TextAlign.left,
-      );
-
-      textPainter.layout(maxWidth: capturedImage.width.toDouble() - 20);
-
-      double textBoxHeight = textPainter.height + 20;
-
-      // Draw text box (background rectangle)
-      Paint rectPaint = Paint()..color = Colors.black.withOpacity(0.7);
-      canvas.drawRect(
-        Rect.fromLTWH(0, capturedImage.height - textBoxHeight,
-            capturedImage.width.toDouble(), textBoxHeight),
-        rectPaint,
-      );
-
-      // Draw text on the canvas
-      textPainter.paint(
-          canvas, Offset(20, capturedImage.height - textBoxHeight + 10));
-
-      // Convert canvas to image
-      ui.Image finalImage = await recorder
-          .endRecording()
-          .toImage(capturedImage.width, capturedImage.height);
-      ByteData? byteData =
-          await finalImage.toByteData(format: ui.ImageByteFormat.png);
-      Uint8List pngBytes = byteData!.buffer.asUint8List();
-      // Save the processed image
-      final directory = await getApplicationDocumentsDirectory();
-      final filePath = '${directory.path}/hrms_user.png';
-      File file = File(filePath);
-      print('_captureAndProcessImage: ${file.path}');
-      await file.writeAsBytes(pngBytes);
-
-      /* ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Image saved successfully at: $filePath")),
-      ); */
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> _handleCaptureAndSignIn() async {
-    try {
-      if (validateForm()) {
-        await _captureAndProcessImage();
-        signIn();
-      }
-    } catch (e) {
-      setState(() {
-        isRequestProcessing = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
-    }
-  }
-
   //MARK: Sign in
   SizedBox signinBtn() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: isRequestProcessing ? null : _handleCaptureAndSignIn,
-        /* () async {
-              _captureAndProcessImage().then((value) => signIn());
-                /* if (validateForm()) {
-                  signIn();
-                } */
-              }, */
+        onPressed: isRequestProcessing
+            ? null
+            : () async {
+          if (validateForm()) {
+            signIn();
+          }
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor:
-              isRequestProcessing ? Colors.grey.shade400 : Styles.primaryColor,
+          isRequestProcessing ? Colors.grey.shade400 : Styles.primaryColor,
           elevation: isRequestProcessing ? 0 : 2,
           padding: const EdgeInsets.symmetric(vertical: 11),
           shape: RoundedRectangleBorder(
@@ -295,16 +134,16 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: isRequestProcessing
             ? const SizedBox(
-                width: 25,
-                height: 25,
-                child: CircularProgressIndicator(
-                  color: Styles.primaryColor,
-                ))
+            width: 25,
+            height: 25,
+            child: CircularProgressIndicator(
+              color: Styles.primaryColor,
+            ))
             : const Text(
-                'Sign in',
-                style: TextStyle(
-                    color: Colors.white, fontSize: 15, fontFamily: 'Calibri'),
-              ),
+          'Sign in',
+          style: TextStyle(
+              color: Colors.white, fontSize: 15, fontFamily: 'Calibri'),
+        ),
       ),
     );
   }
@@ -425,7 +264,8 @@ class _LoginScreenState extends State<LoginScreen> {
       final apiUrl = Uri.parse('$baseUrl$getlogin');
       final requestBody = jsonEncode(
           {"userName": username, "password": password, "rememberMe": true});
-
+      print('signIn: $apiUrl');
+      print('signIn: $requestBody');
       final jsonResponse = await http.post(
         apiUrl,
         body: requestBody,
@@ -510,15 +350,15 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
                 builder: (context) => ChangePasword(
-                      userid: userid,
-                      newpassword: '',
-                      confirmpassword: '',
-                    )),
+                  userid: userid,
+                  newpassword: '',
+                  confirmpassword: '',
+                )),
           );
         } else if (isfirstTime == 'False') {
           DateTime loginTime = DateTime.now();
           String formattedTime =
-              DateFormat('yyyy-MM-dd HH:mm:ss').format(loginTime);
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(loginTime);
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString(SharedKeys.loginTime, formattedTime);
           SharedPreferencesHelper.putBool(Constants.IS_LOGIN, true);

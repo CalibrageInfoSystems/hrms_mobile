@@ -17,6 +17,7 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final String? errorText;
+  final TextInputType? keyboardType; // New parameter
 
   const CustomTextField({
     super.key,
@@ -34,6 +35,7 @@ class CustomTextField extends StatelessWidget {
     this.obscureText = false,
     this.suffixIcon,
     this.errorText,
+    this.keyboardType,
   });
 
   @override
@@ -43,6 +45,7 @@ class CustomTextField extends StatelessWidget {
       readOnly: readOnly,
       maxLines: maxLines,
       obscureText: obscureText,
+      keyboardType: keyboardType, // Assign the keyboard type
 
       style: const TextStyle(
         fontSize: 15,

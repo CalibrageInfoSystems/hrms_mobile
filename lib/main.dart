@@ -32,12 +32,13 @@ void main() {
     callbackDispatcher, // The function that defines background tasks
     isInDebugMode: true, // Set to false for production
   );
-
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => DataAccessHandler(),
-      child: MyApp(),
-    ),
+      runApp(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => DataAccessHandler()),
+          ],
+          child: MyApp(),
+        ),
   );
 }
 

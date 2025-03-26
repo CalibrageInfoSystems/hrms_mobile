@@ -15,15 +15,17 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:hrms/database/DataAccessHandler.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../Database/DataAccessHandler.dart';
+
 import '../Database/SyncService.dart';
 import '../HomeScreen.dart';
 import '../common_widgets/common_styles.dart';
+import '../common_widgets/custom_textfield.dart';
+import '../styles.dart';
 
 
 
@@ -188,35 +190,56 @@ class _AddLeadScreenState extends State<AddLeads>
 
     getuserdata();
     _getCurrentLocation();
+
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.lightBlue[50], // Background color
-        elevation: 0, // Remove the shadow under the AppBar
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            // Navigate to the previous screen
-            Navigator.pop(context);
-          },
-        ),
-        title: const Row(
-          children: [
-            Text(
-              'Add Client Visits', // Add Leads beside the back arrow
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        centerTitle: false,
+    appBar: AppBar(
+      elevation: 0,
+      backgroundColor: Color(0xFFf15f22),
+      title: Text(
+        'Add Client Visits',
+        style: TextStyle(color: Colors.white, fontFamily: 'Calibri'),
       ),
+      centerTitle: true,
+      leading: IconButton(
+        icon: Icon(
+          Icons.arrow_back,
+          color: Colors.white,
+        ),
+        onPressed: () {
+          Navigator.pop(context);
+
+        },
+      ),
+    ),
+      // AppBar(
+      //   backgroundColor: Colors.lightBlue[50], // Background color
+      //   elevation: 0, // Remove the shadow under the AppBar
+      //   leading: IconButton(
+      //     icon: const Icon(Icons.arrow_back, color: Colors.black),
+      //     onPressed: () {
+      //       // Navigate to the previous screen
+      //       Navigator.pop(context);
+      //     },
+      //   ),
+      //   title: const Row(
+      //     children: [
+      //       Text(
+      //         'Add Client Visits', // Add Leads beside the back arrow
+      //         style: TextStyle(
+      //           color: Colors.black,
+      //           fontSize: 16,
+      //           fontWeight: FontWeight.bold,
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      //   centerTitle: false,
+      // ),
       body: Stack(
         children: [
           Padding(
@@ -227,16 +250,18 @@ class _AddLeadScreenState extends State<AddLeads>
                 child: Column(
                   children: [
                     const SizedBox(height: 10),
-                    TextFormField(
+                    CustomTextField(
+                      readOnly: false,
                       controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: "Name *",
-                        hintText: "Enter Name",
-                        counterText: "",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
+                      hintText: "Enter Name",
+                      // decoration: InputDecoration(
+                      //   labelText: "Name *",
+                      //   hintText: "Enter Name",
+                      //   counterText: "",
+                      //   border: OutlineInputBorder(
+                      //     borderRadius: BorderRadius.circular(10),
+                      //   ),
+                      // ),
                       maxLength: 30,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -261,6 +286,7 @@ class _AddLeadScreenState extends State<AddLeads>
                                 }
                               });
                             },
+                            activeColor: Styles.primaryColor,
                           ),
                           const Text("Is Company"),
                         ],
@@ -270,16 +296,18 @@ class _AddLeadScreenState extends State<AddLeads>
                       visible: _isCompany,
                       child: Column(
                         children: [
-                          TextFormField(
+                          CustomTextField(
                             controller: _companyNameController,
-                            decoration: InputDecoration(
-                              labelText: "Company Name *",
-                              hintText: "Enter Company Name",
-                              counterText: "",
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
+                            hintText: "Enter Company Name",
+                            readOnly: false,
+                            // decoration: InputDecoration(
+                            //   labelText: "Company Name *",
+                            //   hintText: "Enter Company Name",
+                            //   counterText: "",
+                            //   border: OutlineInputBorder(
+                            //     borderRadius: BorderRadius.circular(10),
+                            //   ),
+                            // ),
                             maxLength: 50,
                             validator: (value) {
                               if (_isCompany &&
@@ -294,17 +322,11 @@ class _AddLeadScreenState extends State<AddLeads>
                         ],
                       ),
                     ),
-                    TextFormField(
+                    CustomTextField(
                       controller: _phoneNumberController,
-                      decoration: InputDecoration(
-                        labelText: "Phone Number *",
-                        hintText: "Enter Phone Number",
-                        counterText: '',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      keyboardType: TextInputType.phone,
+                      hintText: "Enter Phone Number",
+                      readOnly: false,
+                    keyboardType: TextInputType.phone,
                       maxLength: 10,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
@@ -322,17 +344,10 @@ class _AddLeadScreenState extends State<AddLeads>
                       },
                     ),
                     const SizedBox(height: 10),
-                    TextFormField(
+                    CustomTextField(
                       controller: _emailController,
-
-                      decoration: InputDecoration(
-                        labelText: "Email *",
-                        hintText: "Enter Email",
-                        counterText: "",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
+                      hintText: "Enter Email",
+                      readOnly: false,
                       maxLength: 30,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -347,16 +362,10 @@ class _AddLeadScreenState extends State<AddLeads>
 
                     ),
                     const SizedBox(height: 10),
-                    TextFormField(
+                    CustomTextField(
                       controller: _commentsController,
-                      decoration: InputDecoration(
-                        labelText: "Comments",
-                        hintText: "Enter Comments",
-                        counterText: "",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
+                      hintText: "Enter Comments",
+                      readOnly: false,
                       maxLines: 4,
                       maxLength: 250,
                     ),
@@ -857,9 +866,13 @@ class _AddLeadScreenState extends State<AddLeads>
 
   Future<void> getuserdata() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    userID = prefs.getInt('userID');
-    Username = prefs.getString('username') ?? '';
-    empCode = prefs.getString('empCode') ?? '';
+    userID= 101;
+    Username = "Roja";
+    empCode = "CIS100095";
+     //TODO
+    // userID = prefs.getInt('userID');
+    // Username = prefs.getString('username') ?? '';
+    // empCode = prefs.getString('empCode') ?? '';
     // String firstName = prefs.getString('empCode') ?? '';
     String email = prefs.getString('email') ?? '';
     String mobileNumber = prefs.getString('mobileNumber') ?? '';
@@ -888,8 +901,7 @@ class _AddLeadScreenState extends State<AddLeads>
   }
 
   Future<String?> fetchEmpCode(String username, BuildContext context) async {
-    final dataAccessHandler =
-    Provider.of<DataAccessHandler>(context, listen: false);
+    final dataAccessHandler = Provider.of<DataAccessHandler>(context, listen: false);
 
     // Use parameterized query to avoid SQL injection
     String empCodeQuery = 'SELECT EmpCode FROM UserInfos WHERE UserName = ?';

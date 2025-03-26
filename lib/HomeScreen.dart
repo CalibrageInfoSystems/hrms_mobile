@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
-import 'package:connectivity/connectivity.dart';
+
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Database/HRMSDatabaseHelper.dart';
 
 import 'package:hrms/ui_screens/AddLeads.dart';
 import 'package:hrms/ui_screens/BatteryOptimization.dart';
 import 'package:hrms/ui_screens/ViewLeads.dart';
+import 'package:hrms/ui_screens/test_hrms.dart';
 import 'package:hrms/ui_screens/view_leads_info.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -19,6 +20,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -26,12 +28,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:workmanager/workmanager.dart';
 
+import 'Commonutils.dart';
 import 'Database/SyncServiceB.dart';
 
 import 'Model Class/LeadsModel.dart';
+import 'SharedPreferencesHelper.dart';
+import 'api config.dart';
 import 'common_widgets/common_styles.dart';
 import 'common_widgets/custom_lead_template.dart';
-
+import 'dart:ui' as ui;
 import 'location_service/logic/location_controller/location_controller_cubit.dart';
 import 'location_service/notification/notification.dart';
 import 'location_service/tools/background_service.dart';
@@ -80,17 +85,35 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController remarksController = TextEditingController();
   bool? isLeave;
   int? toastcount = 0; // Controller for remarks
-
+  String _currentDateTime = "";
+  String _currentLocation = "Fetching location...";
   TextEditingController dateController =
   TextEditingController(); // Controller for displaying date
   List<int> userActivityRights = [];
   List<String> menuItems = [];
   static const String PREVIOUS_SYNC_DATE = 'previous_sync_date';
   late Future<List<int>> futureSync;
+  String _latitude = "Fetching...";
+  String _longitude = "Fetching...";
+  String _address = "Fetching address...";
+  String _time = "";
+  String base64Image = '';
+  File? _imageFile;
+  String filename = '';
+  String fileExtension = '';
+  String employecode = '';
+  String? userid;
+  String? photoData;
+  String Gender = '';
+  String EmployeName = '';
+  String? employee_designation;
+  String empolyeid = '';
+  String accessToken = '';
 
   @override
   void initState() {
     super.initState();
+
     getuserdata();
     fetchLeadCounts();
     fetchpendingrecordscount();
@@ -98,7 +121,31 @@ class _HomeScreenState extends State<HomeScreen> {
     backgroundService.initializeService();
     checkLocationEnabled();
     startService();
-    futureSync = _loadUserActivityRights();
+    _getCurrentDateTime();
+    _getCurrentLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showShiftPopup(context, _currentDateTime, _currentLocation);
+    });
+
+    Commonutils.checkInternetConnectivity().then((isConnected) {
+      if (isConnected) {
+        print('The Internet Is Connected');
+        _loademployeresponse();
+        loademployeeimage();
+        // loadAccessToken();
+        // loadUserid();
+        // getLoginTime();
+        // getBloodlookupid();
+        //  _checkLoginTime();
+      } else {
+        print('The Internet Is not  Connected');
+        Commonutils.showCustomToastMessageLong(
+            'Please Check the Internet Connection',
+            context as BuildContext,
+            1,
+            4);
+      }
+    });
     // Refresh the screen after data loading is complete
     /*  Future.delayed(Duration.zero, () {
       setState(() {
@@ -144,11 +191,15 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Scaffold(
           backgroundColor: CommonStyles.whiteColor,
           body: Stack(
-            children: [
-              header(size),
-              Positioned.fill(
-                top: size.height / 3.5,
-                child: Container(
+              children: [
+                backgroundGredient(context),
+                Positioned.fill(
+                    child:
+                    Column(
+                      children: [
+                        headerSection(context),
+                        const SizedBox(height: 10),
+                        Expanded(child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: SingleChildScrollView(
                     child: Column(
@@ -186,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       title: 'Km\'s Travel',
                                       data: totalDistance.toStringAsFixed(2),
                                       // Round to 2 decimal places
-                                      bgImg: 'assets/bg_image2.jpg',
+
                                     ),
                                   ),
                                   const SizedBox(width: 20),
@@ -202,13 +253,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Expanded(
                                     child: customBtn(
                                       onPressed: () {
+
                                         Navigator.push(
                                           context,
-                                          MaterialPageRoute(
-                                            builder: (
-                                                context) => const AddLeads(),
-                                          ),
+                                          MaterialPageRoute(builder: (context) => AddLeads()),
                                         );
+                                        // Navigator.push(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (
+                                        //         context) => const AddLeads(),
+                                        //   ),
+                                        // );
                                       },
                                       child: const Row(
                                         mainAxisAlignment: MainAxisAlignment
@@ -263,63 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                               const SizedBox(height: 20),
-                              // Row(
-                              //   children: [
-                              //     Expanded(
-                              //       child: customBtn(
-                              //         onPressed: () {
-                              //
-                              //           //startTransactionSync(context);
-                              //         },
-                              //         child: const Row(
-                              //           mainAxisAlignment: MainAxisAlignment
-                              //               .center,
-                              //           children: [
-                              //             Icon(
-                              //               Icons.add,
-                              //               size: 18,
-                              //               color: CommonStyles.whiteColor,
-                              //             ),
-                              //             SizedBox(width: 8),
-                              //             Text(
-                              //               'Get Sync Data',
-                              //               style: CommonStyles.txStyF14CwFF5,
-                              //             ),
-                              //           ],
-                              //         ),
-                              //         backgroundColor: CommonStyles
-                              //             .btnBlueBgColor,
-                              //       ),
-                              //     ),
-                              //     const SizedBox(width: 20),
-                              //     Expanded(
-                              //       child: customBtn(
-                              //         onPressed: () {
-                              //           // _showBottomSheet(
-                              //           //     context); // Show bottom sheet on button press
-                              //         },
-                              //         child: const Row(
-                              //           mainAxisAlignment: MainAxisAlignment
-                              //               .center,
-                              //           children: [
-                              //             Icon(
-                              //               Icons.view_list_rounded,
-                              //               size: 18,
-                              //               color: CommonStyles.whiteColor,
-                              //             ),
-                              //             SizedBox(width: 8),
-                              //             Text(
-                              //               'Mark AS',
-                              //               style: CommonStyles.txStyF14CwFF5,
-                              //             ),
-                              //           ],
-                              //         ),
-                              //         //backgroundColor: CommonStyles.btnBlueBgColor,
-                              //       ),
-                              //     ),
-                              //   ],
-                              // ),
-                              // const SizedBox(height: 20),
+
 
                               SizedBox(
                                 width: double.infinity,
@@ -364,67 +364,74 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 20),
-                              // const Text(
-                              //   'Today Client Visits',
-                              //   style: CommonStyles.txStyF16CbFF5,
-                              // ),
-                              // FutureBuilder<List<LeadsModel>>(
-                              //   future: futureLeads,
-                              //   builder: (context, snapshot) {
-                              //     if (snapshot.connectionState ==
-                              //         ConnectionState.waiting) {
-                              //       return const Center(
-                              //           child: CircularProgressIndicator());
-                              //     } else if (snapshot.hasError) {
-                              //       return Center(child: Text(
-                              //           'Error: ${snapshot.error}'));
-                              //     } else if (snapshot.hasData &&
-                              //         snapshot.data!.isNotEmpty) {
-                              //       List<LeadsModel> futureLeads = snapshot
-                              //           .data!;
-                              //       return ListView.separated(
-                              //         itemCount: futureLeads.length,
-                              //         physics: const NeverScrollableScrollPhysics(),
-                              //         shrinkWrap: true,
-                              //         padding: EdgeInsets.zero,
-                              //         itemBuilder: (context, index) {
-                              //           final lead = futureLeads[index];
-                              //           return CustomLeadTemplate(
-                              //             index: index,
-                              //             lead: lead,
-                              //             padding: 0,
-                              //             onTap: () {
-                              //               Navigator.push(
-                              //                 context,
-                              //                 MaterialPageRoute(
-                              //                   builder: (context) =>
-                              //                       ViewLeadsInfo(
-                              //                           code: lead.code!),
-                              //                 ),
-                              //               );
-                              //             },
-                              //           );
-                              //         },
-                              //         separatorBuilder: (context,
-                              //             index) => const SizedBox(height: 10),
-                              //       );
-                              //     } else {
-                              //       return const Center(child: Text(
-                              //           'No Client Visits available for today'));
-                              //     }
-                              //   },
-                              // ),
-                              // const SizedBox(height: 10),
+                          const SizedBox(height: 20),
+
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 5,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+        margin: EdgeInsets.only(bottom: 50),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Work hours",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "09:00 to 18:00",
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  await _captureAndProcessImage();
+                  // Handle Punch In action
+                },
+                icon: Icon(Icons.play_arrow, size: 18),
+                label: Text("Punch In"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+SizedBox(height: 50,)
+
+
+
 
                             ],
                         ]),
                   ),
                 ),
-              ),
 
-            ],
-          ),
+
+                        )],
+    )
+                )
+  ]),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -525,65 +532,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //
-  // Widget statisticsSection() {
-  //   return Row(children: [
-  //     const Text(
-  //       'Statistics',
-  //       style: CommonStyles.txStyF16CbFF5,
-  //     ),
-  //     const Spacer(),
-  //     datePopupMenu(),
-  //     /*  Row(
-  //       children: [
-  //         Text(
-  //           'Last 7d',
-  //           style: CommonStyles.txStyF14CbFF5
-  //               .copyWith(color: CommonStyles.dataTextColor),
-  //         ),
-  //         const Icon(Icons.keyboard_arrow_down_rounded,
-  //             color: CommonStyles.dataTextColor),
-  //       ],
-  //     ), */
-  //     Container(
-  //       height: 30,
-  //       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-  //       alignment: Alignment.center,
-  //       decoration: BoxDecoration(
-  //         border: Border.all(color: Colors.grey),
-  //       ),
-  //       child: GestureDetector(
-  //         onTap: () {
-  //           final DateTime currentDate = DateTime.now();
-  //           final DateTime firstDate = DateTime(currentDate.year - 2);
-  //
-  //           launchDatePicker(
-  //             context,
-  //             firstDate: firstDate,
-  //             lastDate: DateTime.now(),
-  //             initialDate: DateTime.now(),
-  //           );
-  //         },
-  //         child: Row(
-  //           children: [
-  //             Text(calenderDate ?? formatDate(DateTime.now()),
-  //                 style: CommonStyles.txStyF14CbFF5),
-  //             SizedBox(width: 5),
-  //             Icon(
-  //               Icons.calendar_today_outlined,
-  //               size: 16,
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     )
-  //   ]);
-  // }
+
 
   Container dcustomBox({
     required String title,
     String? data,
-    String bgImg = 'assets/bg_image1.jpg',
+    String bgImg = 'assets/card_bg_image.jpg',
   }) {
     return Container(
       height: 110,
@@ -595,7 +549,7 @@ class _HomeScreenState extends State<HomeScreen> {
           fit: BoxFit.cover,
         ),
         border: Border.all(
-          color: CommonStyles.blueTextColor,
+          color: CommonStyles.primaryColor,
         ),
       ),
       child: Column(
@@ -603,12 +557,13 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(title,
-              style: CommonStyles.txStyF20CbluFF5.copyWith(
-                fontSize: 16,
-              )
+          style: CommonStyles.txStyF20CbluFF5.copyWith(
+            fontSize: 16,
+            color: CommonStyles.primaryColor,
+          )),
             /* style: const TextStyle(
                 color: CommonStyles.blueTextColor, fontSize: 20), */
-          ),
+
           Text('$data',
               style: CommonStyles.txStyF20CbFF5.copyWith(
                 fontSize: 30,
@@ -623,7 +578,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Container customBox({
     required String title,
     int? data,
-    String bgImg = 'assets/bg_image1.jpg',
+    // String bgImg = 'assets/bg_image1.jpg',
+    String bgImg = 'assets/card_bg_image.jpg',
   }) {
     return Container(
       height: 110,
@@ -635,7 +591,7 @@ class _HomeScreenState extends State<HomeScreen> {
           fit: BoxFit.cover,
         ),
         border: Border.all(
-          color: CommonStyles.blueTextColor,
+          color: CommonStyles.primaryColor,
         ),
       ),
       child: Column(
@@ -645,21 +601,19 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(title,
               style: CommonStyles.txStyF20CbluFF5.copyWith(
                 fontSize: 16,
-              )
-            /* style: const TextStyle(
-                color: CommonStyles.blueTextColor, fontSize: 20), */
-          ),
-          Text('$data',
-              style: CommonStyles.txStyF20CbFF5.copyWith(
-                fontSize: 30,
-              )
-            /* style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold), */
+                color: CommonStyles.primaryColor,
+              )),
+          Text(
+            '$data',
+            style: CommonStyles.txStyF20CbFF5.copyWith(
+              // color: CommonStyles.primaryColor,
+              fontSize: 30,
+            ),
           ),
         ],
       ),
     );
   }
-
   Positioned header(Size size) {
     getuserdata();
     return Positioned(
@@ -1357,6 +1311,516 @@ class _HomeScreenState extends State<HomeScreen> {
     return storedList?.map(int.parse).toList() ?? [];
   }
 
+
+  void showShiftPopup(BuildContext context, String dateTime, String location) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "NEXT SHIFT",
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              SizedBox(height: 5),
+              Text(
+                "9am-5pm",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(Icons.calendar_today, size: 16, color: Colors.blue),
+                  SizedBox(width: 5),
+                  Expanded(child: Text(dateTime, overflow: TextOverflow.ellipsis)),
+                ],
+              ),
+              SizedBox(height: 5),
+              Row(
+                children: [
+                  Icon(Icons.location_on, size: 16, color: Colors.blue),
+                  SizedBox(width: 5),
+                  Expanded(child: Text(location, overflow: TextOverflow.ellipsis)),
+                ],
+              ),
+              SizedBox(height: 5),
+              Row(
+                children: [
+                  Icon(Icons.person, size: 16, color: Colors.blue),
+                  SizedBox(width: 5),
+                  Text("Client Care"),
+                ],
+              ),
+              SizedBox(height: 15),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text("Punch in"),
+                  ),
+                  OutlinedButton(
+                    onPressed: () {},
+                    child: Text("Punch out"),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              TextButton(
+                onPressed: () {},
+                child: Text(
+                  "Unscheduled punch",
+                  style: TextStyle(color: Colors.blue),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _getCurrentDateTime() {
+    final now = DateTime.now();
+    _currentDateTime = DateFormat('EEEE, MMM d, yyyy – hh:mm a').format(now);
+  }
+
+  void _getCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        _currentLocation = "${position.latitude}, ${position.longitude}";
+      });
+    } catch (e) {
+      setState(() {
+        _currentLocation = "Location unavailable";
+      });
+    }
+  }
+
+  Future<void> _captureAndProcessImage() async {
+    try {
+      // Open camera and capture image
+      final ImagePicker picker = ImagePicker();
+      final XFile? pickedFile =
+      await picker.pickImage(source: ImageSource.camera);
+
+      if (pickedFile == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No image captured!")),
+        );
+        return;
+      }
+
+      // Get location and time
+       _getCurrentLocation();
+
+      // Read captured image
+      final File imageFile = File(pickedFile.path);
+      final ui.Image capturedImage =
+      await decodeImageFromList(await imageFile.readAsBytes());
+
+      // Create canvas for editing image
+      ui.PictureRecorder recorder = ui.PictureRecorder();
+      Canvas canvas = Canvas(recorder);
+      canvas.drawImage(capturedImage, Offset.zero, Paint());
+
+      // Define text style
+      double textStyleHeight = capturedImage.height * 0.09;
+      TextStyle textStyle = TextStyle(
+        color: Colors.white,
+        fontSize: textStyleHeight * 0.16,
+        fontWeight: FontWeight.bold,
+        shadows: const [
+          Shadow(offset: Offset(2, 2), blurRadius: 4, color: Colors.black),
+        ],
+      );
+
+      // Prepare text content
+      String textContent =
+          "Time: $_time\nLocation: $_latitude, $_longitude\n$_address";
+
+      // Measure text height dynamically
+      TextPainter textPainter = TextPainter(
+        text: TextSpan(text: textContent, style: textStyle),
+        textDirection: ui.TextDirection.ltr,
+        textAlign: TextAlign.left,
+      );
+
+      textPainter.layout(maxWidth: capturedImage.width.toDouble() - 20);
+
+      double textBoxHeight = textPainter.height + 20;
+
+      // Draw text box (background rectangle)
+      Paint rectPaint = Paint()..color = Colors.black.withOpacity(0.7);
+      canvas.drawRect(
+        Rect.fromLTWH(0, capturedImage.height - textBoxHeight,
+            capturedImage.width.toDouble(), textBoxHeight),
+        rectPaint,
+      );
+
+      // Draw text on the canvas
+      textPainter.paint(
+          canvas, Offset(20, capturedImage.height - textBoxHeight + 10));
+
+      // Convert canvas to image
+      ui.Image finalImage = await recorder
+          .endRecording()
+          .toImage(capturedImage.width, capturedImage.height);
+      ByteData? byteData =
+      await finalImage.toByteData(format: ui.ImageByteFormat.png);
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+      // Save the processed image
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/hrms_user.png';
+      File file = File(filePath);
+      print('_captureAndProcessImage: ${file.path}');
+      await file.writeAsBytes(pngBytes);
+
+      /* ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Image saved successfully at: $filePath")),
+      ); */
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  SizedBox headerSection(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height / 4.0, // Decreased height
+      child: ClipPath(
+        clipper: CurvedBottomClipper2(),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFf15f22),
+          ),
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height / 4.0, // Decreased height
+          child: Padding(
+            padding: const EdgeInsets.only(left: 0, top: 5),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 8.0),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height / 4.5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              /* Container(
+                                width: MediaQuery.of(context).size.width / 4.0,
+                                height:
+                                    MediaQuery.of(context).size.height / 8.0,
+                                padding: const EdgeInsets.all(3.0),
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: const DecorationImage(
+                                      image: AssetImage('assets/bg_image2.jpg'),
+                                      fit: BoxFit.fill,
+                                    ),
+                                    border: Border.all(
+                                        color: Colors.white, width: 2.0)),
+                              ), */
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Container(
+                                    width: MediaQuery.of(context).size.width / 4.0,
+                                    height: MediaQuery.of(context).size.height / 8.0,
+                                    padding: const EdgeInsets.all(3.0),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 2.0),
+                                    ),
+                                    child: ClipOval(
+                                      child: _imageFile != null
+                                          ? Image.file(
+                                        _imageFile!,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        fit: BoxFit.cover,
+                                      )
+                                          : photoData != null && photoData!.isNotEmpty
+                                          ? FutureBuilder<Uint8List>(
+                                        future: _decodeBase64(photoData!),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                            return Center(
+                                              child: CircularProgressIndicator.adaptive(),
+                                            );
+                                          } else if (snapshot.hasError) {
+                                            return getDefaultImage(Gender, context);
+                                          } else {
+                                            return Image.memory(
+                                              snapshot.data!,
+                                              fit: BoxFit.cover,
+                                              filterQuality: FilterQuality.high,
+                                            );
+                                          }
+                                        },
+                                      )
+                                          : getDefaultImage(Gender, context),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 12,
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white,
+                                      ),
+                                      padding: const EdgeInsets.all(4),
+                                      child: InkWell(
+                                        onTap: () async {
+                                          await showBottomSheetForImageSelection(context);
+                                        },
+                                        child: const Icon(
+                                          Icons.camera_alt_outlined,
+                                          size: 15.0,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                            ],
+                          ),
+                          const SizedBox(height: 5.0),
+                           SizedBox(
+                            child: Text(
+                              "$EmployeName",
+                              softWrap: true,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                  fontFamily: 'Calibri'),
+                            ),
+                          ),
+                          const SizedBox(height: 2.0),
+                           Text(
+                            "$employee_designation",
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.white,
+                                fontFamily: 'Calibri'),
+                          ),
+                          // const Text(
+                          //   "10 AUG 1999",
+                          //   style: TextStyle(
+                          //       fontSize: 12,
+                          //       color: Colors.white,
+                          //       fontFamily: 'Calibri'),
+                          // ),
+                        ],
+                      )),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Image backgroundGredient(BuildContext context) {
+    return Image.asset(
+      'assets/background_layer_2.png',
+      fit: BoxFit.cover,
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+    );
+  }
+
+  showBottomSheetForImageSelection(BuildContext context) {}
+
+  Future<Uint8List> _decodeBase64(String base64String) async {
+    final List<String> parts = base64String.split(',');
+    print('====>${parts.length}');
+
+    if (parts.length != 2) {
+      throw FormatException('Invalid base64 string: Incorrect number of parts');
+    }
+
+    final String dataPart = parts[1];
+
+    try {
+      return Base64Codec().decode(dataPart);
+    } catch (e) {
+      throw FormatException('Invalid base64 string: $e');
+    }
+  }
+  Widget getDefaultImage(String gender, BuildContext context) {
+    return gender == "Male"
+        ? Container(
+        width: MediaQuery.of(context).size.width / 3.8,
+        height: MediaQuery.of(context).size.height / 6.5,
+        padding: EdgeInsets.all(3.0),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            border: Border.all(color: Colors.white, width: 2.0)),
+        child: Image.asset(
+          'assets/men_emp.jpg',
+          // width: MediaQuery.of(context).size.width / 4.5,
+          // height: MediaQuery.of(context).size.height / 6.5,
+        ))
+        : gender == "Female"
+        ? Container(
+      width: MediaQuery.of(context).size.width / 3.8,
+      height: MediaQuery.of(context).size.height / 6.5,
+      padding: EdgeInsets.all(3.0),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+          border: Border.all(color: Colors.white, width: 2.0)),
+      child: Image.asset(
+        'assets/women-emp.jpg',
+        // width: MediaQuery.of(context).size.width / 3.8,
+        // height: MediaQuery.of(context).size.height / 6.5,
+      ),
+    )
+        : Container(
+      width: MediaQuery.of(context).size.width / 3.8,
+      height: MediaQuery.of(context).size.height / 6.5,
+      padding: EdgeInsets.all(3.0),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+          border: Border.all(color: Colors.white, width: 2.0)),
+      child: Image.asset(
+        'assets/app_logo.png',
+        // width: MediaQuery.of(context).size.width / 3.8,
+        // height: MediaQuery.of(context).size.height / 6.5,
+        // height: 90,
+      ),
+    ); // You can replace Container() with another default image or widget
+  }
+
+  void _loademployeresponse() async {
+    final loadedData = await SharedPreferencesHelper.getCategories();
+
+    if (loadedData != null) {
+      final employeeName = loadedData['employeeName'];
+      final dateofbirth = loadedData['originalDOB'];
+      final emailid = loadedData['emailId'];
+      final officemailid = loadedData['officeEmailId'];
+      final expincompany = loadedData['experienceInCompany'];
+      final mobilenum = loadedData['mobileNumber'];
+      final bloodgroup = loadedData['bloodGroup'];
+      final gender = loadedData["gender"];
+      final dateofjoining = loadedData['dateofJoin'];
+      final code = loadedData['code'];
+      final designation = loadedData['designation'];
+      final reportingTo = loadedData['reportingTo'];
+      final nationality = loadedData['nationality'];
+
+      //   "gender"
+      // : "Male"
+      print('employeeName: $employeeName');
+      print('dob: $dateofbirth');
+      print('emailid: $emailid');
+      print('officemail: $officemailid');
+      print('expincompany: $expincompany');
+      print('mobilenum: $mobilenum');
+      print('bloodgroup: $bloodgroup');
+
+      // Format the date of birth into "dd/MM/yyyy"
+      DateTime dobDate = DateTime.parse(dateofbirth);
+      String formattedDOB = DateFormat('dd MMM yyyy').format(dobDate);
+      print('formattedDOB: $formattedDOB');
+
+
+
+      setState(() {
+        if (employeeName != null) {
+          EmployeName = employeeName;
+        } else {
+          EmployeName = '';
+        }
+        // EmployeName = employeeName;
+
+
+        if (designation != null) {
+          employee_designation = designation;
+        } else {
+          employee_designation = '';
+        }
+
+        // Gender = gender;
+        if (gender != null) {
+          Gender = gender;
+        } else {
+          // Handle the case where gender is null, maybe assign a default value
+          Gender = "Unknown";
+        }
+// Check if formatteddateofjoining is not null before using it
+
+      });
+    }
+  }
+
+  Future<void> loademployeeimage() async {
+    // bool isConnected = await Commonutils.checkInternetConnectivity();
+    // if (!isConnected) {
+    //   Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
+    //   FocusScope.of(context).unfocus();
+    //   return;
+    // }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      empolyeid = prefs.getString("employeeId") ?? "";
+      accessToken = prefs.getString("accessToken") ?? "";
+    });
+    print("empolyeidinapplyleave:$empolyeid");
+    final url = Uri.parse(baseUrl + GetEmployeePhoto + '$empolyeid');
+    print('loademployeeimage  $url');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': '$accessToken',
+      },
+    );
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = json.decode(response.body);
+      setState(() {
+        photoData =
+        data['ImageData']; // Initialize with an empty string if null
+        print('photoData==== $photoData');
+      });
+    } else {
+      // Handle error
+      print('Failed to load employee photo');
+    }
+  }
+
+
+
 // Future<void> _loadUserActivityRights() async {
 //   SharedPreferences prefs = await SharedPreferences.getInstance();
 //   setState(() {
@@ -1528,160 +1992,7 @@ void onStart(ServiceInstance service) async {
       appendLog(
           'Received new position: Lat ${position.latitude}, Lon ${position.longitude}.');
 
-      //  if (permission == LocationPermission.always) {
-      //    // Notify the service about location changes
-      //
-      //    DateTime now = DateTime.now();
-      //    bool isWithinTrackingHours = now.hour >= 10 && now.hour < 22; // Between 10 AM and 10 PM
-      //    bool isWeekend = now.weekday == DateTime.sunday;
-      //    appendLog(
-      //        "track condition for data insert: $isWithinTrackingHours   ====== $isWeekend");
-      //    print(
-      //        'track condition for data insert: $isWithinTrackingHours   ====== ${!isWeekend}');
-      //    // Check if tracking is allowed
-      //    if (isWithinTrackingHours && !isWeekend) {
-      //      service.invoke('on_location_changed', position.toJson());
-      //      bool hasPointToday = await dataAccessHandler.hasPointForToday();
-      //      print('hasPointToday=====$hasPointToday');
-      //   //   if (!hasPointToday) {
-      //        if (!isFirstLocationLogged) {
-      //          // Log the first point
-      //          lastLatitude = position.latitude;
-      //          lastLongitude = position.longitude;
-      //          isFirstLocationLogged = true;
-      //          DateTime timestamp = DateTime.now();
-      //
-      //          appendLog('Latitude: ${position.latitude}, Longitude: ${position
-      //              .longitude}. Timestamp: $timestamp');
-      //
-      //          // Insert the first location into your database or send it to the API
-      //          //   await insertLocationToDatabase(position.latitude, position.longitude, timestamp);
-      //          await insertLocationToDatabase(
-      //              palm3FoilDatabase, position, userID, syncService);
-      // //       }
-      //        // Start the timer to insert every 30 seconds
-      //        locationTimer =
-      //            Timer.periodic(Duration(seconds: 30), (timer) async {
-      //              DateTime timestamp = DateTime.now();
-      //              appendLog('Periodic Latitude: ${position
-      //                  .latitude}, Longitude: ${position
-      //                  .longitude}. Timestamp: $timestamp');
-      //
-      //              // Insert the location into your database every 30 seconds
-      //              //       await insertLocationToDatabase(position.latitude, position.longitude, timestamp);
-      //              await insertLocationToDatabase(
-      //                  palm3FoilDatabase, position, userID, syncService);
-      //              // Optionally, send the location to the API
-      //              // await sendLocationToAPI(position.latitude, position.longitude, timestamp, userId);
-      //            });
-      //      }
-      //
-      //      if (_isPositionAccurate(position)) {
-      //        // You can still update the position for accuracy tracking if needed
-      //        lastLatitude = position.latitude;
-      //        lastLongitude = position.longitude;
-      //      }
-      //    }
-      //    else {
-      //      print(
-      //          'Tracking not allowed: isWithinTrackingHours: $isWithinTrackingHours, isWeekend: $isWeekend');
-      //      appendLog(
-      //          'Tracking not allowed: isWithinTrackingHours: $isWithinTrackingHours, isWeekend: $isWeekend');
-      //    }
-      //  }
-      //  if (permission == LocationPermission.always) {
-      //    DateTime now = DateTime.now();
-      //    // Fetch shift timings from the database for the user (assuming ID is 13)
-      //    final shiftFromTime = await dataAccessHandler.getShiftFromTime();  // Example user ID 13
-      //    final shiftToTime = await dataAccessHandler.getShiftToTime();      // Example user ID 13
-      //    final weekoffs = await dataAccessHandler.getweekoffs();
-      //    // Parse the shift times into DateTime objects for comparison
-      //    DateTime shiftStart = DateTime(now.year, now.month, now.day, int.parse(shiftFromTime.split(":")[0]), int.parse(shiftFromTime.split(":")[1]));
-      //    DateTime shiftEnd = DateTime(now.year, now.month, now.day, int.parse(shiftToTime.split(":")[0]), int.parse(shiftToTime.split(":")[1]));
-      //
-      //    // Check if the current time is within the shift hours
-      //    bool isWithinTrackingHours = now.isAfter(shiftStart) && now.isBefore(shiftEnd);
-      //    // bool isWithinTrackingHours = now.hour >= 10 && now.hour < 22; // Between 10 AM and 10 PM
-      //
-      //    bool isWeekend = now.weekday == DateTime.sunday;
-      //
-      //    // Check if the current date is a holiday (excluded date)
-      //    bool isExcludedDate = await dataAccessHandler.checkIfExcludedDate();
-      //    appendLog("track condition for data insert: $isExcludedDate");
-      //    print("track condition for data insert: $isExcludedDate");
-      //
-      //    appendLog("track condition for data insert: $isWithinTrackingHours   ====== $isWeekend");
-      //    print("track condition for data insert: $isWithinTrackingHours   ====== $isWeekend");
-      //    // Check if tracking is allowed
-      //  if (isWithinTrackingHours && !isWeekend && !isExcludedDate) {
-      //      service.invoke('on_location_changed', position.toJson());
-      //
-      //      bool hasPointToday =  await dataAccessHandler.hasPointForToday();
-      //      bool hasleaveToday =  await dataAccessHandler.hasleaveForToday();
-      //      print("track condition  hasleaveToday: $hasleaveToday  hasPointToday ======> $hasPointToday");
-      //      if (!hasleaveToday) {
-      //        // If there is no point for today, insert the first point
-      //        if (!hasPointToday) {
-      //          if (_isPositionAccurate(position)) {
-      //            if (!isFirstLocationLogged) {
-      //              lastLatitude = position.latitude;
-      //              lastLongitude = position.longitude;
-      //              isFirstLocationLogged = true;
-      //
-      //              // Insert the first location
-      //              await insertLocationToDatabase(
-      //                  palm3FoilDatabase, position, userID, syncService);
-      //            }
-      //          }
-      //        }
-      //
-      //        // if (!isFirstLocationLogged) {
-      //        //   lastLatitude = position.latitude;
-      //        //   lastLongitude = position.longitude;
-      //        //   isFirstLocationLogged = true;
-      //        //
-      //        //   // Insert location when the app starts
-      //        //   await insertLocationToDatabase(
-      //        //       palm3FoilDatabase, position, userID, syncService);
-      //        //
-      //        //   //      await backgroundService.syncLocationData();
-      //        // }
-      //
-      //        if (_isPositionAccurate(position)) {
-      //          final distance = Geolocator.distanceBetween(
-      //            lastLatitude,
-      //            lastLongitude,
-      //            position.latitude,
-      //            position.longitude,
-      //          );
-      //
-      //          if (distance >= 50.0) {
-      //            lastLatitude = position.latitude;
-      //            lastLongitude = position.longitude;
-      //
-      //            // Insert location points when the distance exceeds the threshold
-      //            await insertLocationToDatabase(
-      //                palm3FoilDatabase, position, userID, syncService);
-      //
-      //            //    await backgroundService.syncLocationData();
-      //          }
-      //          else {
-      //            appendLog("Skipping insert: distance ${distance} ");
-      //          }
-      //        }
-      //      }
-      //      else {
-      //        appendLog("Tracking not allowed: User have leave Today");
-      //        print("Tracking not allowed: User have leave Today");
-      //      }
-      //      // else {
-      //      //   appendLog("Skipping insert: accuracy ${position.accuracy} or speed ${position.speed} too low.");
-      //      // }
-      //    }
-      //    else {
-      //      appendLog('Tracking not allowed: isWithinTrackingHours: $isWithinTrackingHours, isWeekend: $isWeekend');
-      //    }
-      //  }
+
       if (permission == LocationPermission.always) {
         DateTime now = DateTime.now();
 

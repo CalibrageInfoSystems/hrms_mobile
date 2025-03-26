@@ -19,7 +19,7 @@ import '../Model Class/GeoBoundariesModel.dart';
 import '../Model Class/LeadsModel.dart';
 import '../api config.dart';
 import '../common_widgets/common_styles.dart';
-import 'DataAccessHandler.dart';
+import 'package:hrms/database/DataAccessHandler.dart';
 import 'DatabaseHelper.dart';
 import 'HRMSDatabaseHelper.dart';
 // other imports as necessary

@@ -628,44 +628,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                               .center,
                                                       // alignment: AlignmentDirectional.center,
                                                       children: [
-                                                        // if (photoData != null && photoData != "")
-                                                        //   Container(
-                                                        //     //  width: 90,
-                                                        //     width: MediaQuery.of(context).size.width / 5,
-                                                        //     height: 85,
-                                                        //     child: Image.memory(
-                                                        //       _decodeBase64(photoData),
-                                                        //       //  width: 90,
-                                                        //       width: MediaQuery.of(context).size.width / 5,
-                                                        //
-                                                        //       height: 90,
-                                                        //     ),
-                                                        //   )
-                                                        // else if (Gender != null) ...{
-                                                        //   getDefaultImage(Gender!),
-                                                        // } else ...{
-                                                        //   Container(
-                                                        //     // width: 90,
-                                                        //     width: MediaQuery.of(context).size.width / 5,
-                                                        //
-                                                        //     height: 90,
-                                                        //     child: Image.asset(
-                                                        //       'assets/app_logo.png',
-                                                        //       //    width: 90,
-                                                        //       width: MediaQuery.of(context).size.width / 5,
-                                                        //       height: 90,
-                                                        //     ),
-                                                        //   ),
-                                                        // },
-                                                        // Image.memory(
-                                                        //         _decodeBase64(photoData),
-                                                        //         //  width: 90,
-                                                        //   fit: BoxFit.fitWidth,
-                                                        //   height: MediaQuery.of(context).size.height/8.5,
-                                                        //       )
 
-                                                        // _imageFile != null
-                                                        //     ?
                                                         if (_imageFile !=
                                                             null) ...{
                                                           Image.file(
@@ -755,15 +718,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                             },
                                                           )
 
-                                                          //:  getDefaultImage(Gender, context),
-                                                          // Center(
-                                                          //   child:  Container(
-                                                          //     width: 32,
-                                                          //     height: 32,
-                                                          //
-                                                          //     child: CircularProgressIndicator.adaptive() ,
-                                                          //   ), // Optionally, show a message if photoData is empty
-                                                          // ),
+
                                                         } else if (photoData ==
                                                             null) ...{
                                                           getDefaultImage(

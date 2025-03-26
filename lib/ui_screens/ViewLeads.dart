@@ -13,7 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Database/DataAccessHandler.dart';
+import 'package:hrms/database/DataAccessHandler.dart';
 import '../Model Class/LeadsModel.dart';
 import '../common_widgets/common_styles.dart';
 import '../common_widgets/custom_lead_template.dart';
