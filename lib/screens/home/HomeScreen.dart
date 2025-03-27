@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter_svg/svg.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hrms/Constants.dart';
 import 'package:hrms/Database/HRMSDatabaseHelper.dart';
 
@@ -95,10 +97,14 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> menuItems = [];
   static const String PREVIOUS_SYNC_DATE = 'previous_sync_date';
   late Future<List<int>> futureSync;
+  Position? _currentPosition;
+  GoogleMapController? _mapController;
   String _latitude = "Fetching...";
   String _longitude = "Fetching...";
   String _address = "Fetching address...";
   String _time = "";
+  bool isPunchedIn = false;
+  bool isRequestProcessing = false;
   String base64Image = '';
   File? _imageFile;
   String filename = '';
@@ -410,15 +416,26 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     ElevatedButton(
                                       onPressed: () async {
-                                        showDialog(
+                                        setState(() {
+                                          isRequestProcessing = true;
+                                        });
+
+                                        await showDialog(
                                           context: context,
-                                          builder: (context) => PunchInDialog(
-                                            isPunchIn: !isPunchIn!,
-                                          ),
+                                          builder: (context) =>
+                                              punchInOutDialog(context),
                                         );
+
+                                        /* setState(() {
+                                          isRequestProcessing = false;
+                                        }); */
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.blue,
+                                        /* backgroundColor: isRequestProcessing
+                                            ? Colors.grey
+                                            : Colors.blue, */
+                                        backgroundColor:
+                                            CommonStyles.primaryColor,
                                         foregroundColor: Colors.white,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
@@ -427,9 +444,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 16, vertical: 10),
                                       ),
-                                      child: Text(isPunchIn == true
-                                          ? "Punch Out"
-                                          : "Punch In"),
+                                      child: isRequestProcessing
+                                          ? const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                          : Text(
+                                              isPunchedIn
+                                                  ? "Punch Out"
+                                                  : "Punch In",
+                                            ),
                                     ),
                                   ],
                                 ),
@@ -1048,7 +1076,9 @@ class _HomeScreenState extends State<HomeScreen> {
     userID = prefs.getInt('userID');
     RoleId = prefs.getInt('roleID');
     username = prefs.getString('username') ?? '';
-    isPunchIn = prefs.getBool(Constants.isPunchIn) ?? false;
+    setState(() {
+      isPunchedIn = prefs.getBool(Constants.isPunchIn) ?? false;
+    });
     print('username==$username');
     print('RoleId==$RoleId');
     String firstName = prefs.getString('firstName') ?? '';
@@ -1403,48 +1433,95 @@ class _HomeScreenState extends State<HomeScreen> {
     _currentDateTime = DateFormat('EEEE, MMM d, yyyy – hh:mm a').format(now);
   }
 
-  void _getCurrentLocation() async {
+  Future<void> _getCurrentLocation() async {
     try {
+      bool serviceEnabled;
+      LocationPermission permission;
+
+      // Check if location services are enabled
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return Future.error('Location services are disabled.');
+      }
+
+      // Check for location permissions
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          return Future.error('Location permissions are denied');
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        return Future.error('Location permissions are permanently denied.');
+      }
+
+      // Get the current position
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
+
+      Placemark place = placemarks.first;
+      String currentTime =
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+
+      // Check if the widget is still mounted before calling setState
+      if (!mounted) return;
+
       setState(() {
         _currentLocation = "${position.latitude}, ${position.longitude}";
+        _currentPosition = position;
+        _latitude = position.latitude.toString();
+        _longitude = position.longitude.toString();
+        _address =
+            "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
+        _time = currentTime;
       });
+
+      // Move the map camera to the user's location
+      if (_mapController != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(position.latitude, position.longitude),
+          ),
+        );
+      }
     } catch (e) {
       setState(() {
         _currentLocation = "Location unavailable";
       });
+      rethrow;
     }
   }
 
   Future<void> _captureAndProcessImage() async {
     try {
-      // Open camera and capture image
       final ImagePicker picker = ImagePicker();
       final XFile? pickedFile =
           await picker.pickImage(source: ImageSource.camera);
 
       if (pickedFile == null) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("No image captured!")),
         );
         return;
       }
 
-      // Get location and time
-      _getCurrentLocation();
+      // await _getCurrentLocation();
 
-      // Read captured image
       final File imageFile = File(pickedFile.path);
       final ui.Image capturedImage =
           await decodeImageFromList(await imageFile.readAsBytes());
 
-      // Create canvas for editing image
       ui.PictureRecorder recorder = ui.PictureRecorder();
       Canvas canvas = Canvas(recorder);
       canvas.drawImage(capturedImage, Offset.zero, Paint());
 
-      // Define text style
       double textStyleHeight = capturedImage.height * 0.09;
       TextStyle textStyle = TextStyle(
         color: Colors.white,
@@ -1455,11 +1532,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       );
 
-      // Prepare text content
       String textContent =
           "Time: $_time\nLocation: $_latitude, $_longitude\n$_address";
 
-      // Measure text height dynamically
       TextPainter textPainter = TextPainter(
         text: TextSpan(text: textContent, style: textStyle),
         textDirection: ui.TextDirection.ltr,
@@ -1470,7 +1545,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
       double textBoxHeight = textPainter.height + 20;
 
-      // Draw text box (background rectangle)
       Paint rectPaint = Paint()..color = Colors.black.withOpacity(0.7);
       canvas.drawRect(
         Rect.fromLTWH(0, capturedImage.height - textBoxHeight,
@@ -1478,11 +1552,9 @@ class _HomeScreenState extends State<HomeScreen> {
         rectPaint,
       );
 
-      // Draw text on the canvas
       textPainter.paint(
           canvas, Offset(20, capturedImage.height - textBoxHeight + 10));
 
-      // Convert canvas to image
       ui.Image finalImage = await recorder
           .endRecording()
           .toImage(capturedImage.width, capturedImage.height);
@@ -1491,17 +1563,280 @@ class _HomeScreenState extends State<HomeScreen> {
       Uint8List pngBytes = byteData!.buffer.asUint8List();
       // Save the processed image
       final directory = await getApplicationDocumentsDirectory();
-      final filePath = '${directory.path}/hrms_user.png';
+      final filePath = '${directory.path}/hrms_emp.png';
       File file = File(filePath);
-      print('_captureAndProcessImage: ${file.path}');
       await file.writeAsBytes(pngBytes);
+      updatePunchStatus(isPunchedIn ? false : true);
 
-      /* ScaffoldMessenger.of(context).showSnackBar(
+      /* if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Image saved successfully at: $filePath")),
       ); */
     } catch (e) {
-      rethrow;
+      print('_captureAndProcessImage: catch');
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
     }
+  }
+
+  Future<void> updatePunchStatus(bool status) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(Constants.isPunchIn, status);
+    setState(() {
+      isPunchedIn = status;
+    });
+  }
+
+  /*  Widget punchInOutDialog(BuildContext context) {
+    String currentTime = DateFormat('HH:mm').format(DateTime.now());
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.close, size: 20),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+          Container(
+            height: 350, // Adjust height to match the design
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  isPunchedIn ? "Punch Out" : "Punch In",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+                // Map view
+                Expanded(
+                  child: _currentPosition == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(6.0),
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(
+                                _currentPosition!.latitude,
+                                _currentPosition!.longitude,
+                              ),
+                              zoom: 15,
+                            ),
+                            markers: {
+                              Marker(
+                                markerId: const MarkerId('current_location'),
+                                position: LatLng(
+                                  _currentPosition!.latitude,
+                                  _currentPosition!.longitude,
+                                ),
+                              ),
+                            },
+                            onMapCreated: (GoogleMapController controller) {
+                              _mapController = controller;
+                            },
+                            myLocationEnabled: true,
+                            myLocationButtonEnabled: false,
+                            zoomControlsEnabled: false,
+                          ),
+                        ),
+                ),
+                const SizedBox(height: 10),
+                // Sample text
+                Text(
+                  isPunchedIn
+                      ? "It's time for another great day!"
+                      : 'Time to go home!',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 5),
+                // Current time with pencil icon
+                Text(
+                  currentTime,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Submit button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _captureAndProcessImage().whenComplete(() {
+                        Navigator.of(context).pop();
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: CommonStyles.primaryColor,
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    child: Text(
+                      isPunchedIn ? 'Capture Image' : 'Punch Out',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+ */
+
+  Widget punchInOutDialog(BuildContext context) {
+    String currentTime = DateFormat('HH:mm').format(DateTime.now());
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.close, size: 20),
+              onPressed: () {
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+                setState(() {
+                  isRequestProcessing = false;
+                });
+              },
+            ),
+          ),
+          Container(
+            height: 350, // Adjust height to match the design
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  isPunchedIn ? "Punch Out" : "Punch In",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Map view
+                Expanded(
+                  child: _currentPosition == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(6.0),
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(
+                                _currentPosition!.latitude,
+                                _currentPosition!.longitude,
+                              ),
+                              zoom: 15,
+                            ),
+                            markers: {
+                              Marker(
+                                markerId: const MarkerId('current_location'),
+                                position: LatLng(
+                                  _currentPosition!.latitude,
+                                  _currentPosition!.longitude,
+                                ),
+                              ),
+                            },
+                            onMapCreated: (GoogleMapController controller) {
+                              _mapController = controller;
+                            },
+                            myLocationEnabled: true,
+                            myLocationButtonEnabled: false,
+                            zoomControlsEnabled: false,
+                          ),
+                        ),
+                ),
+                const SizedBox(height: 10),
+                // Sample text
+                Text(
+                  isPunchedIn
+                      ? 'Time to go home!'
+                      : "It's time for another great day!",
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 5),
+                // Current time with pencil icon
+                Text(
+                  currentTime,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Submit button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await _captureAndProcessImage();
+                      setState(() {
+                        isRequestProcessing = false;
+                      });
+                      /* await _captureAndProcessImage().whenComplete(() {
+                        if (mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      }); */
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: CommonStyles.primaryColor,
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    child: const Text(
+                      'Capture Image',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   SizedBox headerSection(BuildContext context) {
@@ -2329,7 +2664,7 @@ bool _isPositionAccurate(Position position) {
 }
 
 void appendLog(String text) async {
-  const String folderName = 'SmartGeoTrack';
+/*   const String folderName = 'SmartGeoTrack';
   const String fileName = 'UsertrackinglogTest.file';
   // final appFolderPath = await getApplicationDocumentsDirectory();
   Directory appFolderPath =
@@ -2353,7 +2688,7 @@ void appendLog(String text) async {
     await buf.close();
   } catch (e) {
     print("Error appending to log file: $e");
-  }
+  } */
 }
 
 class StatCard extends StatelessWidget {
