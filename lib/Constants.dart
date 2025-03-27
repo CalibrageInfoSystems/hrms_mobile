@@ -4,6 +4,7 @@ class Constants {
   static const String WELCOME = "welcome";
 
   static const String isPunchIn = 'isPunchIn';
+  static const String punchTime = 'punchTime';
 
   static const String futureDatesErrMsg =
       "The leaves will be allocated for the following year between 16th and 31st December of every year. Apply for the leave(s) by checking this form after 16th Dec.";
