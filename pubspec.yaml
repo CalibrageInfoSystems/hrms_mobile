@@ -155,6 +155,7 @@ flutter:
     - assets/fileuploadicon.svg
     - assets/hrmsgeotrack.sqlite
     - assets/card_bg_image.jpg
+    - assets/nextcircle.png
 
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see

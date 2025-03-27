@@ -15,11 +15,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../Database/SyncService.dart';
-import 'home/HomeScreen.dart';
+import '../home_screen.dart';
+
 import '../common_widgets/common_styles.dart';
 import '../common_widgets/custom_textfield.dart';
 import '../database/DataAccessHandler.dart';
 import '../styles.dart';
+import 'home/HomeScreen.dart';
 
 class AddLeads extends StatefulWidget {
   const AddLeads({super.key});
@@ -666,7 +668,7 @@ class _AddLeadScreenState extends State<AddLeads>
               'Failed to Add Client Visit Data.', context, 1, 2);
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(builder: (context) =>  home_screen()),
           );
           return;
         }
@@ -719,21 +721,21 @@ class _AddLeadScreenState extends State<AddLeads>
 
         bool isConnected = await CommonStyles.checkInternetConnectivity();
         if (isConnected) {
-          final syncService = SyncService(dataAccessHandler);
-          syncService
-              .performRefreshTransactionsSync(context, 3)
-              .whenComplete(() {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
-          });
+          // final syncService = SyncService(dataAccessHandler);
+          // syncService
+          //     .performRefreshTransactionsSync(context, 3)
+          //     .whenComplete(() {
+          //   Navigator.push(
+          //     context,
+          //     MaterialPageRoute(builder: (context) => const home_screen()),
+          //   );
+          // });
         } else {
           CommonStyles.showCustomToastMessageLong(
               'Client Visit added successfully.', context, 0, 2);
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(builder: (context) =>  home_screen()),
           );
         }
 

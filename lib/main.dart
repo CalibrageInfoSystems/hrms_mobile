@@ -9,6 +9,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hrms/Splash_screen.dart';
 
 import 'package:flutter_svg/svg.dart';
+import 'package:hrms/screens/home/HomeScreen.dart';
 
 import 'package:provider/provider.dart';
 
@@ -16,7 +17,7 @@ import 'package:workmanager/workmanager.dart';
 
 
 import 'Database/SyncServiceB.dart';
-import 'HomeScreen.dart';
+
 import 'package:hrms/database/DataAccessHandler.dart';
 
 import 'location_service/logic/location_controller/location_controller_cubit.dart';

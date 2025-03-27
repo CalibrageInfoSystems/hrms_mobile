@@ -12,6 +12,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'HomeScreen.dart';
 /* 
 void main() {
   runApp(MyApp());
@@ -209,6 +211,11 @@ class _PunchInDialogState extends State<PunchInDialog> {
       widget.isPunchIn
           ? prefs.setBool(Constants.isPunchIn, true)
           : prefs.setBool(Constants.isPunchIn, false);
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
 
       /* if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

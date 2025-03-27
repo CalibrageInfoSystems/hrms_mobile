@@ -48,6 +48,8 @@ import 'dart:math' show cos, sqrt, asin;
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:hrms/database/DataAccessHandler.dart';
 
+import '../../shared_keys.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -201,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Scaffold(
           backgroundColor: CommonStyles.whiteColor,
           body: Stack(children: [
-            backgroundGredient(context),
+         //   backgroundGredient(context),
             Positioned.fill(
                 child: Column(
               children: [
@@ -330,50 +332,82 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(height: 20),
 
-                              SizedBox(
-                                width: double.infinity,
-                                child: customBtn(
-                                  onPressed: () {
-                                    //
-                                    //           //startTransactionSync(context);
-                                  },
-                                  // onPressed: isButtonEnabled
-                                  //     ? () =>
-                                  //     Navigator.push(
-                                  //       context,
-                                  //       MaterialPageRoute(
-                                  //           builder: (context) => SyncScreen()),
-                                  //     )
-                                  //     : null,
-                                  // Navigate if enabled
-                                  backgroundColor: isButtonEnabled
-                                      ? CommonStyles.btnRedBgColor
-                                      : CommonStyles.hintTextColor,
-                                  // Set background color based on enabled/disabled state
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.sync,
-                                        size: 18,
-                                        color: isButtonEnabled
-                                            ? CommonStyles.whiteColor
-                                            : CommonStyles
-                                                .disabledTextColor, // Adjust icon color when disabled
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: customBtn(
+                                      onPressed: () {
+
+                                      //  startTransactionSync(context);
+                                      },
+                                      child: const Row(
+                                        mainAxisAlignment: MainAxisAlignment
+                                            .center,
+                                        children: [
+                                          Icon(
+                                            Icons.add,
+                                            size: 18,
+                                            color: CommonStyles.whiteColor,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Get Sync Data',
+                                            style: CommonStyles.txStyF14CwFF5,
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Sync Data',
-                                        style: isButtonEnabled
-                                            ? CommonStyles.txStyF14CwFF5
-                                            : CommonStyles.txStyF14CwFF5.copyWith(
+                                      backgroundColor: CommonStyles
+                                          .btnBlueBgColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child:      customBtn(
+                                      onPressed: () {
+                                        //
+                                        //           //startTransactionSync(context);
+                                      },
+                                      // onPressed: isButtonEnabled
+                                      //     ? () =>
+                                      //     Navigator.push(
+                                      //       context,
+                                      //       MaterialPageRoute(
+                                      //           builder: (context) => SyncScreen()),
+                                      //     )
+                                      //     : null,
+                                      // Navigate if enabled
+                                      backgroundColor: isButtonEnabled
+                                          ? CommonStyles.btnRedBgColor
+                                          : CommonStyles.hintTextColor,
+                                      // Set background color based on enabled/disabled state
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.sync,
+                                            size: 18,
+                                            color: isButtonEnabled
+                                                ? CommonStyles.whiteColor
+                                                : CommonStyles
+                                                .disabledTextColor, // Adjust icon color when disabled
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Sync Data',
+                                            style: isButtonEnabled
+                                                ? CommonStyles.txStyF14CwFF5
+                                                : CommonStyles.txStyF14CwFF5.copyWith(
                                                 color: CommonStyles
                                                     .disabledTextColor), // Adjust text color when disabled
+                                          ),
+                                        ],
                                       ),
-                                    ],
+                                    ),
+
                                   ),
-                                ),
+                                ],
                               ),
+
                               const SizedBox(height: 20),
 
                               Container(
@@ -577,7 +611,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String bgImg = 'assets/card_bg_image.jpg',
   }) {
     return Container(
-      height: 110,
+      height: 80,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -619,7 +653,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String bgImg = 'assets/card_bg_image.jpg',
   }) {
     return Container(
-      height: 110,
+      height: 80,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -1160,11 +1194,11 @@ class _HomeScreenState extends State<HomeScreen> {
       isLoading = true; // Start loading
     });
 
-    String currentDate =
-        getCurrentDate(); // Assuming this returns a string in 'YYYY-MM-DD' format
+    String currentDate = getCurrentDate(); // Assuming this returns a string in 'YYYY-MM-DD' format
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    userID = prefs.getInt('userID');
+ //   userID = prefs.getInt('userID'); //TODO
     RoleId = prefs.getInt('roleID');
+    userID = 101;
 
     // Fetch total lead counts based on CreatedByUserId
     totalLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
@@ -1239,8 +1273,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       isLoading = true; // Start loading
     });
-    dateRangeLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
-        "SELECT COUNT(*) AS dateRangeLeadsCount FROM Leads WHERE DATE(CreatedDate) BETWEEN '$startday' AND '$today'");
+    dateRangeLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb("SELECT COUNT(*) AS dateRangeLeadsCount FROM Leads WHERE DATE(CreatedDate) BETWEEN '$startday' AND '$today'");
     print('dateRangeLeadsCount==1240 :  $dateRangeLeadsCount');
     double calculateDistance(lat1, lon1, lat2, lon2) {
       var p = 0.017453292519943295; // Pi/180 to convert degrees to radians
@@ -2297,12 +2330,14 @@ void onStart(ServiceInstance service) async {
   try {
     // Initialize your database and shared preferences
     appendLog('Getting instance of Palm3FoilDatabase...');
-    HRMSDatabaseHelper? palm3FoilDatabase = await HRMSDatabaseHelper();
+    HRMSDatabaseHelper? hrmsDatabase = await HRMSDatabaseHelper();
     appendLog('Palm3FoilDatabase instance obtained.');
 
     appendLog('Fetching SharedPreferences...');
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? userID = prefs.getInt('userID');
+ //  int? userID = prefs.getInt('userID');
+    String? userID = prefs.getString(SharedKeys.userId) ?? "";
+//    int? userID = 101;
     appendLog('SharedPreferences fetched, userID: $userID.');
 
     final dataAccessHandler = DataAccessHandler();
@@ -2346,10 +2381,8 @@ void onStart(ServiceInstance service) async {
         DateTime now = DateTime.now();
 
         // Fetch shift timings and weekoffs from the database
-        final shiftFromTime =
-            await dataAccessHandler.getShiftFromTime(); // Example user ID 13
-        final shiftToTime =
-            await dataAccessHandler.getShiftToTime(); // Example user ID 13
+        final shiftFromTime = await dataAccessHandler.getShiftFromTime(); // Example user ID 13
+        final shiftToTime = await dataAccessHandler.getShiftToTime(); // Example user ID 13
         //  final weekoffs = await dataAccessHandler.getweekoffs();            // List of week-off days (e.g., [DateTime.monday, DateTime.friday])
 
         // Parse the shift times into DateTime objects for comparison
@@ -2409,19 +2442,19 @@ void onStart(ServiceInstance service) async {
             "track condition for data insert: $isWithinTrackingHours   ====== $weekoffsString");
 
         // Check if tracking is allowed
-        if (isWithinTrackingHours && !isExcludedDate && !isWeekOff) {
-          //   if ( !isExcludedDate ) {
-          service.invoke('on_location_changed', position.toJson());
-
-          bool hasPointToday = await dataAccessHandler.hasPointForToday();
-          bool hasleaveToday = await dataAccessHandler.hasleaveForToday();
-
-          print(
-              "track condition hasleaveToday: $hasleaveToday  hasPointToday ======> $hasPointToday");
-
-          if (!hasleaveToday) {
-            if (!hasPointToday) {
-              if (_isPositionAccurate(position) && position.speed > 0) {
+        // if (isWithinTrackingHours && !isExcludedDate && !isWeekOff) {
+        //   //   if ( !isExcludedDate ) {
+        //   service.invoke('on_location_changed', position.toJson());
+        //
+         bool hasPointToday = await dataAccessHandler.hasPointForToday();
+        //   bool hasleaveToday = await dataAccessHandler.hasleaveForToday();
+        //
+        //   print(
+        //       "track condition hasleaveToday: $hasleaveToday  hasPointToday ======> $hasPointToday");
+        //
+        //   if (!hasleaveToday) {
+          if (!hasPointToday) {
+             // if (_isPositionAccurate(position) && position.speed > 0) {
                 if (!isFirstLocationLogged) {
                   lastLatitude = position.latitude;
                   lastLongitude = position.longitude;
@@ -2429,10 +2462,10 @@ void onStart(ServiceInstance service) async {
 
                   // Insert the first location
                   await insertLocationToDatabase(
-                      palm3FoilDatabase, position, userID, syncService);
+                      hrmsDatabase, position, userID, syncService);
                 }
-              }
-            }
+          //    }
+          //  }
 
             if (_isPositionAccurate(position) && position.speed > 0) {
               final distance = Geolocator.distanceBetween(
@@ -2448,7 +2481,7 @@ void onStart(ServiceInstance service) async {
 
                 // Insert location points when the distance exceeds the threshold
                 await insertLocationToDatabase(
-                    palm3FoilDatabase, position, userID, syncService);
+                    hrmsDatabase, position, userID, syncService);
               } else {
                 appendLog("Skipping insert: Distance too short (${distance}m)");
               }
@@ -2459,12 +2492,13 @@ void onStart(ServiceInstance service) async {
             appendLog("Tracking not allowed: User has leave today");
             print("Tracking not allowed: User has leave today");
           }
-        } else {
-          appendLog(
-              'Tracking not allowed: isWithinTrackingHours: $isWithinTrackingHours, isWeekend: $weekoffsString, isWeekOff: $isWeekOff');
-          print(
-              'Tracking not allowed: isWithinTrackingHours: $isWithinTrackingHours, isWeekend: $weekoffsString, isWeekOff: $isWeekOff');
-        }
+      //   }
+      // else {
+      //     appendLog(
+      //         'Tracking not allowed: isWithinTrackingHours: $isWithinTrackingHours, isWeekend: $weekoffsString, isWeekOff: $isWeekOff');
+      //     print(
+      //         'Tracking not allowed: isWithinTrackingHours: $isWithinTrackingHours, isWeekend: $weekoffsString, isWeekOff: $isWeekOff');
+      //   }
       }
     }, onError: (e) {
       appendLog('Error in Geolocator stream: $e');
@@ -2552,7 +2586,7 @@ String getCurrentDate() {
 }
 
 Future<void> insertLocationToDatabase(HRMSDatabaseHelper? database,
-    Position position, int? userID, SyncServiceB syncService) async {
+    Position position, String? userID, SyncServiceB syncService) async {
   if (database == null) {
     appendLog("Error: Database instance is null.");
     return;
@@ -2570,7 +2604,7 @@ Future<void> insertLocationToDatabase(HRMSDatabaseHelper? database,
       await database.insertLocationValues(
         latitude: position.latitude,
         longitude: position.longitude,
-        createdByUserId: userID,
+        createdByUserId: userID!,
         serverUpdatedStatus:
             false, // Initially false, will be updated after successful sync
         from: '997', // Replace with appropriate source if needed

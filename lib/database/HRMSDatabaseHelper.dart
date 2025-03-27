@@ -173,7 +173,7 @@ class HRMSDatabaseHelper {
   Future<void> insertLocationValues({
     required double latitude,
     required double longitude,
-    required int? createdByUserId,
+    required String? createdByUserId,
     required bool serverUpdatedStatus,
     required String? from,
   }) async {
