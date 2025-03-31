@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:hrms/Model%20Class/DailyPunch.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -31,7 +32,7 @@ class SyncService {
   static const String geoBoundariesTable = 'geoBoundaries';
   static const String leadsTable = 'leads';
   static const String fileRepositoryTable = 'FileRepositorys';
- static const String userWeekOffXref = 'UserWeekOffXref';
+ static const String dailyPunchTable = 'DailyPunchInAndOut';
  final dbHelper = HRMSDatabaseHelper();
 
  final DataAccessHandler dataAccessHandler;
@@ -40,7 +41,7 @@ class SyncService {
     geoBoundariesTable,
     leadsTable,
     fileRepositoryTable,
-    userWeekOffXref
+    dailyPunchTable
   ];
   int transactionsCheck = 0;
 
@@ -87,13 +88,11 @@ class SyncService {
    }
 
    // Fetching leads
-   List<LeadsModel> leadsList = await _fetchData(
-       dbHelper.getLeadsDetails, 'Leads');
+   List<LeadsModel> leadsList = await _fetchData(dbHelper.getLeadsDetails, 'Leads');
    print('leadsList: ${leadsList.length}');
 
    // Check if leadsList is not empty before adding to the map
-   if (leadsList.isNotEmpty) {
-     List<LeadsModel> updatedleadsList = [];
+   if (leadsList.isNotEmpty) {List<LeadsModel> updatedleadsList = [];
 
      // For each lead, get the address using latitude and longitude
      for (var leaddata in leadsList) { // Should use leadsList, not updatedleadsList
@@ -114,47 +113,65 @@ class SyncService {
    }
 
    // Fetching fileRepoList
-   List<FileRepositoryModel> fileRepoList = await _fetchData(
-       dbHelper.getFileRepositoryDetails, 'FileRepositorys');
-
-   if (fileRepoList.isNotEmpty) {
-     print('File Repository list: $fileRepoList');
-
-     List<FileRepositoryModel> updatedFileRepoList = [];
-
-     // For each file repository, call prepareAndSendFile
-     for (var model in fileRepoList) {
-       if (model.fileLocation != null) {
-         // Call prepareAndSendFile and update the model
-         await prepareAndSendFile(model.fileLocation!, model);
-
-         // Add the updated model to the new list
-         updatedFileRepoList.add(model);
-       }
-     }
-
-     // Now store the updated list in the map
-     refreshTransactionsDataMap[fileRepositoryTable] =
-         updatedFileRepoList.map((model) => model.toJson()).toList();
-
-     print(
-         'Updated File Repository map: ${refreshTransactionsDataMap[fileRepositoryTable]}');
-   } else {
-     print('File Repository list is empty.');
-   }
-   // Fetching Weekoff
-
-   // List<UserWeekOffXref> weekoffList =
-   // await _fetchData(dbHelper.getUserWeekOffXrefDetails, 'UserWeekOffXref');
+   // List<FileRepositoryModel> fileRepoList = await _fetchData(
+   //     dbHelper.getFileRepositoryDetails, 'FileRepositorys');
    //
+   // if (fileRepoList.isNotEmpty) {
+   //   print('File Repository list: $fileRepoList');
    //
-   // if (weekoffList.isNotEmpty) {
-   //   refreshTransactionsDataMap['UserWeekOffXref'] =
-   //       weekoffList.map((model) => model.toMap()).toList();
+   //   List<FileRepositoryModel> updatedFileRepoList = [];
+   //
+   //   // For each file repository, call prepareAndSendFile
+   //   for (var model in fileRepoList) {
+   //     if (model.fileLocation != null) {
+   //       // Call prepareAndSendFile and update the model
+   //       await prepareAndSendFile(model.fileLocation!, model);
+   //
+   //       // Add the updated model to the new list
+   //       updatedFileRepoList.add(model);
+   //     }
+   //   }
+   //
+   //   // Now store the updated list in the map
+   //   refreshTransactionsDataMap[fileRepositoryTable] =
+   //       updatedFileRepoList.map((model) => model.toJson()).toList();
+   //
+   //   print(
+   //       'Updated File Repository map: ${refreshTransactionsDataMap[fileRepositoryTable]}');
    // } else {
-   //   print('weekoffList is empty, skipping to next.');
+   //   print('File Repository list is empty.');
    // }
 
+   // Fetching Daily Punch-In/Out data
+  // List<DailyPunch> dailyPunchList = await dbHelper.getDailyPunchDetails();
+
+   List<DailyPunch> dailyPunchList = await _fetchData(dbHelper.getDailyPunchDetails, 'DailyPunchInAndOut');
+   print("DailyPunchlist before adding: ${dailyPunchList.length}");
+   if (dailyPunchList.isNotEmpty) {
+     List<DailyPunch> updatedDailyPunchList = [];
+
+     for (var punchData in dailyPunchList) {
+       if (punchData.punchInLatitude != null &&
+           punchData.punchInLongitude != null) {
+         punchData.punchInAddress = await getAddressFromLatLong(
+             punchData.punchInLatitude, punchData.punchInLongitude);
+       }
+       if (punchData.punchOutLatitude != null &&
+           punchData.punchOutLongitude != null) {
+         punchData.punchOutAddress = await getAddressFromLatLong(
+             punchData.punchOutLatitude!, punchData.punchOutLongitude!);
+       }
+       updatedDailyPunchList.add(punchData);
+     }
+
+     refreshTransactionsDataMap[dailyPunchTable] =
+         updatedDailyPunchList.map((model) => model.toMap()).toList();
+
+     print(
+         'Updated DailyPunchInAndOut map: ${refreshTransactionsDataMap[dailyPunchTable]}');
+   } else {
+     print('DailyPunch list is empty.');
+   }
 
    // If no data was fetched, print a message
    if (refreshTransactionsDataMap.isEmpty) {
@@ -165,21 +182,7 @@ class SyncService {
  }
 
 
-  // Future<void> getRefreshSyncTransDataMap() async {
-  //   // Fetching geoBoundaries
-  //   List<GeoBoundariesModel> geoBoundariesList = await _fetchData(dbHelper.getGeoBoundariesDetails, 'GeoBoundaries');
-  //   refreshTransactionsDataMap[geoBoundariesTable] = geoBoundariesList.map((model) => model.toMap()).toList();
-  //
-  //   // Fetching leads
-  //   List<LeadsModel> leadsList = await _fetchData(dbHelper.getLeadsDetails, 'Leads');
-  //   refreshTransactionsDataMap[leadsTable] = leadsList.map((model) => model.toMap()).toList();
-  //
-  //   // Fetching fileRepoList
-  //   List<FileRepositoryModel> fileRepoList = await _fetchData(dbHelper.getFileRepositoryDetails, 'File Repository');
-  //   refreshTransactionsDataMap[fileRepositoryTable] = fileRepoList.map((model) => model.toJson()).toList();
-  //
-  //   print('Fetched Data: $refreshTransactionsDataMap');
-  // }
+
   Future<void> performRefreshTransactionsSync(BuildContext context, int toastIndex,
       {void Function()? showSuccessBottomSheet,
       void Function()? onComplete}) async {
@@ -193,6 +196,7 @@ class SyncService {
       // _showSnackBar(context, "No transactions data to sync.");
       String tableName = "No transactions data to sync.";
       List tableData = refreshTransactionsDataMap[tableName] ?? [];
+      print('Syncing table: $tableName, Data: ${jsonEncode({tableName: tableData})}');
       print('toastIndex=>193 $toastIndex');
       if (tableData.isNotEmpty) {
         try {
@@ -217,16 +221,6 @@ class SyncService {
                     context, refreshTableNamesList[transactionsCheck],toastIndex);
               }
               print('toastIndex=>193 $toastIndex');
-              // Fluttertoast.showToast(
-              //   msg: "Sync successful for $tableName!",
-              //   toastLength: Toast.LENGTH_SHORT,
-              //   gravity: ToastGravity.BOTTOM,
-              //   backgroundColor: Colors.green,
-              //   textColor: Colors.white,
-              //   fontSize: 16.0,
-              // );
-
-            //  _showSnackBar(context, "Sync is successful!");
 
               // Call onComplete after the loop ends
               if (onComplete != null) {
@@ -240,24 +234,7 @@ class SyncService {
               _showSnackBar(context, "Sync failed for $tableName: $errorMessage");
             }
 
-          // if (response.statusCode == 200) {
-          //   await _updateServerUpdatedStatus(tableName);
-          //
-          //   transactionsCheck++;
-          //
-          //   for (int transactionsCheck = 0;
-          //       transactionsCheck < refreshTableNamesList.length;
-          //       transactionsCheck++) {
-          //     await _syncTransactionsDataToCloud(
-          //         context, refreshTableNamesList[transactionsCheck]);
-          //   }
-          //
-          //   _showSnackBar(context, "Sync is successful!");
-          //
-          //   // Call onComplete after the loop ends
-          //   if (onComplete != null) {
-          //     onComplete(); // Ensure the callback is invoked
-          //   }
+
           } else {
             print("Sync failed for $tableName: ${response.body}");
             _showSnackBar(

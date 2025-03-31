@@ -20,6 +20,7 @@ import '../home_screen.dart';
 import '../common_widgets/common_styles.dart';
 import '../common_widgets/custom_textfield.dart';
 import '../database/DataAccessHandler.dart';
+import '../shared_keys.dart';
 import '../styles.dart';
 import 'home/HomeScreen.dart';
 
@@ -47,7 +48,7 @@ class _AddLeadScreenState extends State<AddLeads>
   bool isImageList = false;
   final ImagePicker _picker = ImagePicker();
   final List<PlatformFile> _files = [];
-  int? userID;
+  String? userID;
   String? _errorMessage;
   String? Username;
   String? empCode;
@@ -721,15 +722,15 @@ class _AddLeadScreenState extends State<AddLeads>
 
         bool isConnected = await CommonStyles.checkInternetConnectivity();
         if (isConnected) {
-          // final syncService = SyncService(dataAccessHandler);
-          // syncService
-          //     .performRefreshTransactionsSync(context, 3)
-          //     .whenComplete(() {
-          //   Navigator.push(
-          //     context,
-          //     MaterialPageRoute(builder: (context) => const home_screen()),
-          //   );
-          // });
+          final syncService = SyncService(dataAccessHandler);
+          syncService
+              .performRefreshTransactionsSync(context, 3)
+              .whenComplete(() {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) =>  home_screen()),
+            );
+          });
         } else {
           CommonStyles.showCustomToastMessageLong(
               'Client Visit added successfully.', context, 0, 2);
@@ -869,9 +870,10 @@ class _AddLeadScreenState extends State<AddLeads>
 
   Future<void> getuserdata() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    userID = 101;
+    userID = prefs.getString(SharedKeys.userId) ?? "";
     Username = "Roja";
-    empCode = "CIS100095";
+    empCode= prefs.getString(SharedKeys.employeeId) ?? "";
+
     //TODO
     // userID = prefs.getInt('userID');
     // Username = prefs.getString('username') ?? '';

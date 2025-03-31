@@ -8,6 +8,7 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../Model Class/DailyPunch.dart';
 import '../Model Class/FileRepositoryModel.dart';
 import '../Model Class/GeoBoundariesModel.dart';
 import '../Model Class/LeadsModel.dart';
@@ -726,4 +727,17 @@ class HRMSDatabaseHelper {
 
     return result.map((row) => FileRepositoryModel.fromJson(row)).toList();
   }
+
+  Future<List<DailyPunch>> getDailyPunchDetails() async {
+    final db = await database;
+    final List<Map<String, dynamic>> result = await db.query(
+      'DailyPunchInAndOut',
+      where: 'ServerUpdatedStatus = ?',
+      whereArgs: [0],
+    );
+    print('DailyPunchInAndOut fetched: $result');
+
+    return result.map((row) => DailyPunch.fromMap(row)).toList();
+  }
+
 }

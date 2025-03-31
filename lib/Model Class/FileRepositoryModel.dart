@@ -2,19 +2,20 @@ import 'dart:convert';
 import 'dart:io';
 
 class FileRepositoryModel {
-  final String leadsCode;
+  final String? leadsCode;
   String? fileName; // File name will now store the Base64 string
   final String? fileLocation; // Nullable
   final String? fileExtension; // Nullable
   final bool isActive;
-  final int createdByUserId;
+  final String createdByUserId;
   final String createdDate; // This should not be nullable
-  final int updatedByUserId;
+  final String updatedByUserId;
   final String updatedDate; // This should not be nullable
   final bool serverUpdatedStatus;
+  final int? LookupType;
 
   FileRepositoryModel({
-    required this.leadsCode,
+     this.leadsCode,
     this.fileName, // Base64 content (optional, will be updated later)
     this.fileLocation, // Nullable
     this.fileExtension, // Nullable
@@ -24,6 +25,7 @@ class FileRepositoryModel {
     required this.updatedByUserId,
     required this.updatedDate,
     required this.serverUpdatedStatus,
+    this.LookupType,
   });
 
   // Factory method to create an instance from a JSON map
@@ -38,7 +40,8 @@ class FileRepositoryModel {
       createdDate: json['CreatedDate'] ?? '', // Ensure it has a default value
       updatedByUserId: json['UpdatedByUserId'] ?? 0, // Default to 0 if null
       updatedDate: json['UpdatedDate'] ?? '', // Ensure it has a default value
-      serverUpdatedStatus: json['ServerUpdatedStatus'] == 1, // Handle conversion from int to bool
+      serverUpdatedStatus: json['ServerUpdatedStatus'] == 1,
+      LookupType: json['LookupType'] ?? 0,// Handle conversion from int to bool
     );
   }
 

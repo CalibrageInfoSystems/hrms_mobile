@@ -2,7 +2,7 @@ class GeoBoundariesModel {
   double? latitude;
   double? longitude;
   String? Address;
-  int? createdByUserId;
+  String? createdByUserId;
   String? createdDate;
   bool? serverUpdatedStatus;
 

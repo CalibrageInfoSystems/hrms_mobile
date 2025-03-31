@@ -6,7 +6,7 @@ var baseUrl = "http://182.18.157.215/HRMS/API"; //  test
 
 const leaveApplyURL = 'http://182.18.157.215:/';
 // const leaveApplyURL = 'https://hrms.calibrage.in:/';
-
+//https://localhost:7215/api/Track/SyncTransactions
 var getlogin = "/hrmsapi/Security/Login"; // login url post api
 var getselfempolyee =
     "/hrmsapi/Employee/GetSelfEmployeeData/"; // need to pass the empolyeeid
@@ -42,4 +42,4 @@ var getemployedata = '/hrmsapi/Employee/GetEmployeeBasedOnId/';
 var getleaveStatistics = '/hrmsapi/Attendance/GetLeaveStatistics/';
 /* const testLeaveApplyURL = 'http://182.18.157.215:/';
 const uatLeaveApplyURL = 'https://hrms.calibrage.in:/'; */
-var SyncTransactions = "Sync/SyncTransactions";
+var SyncTransactions = "/api/Track/SyncTransactions";

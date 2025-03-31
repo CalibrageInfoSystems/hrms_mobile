@@ -10,9 +10,9 @@ class LeadsModel {
   final double? latitude;
   final double? longitude;
   String? Address;
-  final int? createdByUserId;
+  final String? createdByUserId;
   final DateTime? createdDate;
-  final int? updatedByUserId;
+  final String? updatedByUserId;
   final DateTime? updatedDate;
   bool? serverUpdatedStatus;
 
