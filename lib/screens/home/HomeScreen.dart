@@ -85,14 +85,14 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isButtonEnabled = false;
   String? selectedOptionbottom = null; // Default selected option
   DateTime selectedDatemark =
-  DateTime.now().add(const Duration(days: 1)); // Default current date
+      DateTime.now().add(const Duration(days: 1)); // Default current date
   TextEditingController remarksController = TextEditingController();
   bool? isLeave;
   int? toastcount = 0; // Controller for remarks
   String _currentDateTime = "";
   String _currentLocation = "Fetching location...";
   TextEditingController dateController =
-  TextEditingController(); // Controller for displaying date
+      TextEditingController(); // Controller for displaying date
   List<int> userActivityRights = [];
   List<String> menuItems = [];
   static const String PREVIOUS_SYNC_DATE = 'previous_sync_date';
@@ -133,9 +133,9 @@ class _HomeScreenState extends State<HomeScreen> {
     startService();
     _getCurrentDateTime();
     _getCurrentLocation();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    /*  WidgetsBinding.instance.addPostFrameCallback((_) {
       showShiftPopup(context, _currentDateTime, _currentLocation);
-    });
+    }); */
 
     Commonutils.checkInternetConnectivity().then((isConnected) {
       if (isConnected) {
@@ -189,17 +189,39 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       isPunchedIn = prefs.getBool(Constants.isPunchIn) ?? false;
       _time = prefs.getString(Constants.punchTime) ?? 'Invalid Time';
-      print('isPunchedIn: ${isPunchedIn}');
-      print('xxx1: ${prefs.getString(Constants.punchTime)}');
-      print('xxx2: $_time');
     });
+    final now = DateTime.now();
+    final int currentHour = now.hour;
+    if (currentHour >= 9 && currentHour < 18) {
+      if (!isPunchedIn) {
+        setState(() {
+          isRequestProcessing = true;
+        });
+
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => punchInOutDialog(context),
+        );
+      }
+    } else if (currentHour >= 18) {
+      if (isPunchedIn) {
+        setState(() {
+          isRequestProcessing = true;
+        });
+
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => punchInOutDialog(context),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery
-        .of(context)
-        .size;
+    final size = MediaQuery.of(context).size;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -217,107 +239,103 @@ class _HomeScreenState extends State<HomeScreen> {
             // backgroundGredient(context),
             Positioned.fill(
                 child: Column(
-                  children: [
-                    headerSection(context),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: SingleChildScrollView(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Show loading indicator while data is loading
-                                if (isLoading)
-                                  const Center(
-                                      child:
+              children: [
+                headerSection(context),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: SingleChildScrollView(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Show loading indicator while data is loading
+                            if (isLoading)
+                              const Center(
+                                  child:
                                       CircularProgressIndicator()) // Loading indicator
-                                else
-                                  ...[
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 5),
-                                      decoration: BoxDecoration(
-                                        // color: Colors.white,
-                                        borderRadius: BorderRadius.circular(10),
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            CommonStyles.primaryColor
-                                                .withOpacity(0.05),
-                                            CommonStyles.primaryColor
-                                                .withOpacity(0.1),
-                                            CommonStyles.primaryColor
-                                                .withOpacity(0.2),
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
+                            else ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 5),
+                                decoration: BoxDecoration(
+                                  // color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      CommonStyles.primaryColor
+                                          .withOpacity(0.05),
+                                      CommonStyles.primaryColor
+                                          .withOpacity(0.1),
+                                      CommonStyles.primaryColor
+                                          .withOpacity(0.2),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  border: Border.all(
+                                    color: CommonStyles.primaryColor,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          isPunchedIn
+                                              ? "Punch In"
+                                              : "Shift Timings",
+                                          style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold),
                                         ),
-                                        border: Border.all(
-                                          color: CommonStyles.primaryColor,
+                                        Text(
+                                          isPunchedIn
+                                              ? "at ${formatPunchTime(_time)}"
+                                              : "09:00 to 18:00",
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey[700]),
                                         ),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Column(
-                                            crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                isPunchedIn
-                                                    ? "Punch In"
-                                                    : "Shift Timings",
-                                                style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight
-                                                        .bold),
-                                              ),
-                                              Text(
-                                                isPunchedIn
-                                                    ? "at ${formatPunchTime(
-                                                    _time)}"
-                                                    : "09:00 to 18:00",
-                                                style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.grey[700]),
-                                              ),
-                                            ],
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () async {
-                                              setState(() {
-                                                isRequestProcessing = true;
-                                              });
+                                      ],
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        setState(() {
+                                          isRequestProcessing = true;
+                                        });
 
-                                              await showDialog(
-                                                context: context,
-                                                barrierDismissible: false,
-                                                builder: (context) =>
-                                                    punchInOutDialog(context),
-                                              );
+                                        await showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (context) =>
+                                              punchInOutDialog(context),
+                                        );
 
-                                              /* setState(() {
+                                        /* setState(() {
                                           isRequestProcessing = false;
                                         }); */
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              /* backgroundColor: isRequestProcessing
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        /* backgroundColor: isRequestProcessing
                                             ? Colors.grey
                                             : Colors.blue, */
-                                              backgroundColor:
-                                              CommonStyles.primaryColor,
-                                              foregroundColor: Colors.white,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                BorderRadius.circular(20),
-                                              ),
-                                              padding: const EdgeInsets
-                                                  .symmetric(
-                                                  horizontal: 16, vertical: 10),
-                                            ),
-                                            child: isRequestProcessing
-                                                ? const SizedBox(
+                                        backgroundColor:
+                                            CommonStyles.primaryColor,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16, vertical: 10),
+                                      ),
+                                      child: isRequestProcessing
+                                          ? const SizedBox(
                                               width: 20,
                                               height: 20,
                                               child: CircularProgressIndicator(
@@ -325,216 +343,205 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 strokeWidth: 2,
                                               ),
                                             )
-                                                : Text(
+                                          : Text(
                                               isPunchedIn
                                                   ? "Punch Out"
                                                   : "Punch In",
                                             ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: customBox(
+                                        title: 'Total Client Visits',
+                                        data: totalLeadsCount),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: customBox(
+                                        title: 'Today Client Visits',
+                                        data: todayLeadsCount),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              statisticsSection(),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: dcustomBox(
+                                      title: 'Km\'s Travel',
+                                      data: totalDistance.toStringAsFixed(2),
+                                      // Round to 2 decimal places
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: customBox(
+                                        title: 'Client Visits',
+                                        data: dateRangeLeadsCount),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: customBtn(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const AddLeads()),
+                                        );
+                                        // Navigator.push(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (
+                                        //         context) => const AddLeads(),
+                                        //   ),
+                                        // );
+                                      },
+                                      child: const Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.add,
+                                            size: 18,
+                                            color: CommonStyles.whiteColor,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Add Client Visit',
+                                            style: CommonStyles.txStyF14CwFF5,
                                           ),
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(height: 20),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: customBox(
-                                              title: 'Total Client Visits',
-                                              data: totalLeadsCount),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: customBox(
-                                              title: 'Today Client Visits',
-                                              data: todayLeadsCount),
-                                        ),
-                                      ],
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: customBtn(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const ViewLeads(),
+                                          ),
+                                        );
+                                      },
+                                      child: const Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.view_list_rounded,
+                                            size: 18,
+                                            color: CommonStyles.whiteColor,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'View Client Visits',
+                                            style: CommonStyles.txStyF14CwFF5,
+                                          ),
+                                        ],
+                                      ),
+                                      backgroundColor: CommonStyles.blueheader,
                                     ),
-                                    const SizedBox(height: 10),
-                                    statisticsSection(),
-                                    const SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: dcustomBox(
-                                            title: 'Km\'s Travel',
-                                            data: totalDistance.toStringAsFixed(
-                                                2),
-                                            // Round to 2 decimal places
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: customBtn(
+                                      onPressed: () {
+                                        //  startTransactionSync(context);
+                                      },
+                                      child: const Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.add,
+                                            size: 18,
+                                            color: CommonStyles.whiteColor,
                                           ),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: customBox(
-                                              title: 'Client Visits',
-                                              data: dateRangeLeadsCount),
-                                        ),
-                                      ],
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Get Sync Data',
+                                            style: CommonStyles.txStyF14CwFF5,
+                                          ),
+                                        ],
+                                      ),
+                                      backgroundColor: CommonStyles.blueheader,
                                     ),
-                                    const SizedBox(height: 20),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: customBtn(
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                    const AddLeads()),
-                                              );
-                                              // Navigator.push(
-                                              //   context,
-                                              //   MaterialPageRoute(
-                                              //     builder: (
-                                              //         context) => const AddLeads(),
-                                              //   ),
-                                              // );
-                                            },
-                                            child: const Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.add,
-                                                  size: 18,
-                                                  color: CommonStyles
-                                                      .whiteColor,
-                                                ),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  'Add Client Visit',
-                                                  style: CommonStyles
-                                                      .txStyF14CwFF5,
-                                                ),
-                                              ],
-                                            ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: customBtn(
+                                      onPressed: () {
+                                        //
+                                        //           //startTransactionSync(context);
+                                      },
+                                      // onPressed: isButtonEnabled
+                                      //     ? () =>
+                                      //     Navigator.push(
+                                      //       context,
+                                      //       MaterialPageRoute(
+                                      //           builder: (context) => SyncScreen()),
+                                      //     )
+                                      //     : null,
+                                      // Navigate if enabled
+                                      backgroundColor: isButtonEnabled
+                                          ? CommonStyles.btnRedBgColor
+                                          : CommonStyles.hintTextColor,
+                                      // Set background color based on enabled/disabled state
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.sync,
+                                            size: 18,
+                                            color: isButtonEnabled
+                                                ? CommonStyles.whiteColor
+                                                : CommonStyles
+                                                    .disabledTextColor, // Adjust icon color when disabled
                                           ),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: customBtn(
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                  const ViewLeads(),
-                                                ),
-                                              );
-                                            },
-                                            child: const Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.view_list_rounded,
-                                                  size: 18,
-                                                  color: CommonStyles
-                                                      .whiteColor,
-                                                ),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  'View Client Visits',
-                                                  style: CommonStyles
-                                                      .txStyF14CwFF5,
-                                                ),
-                                              ],
-                                            ),
-                                            backgroundColor: CommonStyles
-                                                .blueheader,
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Sync Data',
+                                            style: isButtonEnabled
+                                                ? CommonStyles.txStyF14CwFF5
+                                                : CommonStyles.txStyF14CwFF5
+                                                    .copyWith(
+                                                        color: CommonStyles
+                                                            .disabledTextColor), // Adjust text color when disabled
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                    const SizedBox(height: 20),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: customBtn(
-                                            onPressed: () {
-                                              //  startTransactionSync(context);
-                                            },
-                                            child: const Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.add,
-                                                  size: 18,
-                                                  color: CommonStyles
-                                                      .whiteColor,
-                                                ),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  'Get Sync Data',
-                                                  style: CommonStyles
-                                                      .txStyF14CwFF5,
-                                                ),
-                                              ],
-                                            ),
-                                            backgroundColor: CommonStyles
-                                                .blueheader,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: customBtn(
-                                            onPressed: () {
-                                              //
-                                              //           //startTransactionSync(context);
-                                            },
-                                            // onPressed: isButtonEnabled
-                                            //     ? () =>
-                                            //     Navigator.push(
-                                            //       context,
-                                            //       MaterialPageRoute(
-                                            //           builder: (context) => SyncScreen()),
-                                            //     )
-                                            //     : null,
-                                            // Navigate if enabled
-                                            backgroundColor: isButtonEnabled
-                                                ? CommonStyles.btnRedBgColor
-                                                : CommonStyles.hintTextColor,
-                                            // Set background color based on enabled/disabled state
-                                            child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.sync,
-                                                  size: 18,
-                                                  color: isButtonEnabled
-                                                      ? CommonStyles.whiteColor
-                                                      : CommonStyles
-                                                      .disabledTextColor, // Adjust icon color when disabled
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  'Sync Data',
-                                                  style: isButtonEnabled
-                                                      ? CommonStyles
-                                                      .txStyF14CwFF5
-                                                      : CommonStyles
-                                                      .txStyF14CwFF5
-                                                      .copyWith(
-                                                      color: CommonStyles
-                                                          .disabledTextColor), // Adjust text color when disabled
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 20),
-                                  ],
-                              ]),
-                        ),
-                      ),
-                    )
-                  ],
-                ))
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                            ],
+                          ]),
+                    ),
+                  ),
+                )
+              ],
+            ))
           ]),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
@@ -568,9 +575,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  ElevatedButton customBtn({Color? backgroundColor = CommonStyles.primaryColor,
-    required Widget child,
-    void Function()? onPressed}) {
+  ElevatedButton customBtn(
+      {Color? backgroundColor = CommonStyles.primaryColor,
+      required Widget child,
+      void Function()? onPressed}) {
     return ElevatedButton(
       onPressed: () {
         onPressed?.call();
@@ -666,8 +674,8 @@ class _HomeScreenState extends State<HomeScreen> {
               style: CommonStyles.txStyF20CbFF5.copyWith(
                 fontSize: 30,
               )
-            /* style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold), */
-          ),
+              /* style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold), */
+              ),
         ],
       ),
     );
@@ -822,7 +830,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             selectedOption = value;
             totalDistance =
-            0.0; // Reset total distance when a new option is selected
+                0.0; // Reset total distance when a new option is selected
           });
           // Handle date selection and print accordingly
           if (value == 'Today') {
@@ -833,7 +841,7 @@ class _HomeScreenState extends State<HomeScreen> {
             DateTime now = DateTime.now();
             int currentWeekDay = now.weekday;
             DateTime firstDayOfWeek =
-            now.subtract(Duration(days: currentWeekDay - 1)); // Monday
+                now.subtract(Duration(days: currentWeekDay - 1)); // Monday
             String monday = DateFormat('yyyy-MM-dd').format(firstDayOfWeek);
             String today = DateFormat('yyyy-MM-dd').format(now);
             fetchdatewiseleads(monday, today);
@@ -870,7 +878,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String? selectedDate = 'Today';
 
-  void launchDatePicker(BuildContext context, {
+  void launchDatePicker(
+    BuildContext context, {
     required DateTime firstDate,
     required DateTime lastDate,
     required DateTime initialDate,
@@ -983,7 +992,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (permission) {
         // Check background permission
         LocationPermission backgroundPermission =
-        await Geolocator.checkPermission();
+            await Geolocator.checkPermission();
         print('Initial background permission check: $backgroundPermission');
         appendLog('Initial background permission check: $backgroundPermission');
 
@@ -1023,8 +1032,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // Debug prints to check the current position
         print('Location permission granted');
         print(
-            'Current Position: Latitude: ${currentPosition
-                .latitude}, Longitude: ${currentPosition.longitude}');
+            'Current Position: Latitude: ${currentPosition.latitude}, Longitude: ${currentPosition.longitude}');
 
         // Show success toast
         //   await Fluttertoast.showToast(msg: "Service started successfully!");
@@ -1110,7 +1118,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Directory appFolderPath = Directory(
     //     '/storage/emulated/0/Download/$folderName');
     Directory appFolderPath =
-    Directory('/storage/emulated/0/Download/SmartGeoTrack');
+        Directory('/storage/emulated/0/Download/SmartGeoTrack');
     if (!appFolderPath.existsSync()) {
       appFolderPath.createSync(recursive: true);
     }
@@ -1122,7 +1130,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Get the current date and time in a readable format
     String currentDateTime =
-    DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+        DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
     try {
       final buf = logFile.openWrite(mode: FileMode.append);
@@ -1139,11 +1147,7 @@ class _HomeScreenState extends State<HomeScreen> {
     userID = prefs.getInt('userID');
     RoleId = prefs.getInt('roleID');
     username = prefs.getString('username') ?? '';
-    setState(() {
-      isPunchedIn = prefs.getBool(Constants.isPunchIn) ?? false;
-    });
-    print('username==$username');
-    print('RoleId==$RoleId');
+
     String firstName = prefs.getString('firstName') ?? '';
     String email = prefs.getString('email') ?? '';
     String mobileNumber = prefs.getString('mobileNumber') ?? '';
@@ -1159,8 +1163,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String day = DateFormat('d').format(date);
     String suffix = getDaySuffix(int.parse(day));
     String formattedDate =
-        '$day$suffix ${DateFormat('MMM').format(date)} ${DateFormat('y').format(
-        date)}';
+        '$day$suffix ${DateFormat('MMM').format(date)} ${DateFormat('y').format(date)}';
     return formattedDate;
   }
 
@@ -1198,7 +1201,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return AlertDialog(
           title: const Text("Location Services Disabled"),
           content:
-          const Text("Please enable location services to use this app."),
+              const Text("Please enable location services to use this app."),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -1225,7 +1228,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     String currentDate =
-    getCurrentDate(); // Assuming this returns a string in 'YYYY-MM-DD' format
+        getCurrentDate(); // Assuming this returns a string in 'YYYY-MM-DD' format
     SharedPreferences prefs = await SharedPreferences.getInstance();
     //   userID = prefs.getInt('userID'); //TODO
     RoleId = prefs.getInt('roleID');
@@ -1283,8 +1286,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String getCurrentDate() {
     DateTime now = DateTime.now();
     String formattedDate =
-        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day
-        .toString().padLeft(2, '0')}";
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
     return formattedDate;
   }
 
@@ -1292,9 +1294,9 @@ class _HomeScreenState extends State<HomeScreen> {
     String currentDate = getCurrentDate();
     try {
       final dataAccessHandler =
-      Provider.of<DataAccessHandler>(context, listen: false);
+          Provider.of<DataAccessHandler>(context, listen: false);
       List<dynamic> leads =
-      await dataAccessHandler.getTodayLeadsuser(currentDate, userID);
+          await dataAccessHandler.getTodayLeadsuser(currentDate, userID);
       return leads.map((item) => LeadsModel.fromMap(item)).toList();
     } catch (e) {
       throw Exception('catch: ${e.toString()}');
@@ -1320,7 +1322,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Replace this list with dynamically fetched data
     // Fetch latitude and longitude data for the given date range
     List<Map<String, double>> data =
-    await dataAccessHandler.fetchLatLongsFromDatabase(startday, today);
+        await dataAccessHandler.fetchLatLongsFromDatabase(startday, today);
 
     print('Data: $data km');
     totalDistance = 0.0;
@@ -1529,11 +1531,11 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       List<Placemark> placemarks =
-      await placemarkFromCoordinates(position.latitude, position.longitude);
+          await placemarkFromCoordinates(position.latitude, position.longitude);
 
       Placemark place = placemarks.first;
       String currentTime =
-      DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
       // Check if the widget is still mounted before calling setState
       if (!mounted) return;
@@ -1544,8 +1546,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _latitude = position.latitude.toString();
         _longitude = position.longitude.toString();
         _address =
-        "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place
-            .administrativeArea}, ${place.postalCode}, ${place.country}";
+            "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
         _time = currentTime;
       });
 
@@ -1565,12 +1566,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
   Future<void> _captureAndProcessImage() async {
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? pickedFile =
-      await picker.pickImage(source: ImageSource.camera);
+          await picker.pickImage(source: ImageSource.camera);
 
       if (pickedFile == null) {
         if (!mounted) return;
@@ -1584,7 +1584,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final File imageFile = File(pickedFile.path);
       final ui.Image capturedImage =
-      await decodeImageFromList(await imageFile.readAsBytes());
+          await decodeImageFromList(await imageFile.readAsBytes());
 
       ui.PictureRecorder recorder = ui.PictureRecorder();
       Canvas canvas = Canvas(recorder);
@@ -1613,8 +1613,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       double textBoxHeight = textPainter.height + 20;
 
-      Paint rectPaint = Paint()
-        ..color = Colors.black.withOpacity(0.7);
+      Paint rectPaint = Paint()..color = Colors.black.withOpacity(0.7);
       canvas.drawRect(
         Rect.fromLTWH(0, capturedImage.height - textBoxHeight,
             capturedImage.width.toDouble(), textBoxHeight),
@@ -1628,7 +1627,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .endRecording()
           .toImage(capturedImage.width, capturedImage.height);
       ByteData? byteData =
-      await finalImage.toByteData(format: ui.ImageByteFormat.png);
+          await finalImage.toByteData(format: ui.ImageByteFormat.png);
       Uint8List pngBytes = byteData!.buffer.asUint8List();
       // Save the processed image
       final directory = await getApplicationDocumentsDirectory();
@@ -1636,17 +1635,16 @@ class _HomeScreenState extends State<HomeScreen> {
       File file = File(filePath);
       await file.writeAsBytes(pngBytes);
       // Insert into DailyPunchInAndOut table
-      await await _insertPunchData(
-        DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()), // Punch time
-        _latitude!,
-        _longitude!,
-        _address!,
-        isPunchedIn, // true = punch in, false = punch out
-        filePath, // Image file path
+      await _insertPunchData(
+        DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+        _latitude,
+        _longitude,
+        _address,
+        isPunchedIn,
+        filePath,
       );
 
-
-      updatePunchStatus(isPunchedIn ? false : true);
+      await updatePunchStatus(isPunchedIn ? false : true);
 
       /* if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1665,6 +1663,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget punchInOutDialog(BuildContext context) {
     String currentTime = DateFormat('HH:mm').format(DateTime.now());
+    Future<Position> futurePosition = Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -1703,35 +1704,78 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 12),
                 // Map view
                 Expanded(
-                  child: _currentPosition == null
+                  child: FutureBuilder<Position>(
+                    future: futurePosition,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(6.0),
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(
+                                snapshot.data!.latitude,
+                                snapshot.data!.longitude,
+                              ),
+                              zoom: 15,
+                            ),
+                            markers: {
+                              Marker(
+                                markerId: const MarkerId('current_location'),
+                                position: LatLng(
+                                  snapshot.data!.latitude,
+                                  snapshot.data!.longitude,
+                                ),
+                              ),
+                            },
+                            onMapCreated: (GoogleMapController controller) {
+                              _mapController = controller;
+                            },
+                            myLocationEnabled: true,
+                            myLocationButtonEnabled: false,
+                            zoomControlsEnabled: false,
+                          ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text('Error: ${snapshot.error}'),
+                        );
+                      } else {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    },
+                  ),
+
+                  /* _currentPosition == null
                       ? const Center(child: CircularProgressIndicator())
                       : ClipRRect(
-                    borderRadius: BorderRadius.circular(6.0),
-                    child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: LatLng(
-                          _currentPosition!.latitude,
-                          _currentPosition!.longitude,
-                        ),
-                        zoom: 15,
-                      ),
-                      markers: {
-                        Marker(
-                          markerId: const MarkerId('current_location'),
-                          position: LatLng(
-                            _currentPosition!.latitude,
-                            _currentPosition!.longitude,
+                          borderRadius: BorderRadius.circular(6.0),
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(
+                                _currentPosition!.latitude,
+                                _currentPosition!.longitude,
+                              ),
+                              zoom: 15,
+                            ),
+                            markers: {
+                              Marker(
+                                markerId: const MarkerId('current_location'),
+                                position: LatLng(
+                                  _currentPosition!.latitude,
+                                  _currentPosition!.longitude,
+                                ),
+                              ),
+                            },
+                            onMapCreated: (GoogleMapController controller) {
+                              _mapController = controller;
+                            },
+                            myLocationEnabled: true,
+                            myLocationButtonEnabled: false,
+                            zoomControlsEnabled: false,
                           ),
-                        ),
-                      },
-                      onMapCreated: (GoogleMapController controller) {
-                        _mapController = controller;
-                      },
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: false,
-                      zoomControlsEnabled: false,
-                    ),
-                  ),
+                        ), */
                 ),
                 const SizedBox(height: 10),
                 // Sample text
@@ -1759,9 +1803,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () async {
                       Navigator.of(context).pop();
                       await _captureAndProcessImage();
-                      setState(() {
-                        isRequestProcessing = false;
-                      });
+
                       /* await _captureAndProcessImage().whenComplete(() {
                         if (mounted) {
                           Navigator.of(context).pop();
@@ -1843,14 +1885,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Image.asset(
       'assets/background_layer_2.png',
       fit: BoxFit.cover,
-      width: MediaQuery
-          .of(context)
-          .size
-          .width,
-      height: MediaQuery
-          .of(context)
-          .size
-          .height,
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
     );
   }
 
@@ -1959,7 +1995,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Map<String, dynamic> data = json.decode(response.body);
       setState(() {
         photoData =
-        data['ImageData']; // Initialize with an empty string if null
+            data['ImageData']; // Initialize with an empty string if null
         print('photoData==== $photoData');
       });
     } else {
@@ -1973,8 +2009,106 @@ class _HomeScreenState extends State<HomeScreen> {
     return DateFormat('EEEE, MMMM d yyyy').format(DateTime.now());
   }
 
-  /// Builds the profile image based on available data
   Widget _buildProfileImage() {
+    if (_imageFile != null) {
+      /*  return Image.file(
+        _imageFile!,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+      ); */
+      /* return CircleAvatar(
+        radius: 25,
+        backgroundColor: Colors.grey[300],
+        child: Image.file(
+          _imageFile!,
+          fit: BoxFit.cover,
+        ),
+      ); */
+      return Container(
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: CommonStyles.primaryColor),
+        ),
+        child: CircleAvatar(
+          radius: 25,
+          backgroundColor: Colors.grey[300],
+          child: Image.file(
+            _imageFile!,
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    } else if (photoData != null && photoData!.isNotEmpty) {
+      return FutureBuilder<Uint8List>(
+        future: _decodeBase64(photoData!),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // return const Center(child: CircularProgressIndicator.adaptive());
+            return Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: CommonStyles.primaryColor),
+              ),
+              child: CircleAvatar(
+                radius: 25,
+                backgroundColor: Colors.grey[300],
+                child:
+                    const Center(child: CircularProgressIndicator.adaptive()),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: CommonStyles.primaryColor),
+              ),
+              child: CircleAvatar(
+                radius: 25,
+                backgroundColor: Colors.grey[300],
+                child: const Icon(Icons.person, size: 40, color: Colors.white),
+              ),
+            );
+          } else {
+            return Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: CommonStyles.primaryColor),
+              ),
+              child: CircleAvatar(
+                radius: 25,
+                backgroundColor: Colors.grey[300],
+                backgroundImage:
+                    snapshot.data != null ? MemoryImage(snapshot.data!) : null,
+                child: snapshot.data == null
+                    ? const Icon(Icons.person, size: 40, color: Colors.white)
+                    : null,
+              ),
+            );
+          }
+        },
+      );
+    } else {
+      return Container(
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: CommonStyles.primaryColor),
+        ),
+        child: CircleAvatar(
+          radius: 25,
+          backgroundColor: Colors.grey[300],
+          child: const Icon(Icons.person, size: 40, color: Colors.white),
+        ),
+      );
+    }
+  }
+
+  /*  Widget _buildProfileImage() {
     if (_imageFile != null) {
       /*  return Image.file(
         _imageFile!,
@@ -2004,13 +2138,13 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border:
-                Border.all(color: CommonStyles.primaryColor), // Blue Border
+                    Border.all(color: CommonStyles.primaryColor), // Blue Border
               ),
               child: CircleAvatar(
                 radius: 25, // Adjust size
                 backgroundColor: Colors.grey[300],
                 backgroundImage:
-                snapshot.data != null ? MemoryImage(snapshot.data!) : null,
+                    snapshot.data != null ? MemoryImage(snapshot.data!) : null,
                 child: snapshot.data == null
                     ? const Icon(Icons.person, size: 60, color: Colors.white)
                     : null,
@@ -2030,100 +2164,50 @@ class _HomeScreenState extends State<HomeScreen> {
       return _getDefaultImage(Gender, context);
     }
   }
+ */
 
-  /* Widget _buildProfileImage() {
-    if (_imageFile != null) {
-      return Image.file(
-        _imageFile!,
-        width: 40,
-        height: 40,
-        fit: BoxFit.cover,
-      );
-    } else if (photoData != null && photoData!.isNotEmpty) {
-      return FutureBuilder<Uint8List>(
-        future: _decodeBase64(photoData!),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator.adaptive());
-          } else if (snapshot.hasError) {
-            return _getDefaultImage(Gender, context);
-          } else {
-            return Image.memory(
-              snapshot.data!,
-              width: 40,
-              height: 40,
-              fit: BoxFit.cover,
-              filterQuality: FilterQuality.high,
-            );
-          }
-        },
-      );
-    } else {
-      return _getDefaultImage(Gender, context);
-    }
-  } */
-
-  /// Returns a default profile image based on gender
   Widget _getDefaultImage(String gender, BuildContext context) {
     return gender == "Male"
         ? Container(
-        width: MediaQuery
-            .of(context)
-            .size
-            .width / 3.8,
-        height: MediaQuery
-            .of(context)
-            .size
-            .height / 6.5,
-        padding: const EdgeInsets.all(3.0),
-        decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-            border: Border.all(color: Colors.white, width: 2.0)),
-        child: Image.asset(
-          'assets/men_emp.jpg',
-          // width: MediaQuery.of(context).size.width / 4.5,
-          // height: MediaQuery.of(context).size.height / 6.5,
-        ))
+            width: MediaQuery.of(context).size.width / 3.8,
+            height: MediaQuery.of(context).size.height / 6.5,
+            padding: const EdgeInsets.all(3.0),
+            decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+                border: Border.all(color: Colors.white, width: 2.0)),
+            child: Image.asset(
+              'assets/men_emp.jpg',
+              // width: MediaQuery.of(context).size.width / 4.5,
+              // height: MediaQuery.of(context).size.height / 6.5,
+            ))
         : gender == "Female"
-        ? Container(
-      width: MediaQuery
-          .of(context)
-          .size
-          .width / 3.8,
-      height: MediaQuery
-          .of(context)
-          .size
-          .height / 6.5,
-      padding: const EdgeInsets.all(3.0),
-      decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-          border: Border.all(color: Colors.white, width: 2.0)),
-      child: Image.asset(
-        'assets/women-emp.jpg',
-        // width: MediaQuery.of(context).size.width / 3.8,
-        // height: MediaQuery.of(context).size.height / 6.5,
-      ),
-    )
-        : Container(
-      width: MediaQuery
-          .of(context)
-          .size
-          .width / 3.8,
-      height: MediaQuery
-          .of(context)
-          .size
-          .height / 6.5,
-      padding: const EdgeInsets.all(3.0),
-      decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-          border: Border.all(color: Colors.white, width: 2.0)),
-      child: Image.asset(
-        'assets/app_logo.png',
-        // width: MediaQuery.of(context).size.width / 3.8,
-        // height: MediaQuery.of(context).size.height / 6.5,
-        // height: 90,
-      ),
-    ); // You can replace Container() with another default image or widget
+            ? Container(
+                width: MediaQuery.of(context).size.width / 3.8,
+                height: MediaQuery.of(context).size.height / 6.5,
+                padding: const EdgeInsets.all(3.0),
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+                    border: Border.all(color: Colors.white, width: 2.0)),
+                child: Image.asset(
+                  'assets/women-emp.jpg',
+                  // width: MediaQuery.of(context).size.width / 3.8,
+                  // height: MediaQuery.of(context).size.height / 6.5,
+                ),
+              )
+            : Container(
+                width: MediaQuery.of(context).size.width / 3.8,
+                height: MediaQuery.of(context).size.height / 6.5,
+                padding: const EdgeInsets.all(3.0),
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+                    border: Border.all(color: Colors.white, width: 2.0)),
+                child: Image.asset(
+                  'assets/app_logo.png',
+                  // width: MediaQuery.of(context).size.width / 3.8,
+                  // height: MediaQuery.of(context).size.height / 6.5,
+                  // height: 90,
+                ),
+              ); // You can replace Container() with another default image or widget
   }
 
   String formatPunchTime(String? dateTimeString) {
@@ -2131,7 +2215,7 @@ class _HomeScreenState extends State<HomeScreen> {
       print('xxx5: $dateTimeString');
       if (dateTimeString == null) return "Invalid Date";
       DateTime dateTime =
-      DateFormat("yyyy-MM-dd HH:mm:ss").parse(dateTimeString);
+          DateFormat("yyyy-MM-dd HH:mm:ss").parse(dateTimeString);
       return DateFormat("hh:mm a").format(dateTime);
     } catch (e) {
       return "Invalid Date";
@@ -2185,14 +2269,15 @@ class _HomeScreenState extends State<HomeScreen> {
       String filePath) async {
     try {
       final dataAccessHandler =
-      Provider.of<DataAccessHandler>(context, listen: false);
+          Provider.of<DataAccessHandler>(context, listen: false);
       final db = await dbHelper.database;
 
       // Ensure UserId is set correctly
-      String userId = "e939b672-84ed-45ed-ba3a-b7a372403ad3"; // Replace with actual User ID
+      String userId =
+          "e939b672-84ed-45ed-ba3a-b7a372403ad3"; // Replace with actual User ID
 
       if (userId.isEmpty) {
-        print("❌ Error: User ID is missing!");
+        print("Error: User ID is missing!");
         return false;
       }
 
@@ -2224,7 +2309,16 @@ class _HomeScreenState extends State<HomeScreen> {
           UpdatedByUserId = ?, UpdatedDate = ?,ServerUpdatedStatus = ?
       WHERE UserId = ? AND PunchOutTime IS NULL
       ''',
-          [punchTime, latitude, longitude, address, userId, punchTime,false, userId],
+          [
+            punchTime,
+            latitude,
+            longitude,
+            address,
+            userId,
+            punchTime,
+            false,
+            userId
+          ],
         );
 
         print(punchResult > 0
@@ -2243,26 +2337,26 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         // **Insert file details into FileRepository (if file exists)**
-       // int fileResult = 0;
-       //  if (filePath != null && filePath.isNotEmpty) {
-       //    Map<String, dynamic> fileData = {
-       //      'leadsCode': null,
-       //      'FileName': filePath.split('/').last,
-       //      'FileLocation': filePath,
-       //      'FileExtension': '.png',
-       //      'IsActive': 1,
-       //      'CreatedByUserId': userId,
-       //      'CreatedDate': punchTime,
-       //      'UpdatedByUserId': userId,
-       //      'UpdatedDate': punchTime,
-       //      'ServerUpdatedStatus': false,
-       //      'LookupType': 23,
-       //    };
-       //
-       //    fileResult = await db.insert('FileRepositorys', fileData);
-       //    print("✅ FileRepository entry created: $fileResult");
-       //    await dataAccessHandler.insertFileRepository(fileData);
-       //  }
+        // int fileResult = 0;
+        //  if (filePath != null && filePath.isNotEmpty) {
+        //    Map<String, dynamic> fileData = {
+        //      'leadsCode': null,
+        //      'FileName': filePath.split('/').last,
+        //      'FileLocation': filePath,
+        //      'FileExtension': '.png',
+        //      'IsActive': 1,
+        //      'CreatedByUserId': userId,
+        //      'CreatedDate': punchTime,
+        //      'UpdatedByUserId': userId,
+        //      'UpdatedDate': punchTime,
+        //      'ServerUpdatedStatus': false,
+        //      'LookupType': 23,
+        //    };
+        //
+        //    fileResult = await db.insert('FileRepositorys', fileData);
+        //    print("✅ FileRepository entry created: $fileResult");
+        //    await dataAccessHandler.insertFileRepository(fileData);
+        //  }
 
         // **Check internet connection before syncing**
 
@@ -2275,8 +2369,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return false;
     }
   }
-
-
 }
 // Future<void> _loadUserActivityRights() async {
 //   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -2686,7 +2778,8 @@ Future<void> insertLocationToDatabase(HRMSDatabaseHelper? database,
         from: '997', // Replace with appropriate source if needed
       );
 
-      appendLog('Location inserted: Latitude: ${position.latitude}, Longitude: ${position.longitude}.');
+      appendLog(
+          'Location inserted: Latitude: ${position.latitude}, Longitude: ${position.longitude}.');
 
       // Check if the network is available and then sync data
       bool isConnected = await CommonStyles.checkInternetConnectivity();

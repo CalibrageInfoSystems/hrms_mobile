@@ -119,13 +119,13 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: isRequestProcessing
             ? null
             : () async {
-          if (validateForm()) {
-            signIn();
-          }
-        },
+                if (validateForm()) {
+                  signIn();
+                }
+              },
         style: ElevatedButton.styleFrom(
           backgroundColor:
-          isRequestProcessing ? Colors.grey.shade400 : Styles.primaryColor,
+              isRequestProcessing ? Colors.grey.shade400 : Styles.primaryColor,
           elevation: isRequestProcessing ? 0 : 2,
           padding: const EdgeInsets.symmetric(vertical: 11),
           shape: RoundedRectangleBorder(
@@ -134,16 +134,16 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: isRequestProcessing
             ? const SizedBox(
-            width: 25,
-            height: 25,
-            child: CircularProgressIndicator(
-              color: Styles.primaryColor,
-            ))
+                width: 25,
+                height: 25,
+                child: CircularProgressIndicator(
+                  color: Styles.primaryColor,
+                ))
             : const Text(
-          'Sign in',
-          style: TextStyle(
-              color: Colors.white, fontSize: 15, fontFamily: 'Calibri'),
-        ),
+                'Sign in',
+                style: TextStyle(
+                    color: Colors.white, fontSize: 15, fontFamily: 'Calibri'),
+              ),
       ),
     );
   }
@@ -251,12 +251,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!isConnected) {
         Commonutils.showCustomToastMessageLong(
             'Please Check the Internet Connection', context, 1, 4);
-        return;
+        throw Exception('No internet connection');
       }
-
-      /* setState(() {
-        progressDialog.show();
-      }); */
 
       String username = _userNameController.text.toString().trim();
       String password = _passwordController.text.toString().trim();
@@ -264,8 +260,6 @@ class _LoginScreenState extends State<LoginScreen> {
       final apiUrl = Uri.parse('$baseUrl$getlogin');
       final requestBody = jsonEncode(
           {"userName": username, "password": password, "rememberMe": true});
-      print('signIn: $apiUrl');
-      print('signIn: $requestBody');
       final jsonResponse = await http.post(
         apiUrl,
         body: requestBody,
@@ -278,7 +272,6 @@ class _LoginScreenState extends State<LoginScreen> {
         Map<String, dynamic> response = json.decode(jsonResponse.body);
 
         final accessToken = response['accessToken'];
-        // final refreshToken = response['refreshToken'];
 
         Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken!);
 
@@ -350,15 +343,15 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
                 builder: (context) => ChangePasword(
-                  userid: userid,
-                  newpassword: '',
-                  confirmpassword: '',
-                )),
+                      userid: userid,
+                      newpassword: '',
+                      confirmpassword: '',
+                    )),
           );
         } else if (isfirstTime == 'False') {
           DateTime loginTime = DateTime.now();
           String formattedTime =
-          DateFormat('yyyy-MM-dd HH:mm:ss').format(loginTime);
+              DateFormat('yyyy-MM-dd HH:mm:ss').format(loginTime);
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString(SharedKeys.loginTime, formattedTime);
           SharedPreferencesHelper.putBool(Constants.IS_LOGIN, true);
