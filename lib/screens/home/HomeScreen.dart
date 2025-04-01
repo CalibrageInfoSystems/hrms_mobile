@@ -126,8 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
     getuserdata();
     fetchLeadCounts();
     fetchpendingrecordscount();
-    backgroundService =
-        BackgroundService(userId: userID, dataAccessHandler: dataAccessHandler);
+    backgroundService = BackgroundService(userId: userID, dataAccessHandler: dataAccessHandler);
     backgroundService.initializeService();
     checkLocationEnabled();
     startService();
@@ -174,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void  didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       // App is in the foreground
       WakelockPlus.enable();
@@ -465,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Expanded(
                                     child: customBtn(
                                       onPressed: () {
-                                        //  startTransactionSync(context);
+                                      startTransactionSync(context);
                                       },
                                       child: const Row(
                                         mainAxisAlignment:
@@ -1577,7 +1576,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("No image captured!")),
         );
-        throw Exception("No image captured!");
+        return;
       }
 
       // await _getCurrentLocation();
@@ -2232,44 +2231,16 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // Future<void> updatePunchStatus(bool status, String filePath) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   await prefs.setBool(Constants.isPunchIn, status);
-  //   await prefs.setString(Constants.punchTime, _time);
-  //
-  //   bool punchUpdated = await _insertPunchData(
-  //     DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()), // Punch time
-  //     _latitude!,
-  //     _longitude!,
-  //     _address!,
-  //     isPunchedIn, // true = punch in, false = punch out
-  //     filePath, // Image file path
-  //   );
-  //   if (punchUpdated) {
-  //     setState(() {
-  //      // isPunchedIn = !isPunchedIn;
-  //       isPunchedIn = status;
-  //       isRequestProcessing = false;// Toggle Punch Status
-  //     });
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text(isPunchedIn ? "Punched In Successfully!" : "Punched Out Successfully!")),
-  //     );
-  //   }
-  //   // setState(() {
-  //   //   isPunchedIn = status;
-  //   //   isRequestProcessing = false;
-  //   // });
-  // }
   Future<bool> _insertPunchData(
       String punchTime,
       String latitude,
       String longitude,
       String address,
       bool isPunchedIn,
-      String filePath) async {
+      String? filePath) async {
     try {
       final dataAccessHandler =
-          Provider.of<DataAccessHandler>(context, listen: false);
+      Provider.of<DataAccessHandler>(context, listen: false);
       final db = await dbHelper.database;
 
       // Ensure UserId is set correctly
@@ -2277,7 +2248,7 @@ class _HomeScreenState extends State<HomeScreen> {
           "e939b672-84ed-45ed-ba3a-b7a372403ad3"; // Replace with actual User ID
 
       if (userId.isEmpty) {
-        print("Error: User ID is missing!");
+        print("❌ Error: User ID is missing!");
         return false;
       }
 
@@ -2304,11 +2275,11 @@ class _HomeScreenState extends State<HomeScreen> {
         // **Punch Out: Update last Punch In record**
         punchResult = await db.rawUpdate(
           '''
-      UPDATE DailyPunchInAndOut
-      SET PunchOutTime = ?, PunchOutLatitude = ?, PunchOutLongitude = ?, PunchOutAddress = ?, 
-          UpdatedByUserId = ?, UpdatedDate = ?,ServerUpdatedStatus = ?
-      WHERE UserId = ? AND PunchOutTime IS NULL
-      ''',
+        UPDATE DailyPunchInAndOut
+        SET PunchOutTime = ?, PunchOutLatitude = ?, PunchOutLongitude = ?, PunchOutAddress = ?, 
+            UpdatedByUserId = ?, UpdatedDate = ?, ServerUpdatedStatus = ?
+        WHERE UserId = ? AND PunchOutTime IS NULL
+        ''',
           [
             punchTime,
             latitude,
@@ -2327,38 +2298,59 @@ class _HomeScreenState extends State<HomeScreen> {
       }
 
       if (punchResult > 0) {
-        bool isConnected = await CommonStyles.checkInternetConnectivity();
-        if (isConnected) {
-          final syncService = SyncService(dataAccessHandler);
-          await syncService.performRefreshTransactionsSync(context, 8);
-          print("✅ Data synced successfully to the server.");
-        } else {
-          print("⚠️ No internet connection. Data will sync later.");
-        }
-
-        // **Insert file details into FileRepository (if file exists)**
-        int fileResult = 0;
+        // **Check if File Already Exists Before Inserting**
         if (filePath != null && filePath.isNotEmpty) {
-          Map<String, dynamic> fileData = {
-            'leadsCode': null,
-            'FileName': filePath.split('/').last,
-            'FileLocation': filePath,
-            'FileExtension': '.png',
-            'IsActive': 1,
-            'CreatedByUserId': userId,
-            'CreatedDate': punchTime,
-            'UpdatedByUserId': userId,
-            'UpdatedDate': punchTime,
-            'ServerUpdatedStatus': false,
-            'LookupType': 23,
-          };
+          String fileName = filePath.split('/').last;
 
-          fileResult = await db.insert('FileRepositorys', fileData);
-          print("✅ FileRepository entry created: ${jsonEncode(fileData)}");
-          await dataAccessHandler.insertFileRepository(fileData);
+          // **Prevent duplicate inserts**
+          List<Map<String, dynamic>> existingFiles = await db.rawQuery(
+              "SELECT * FROM FileRepositorys WHERE FileName = ? AND LookupType = ? AND ServerUpdatedStatus = 0",
+              [fileName, isPunchedIn ? 24 : 23]);
+
+          if (existingFiles.isEmpty) {
+            Map<String, dynamic> fileData = {
+              'leadsCode': null,
+              'FileName': fileName,
+              'FileLocation': filePath,
+              'FileExtension': '.png',
+              'IsActive': 1,
+              'CreatedByUserId': userId,
+              'CreatedDate': punchTime,
+              'UpdatedByUserId': userId,
+              'UpdatedDate': punchTime,
+              'ServerUpdatedStatus': 0, // Ensure it's marked for sync
+              'LookupType': isPunchedIn ? 24 : 23, // 23 for Punch In, 24 for Punch Out
+            };
+
+            // **Insert Image (Only One at a Time)**
+            int fileResult = await db.insert('FileRepositorys', fileData);
+            print("✅ File stored in FileRepository: $fileResult");
+
+
+          } else {
+            print("⚠️ Duplicate image detected, skipping insert: $fileName");
+          }
         }
 
         // **Check internet connection before syncing**
+        bool isConnected = await CommonStyles.checkInternetConnectivity();
+        if (isConnected) {
+          final syncService = SyncService(dataAccessHandler);
+
+          // **Sync FileRepositorys**
+          int? unsyncedFileCount =  await dataAccessHandler.getOnlyOneIntValueFromDb(
+              "SELECT COUNT(*) FROM FileRepositorys WHERE ServerUpdatedStatus = 0")!;
+
+          if (unsyncedFileCount! > 0) {
+            await syncService.performRefreshTransactionsSync(context, 8);
+
+            print("✅ Data synced successfully to the server.");
+          } else {
+            print("⚠️ No unsynced files found for syncing.");
+          }
+        } else {
+          print("⚠️ No internet connection. Data will sync later.");
+        }
 
         return true;
       }
@@ -2369,6 +2361,142 @@ class _HomeScreenState extends State<HomeScreen> {
       return false;
     }
   }
+
+  Future<void> startTransactionSync(BuildContext context) async {
+    final syncService = SyncService(dataAccessHandler);
+
+    // **Sync FileRepositorys**
+    int? unsyncedFileCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
+        "SELECT COUNT(*) FROM FileRepositorys WHERE ServerUpdatedStatus = 0")!;
+
+    if (unsyncedFileCount! > 0) {
+      await syncService.performRefreshTransactionsSync(context, 8);
+    }
+  }
+
+  // Future<bool> _insertPunchData(
+  //     String punchTime,
+  //     String latitude,
+  //     String longitude,
+  //     String address,
+  //     bool isPunchedIn,
+  //     String? filePath) async {
+  //   try {
+  //     final dataAccessHandler =
+  //     Provider.of<DataAccessHandler>(context, listen: false);
+  //     final db = await dbHelper.database;
+  //
+  //     // Ensure UserId is set correctly
+  //     String userId =
+  //         "e939b672-84ed-45ed-ba3a-b7a372403ad3"; // Replace with actual User ID
+  //
+  //     if (userId.isEmpty) {
+  //       print("Error: User ID is missing!");
+  //       return false;
+  //     }
+  //
+  //     int punchResult = 0;
+  //
+  //     if (!isPunchedIn) {
+  //       // **Punch In: Insert new record in DailyPunchInAndOut**
+  //       Map<String, dynamic> punchInData = {
+  //         'UserId': userId,
+  //         'PunchInTime': punchTime,
+  //         'PunchInLatitude': latitude,
+  //         'PunchInLongitude': longitude,
+  //         'PunchInAddress': address,
+  //         'CreatedByUserId': userId,
+  //         'CreatedDate': punchTime,
+  //         'UpdatedByUserId': userId,
+  //         'UpdatedDate': punchTime,
+  //         'ServerUpdatedStatus': false, // Unsynced data
+  //       };
+  //
+  //       punchResult = await db.insert('DailyPunchInAndOut', punchInData);
+  //       print("✅ Punch In inserted successfully: $punchResult");
+  //     } else {
+  //       // **Punch Out: Update last Punch In record**
+  //       punchResult = await db.rawUpdate(
+  //         '''
+  //       UPDATE DailyPunchInAndOut
+  //       SET PunchOutTime = ?, PunchOutLatitude = ?, PunchOutLongitude = ?, PunchOutAddress = ?,
+  //           UpdatedByUserId = ?, UpdatedDate = ?, ServerUpdatedStatus = ?
+  //       WHERE UserId = ? AND PunchOutTime IS NULL
+  //       ''',
+  //         [
+  //           punchTime,
+  //           latitude,
+  //           longitude,
+  //           address,
+  //           userId,
+  //           punchTime,
+  //           false,
+  //           userId
+  //         ],
+  //       );
+  //
+  //       print(punchResult > 0
+  //           ? "✅ Punch Out updated successfully!"
+  //           : "⚠️ No matching Punch In found!");
+  //     }
+  //
+  //     if (punchResult > 0) {
+  //       // **Insert Punch In/Out images into FileRepository**
+  //       int fileResult = 0;
+  //       if (filePath != null && filePath.isNotEmpty) {
+  //         Map<String, dynamic> fileData = {
+  //           'leadsCode': null,
+  //           'FileName': filePath.split('/').last,
+  //           'FileLocation': filePath,
+  //           'FileExtension': '.png',
+  //           'IsActive': 1,
+  //           'CreatedByUserId': userId,
+  //           'CreatedDate': punchTime,
+  //           'UpdatedByUserId': userId,
+  //           'UpdatedDate': punchTime,
+  //           'ServerUpdatedStatus': false,
+  //           'LookupType': isPunchedIn ? 24 : 23, // 23 for Punch In, 24 for Punch Out
+  //         };
+  //
+  //         // Check if this file already exists
+  //         var existingFile = await db.query(
+  //           'FileRepositorys',
+  //           where: 'FileLocation = ?',
+  //           whereArgs: [filePath],
+  //         );
+  //
+  //         if (existingFile.isEmpty) {
+  //           fileResult = await db.insert('FileRepositorys', fileData);
+  //           print(isPunchedIn
+  //               ? "✅ Punch Out image stored: $fileResult"
+  //               : "✅ Punch In image stored: $fileResult");
+  //           await dataAccessHandler.insertFileRepository(fileData);
+  //         } else {
+  //           print("⚠️ Image already exists in FileRepository. Skipping insertion.");
+  //         }
+  //       }
+  //
+  //       // **Check internet connection before syncing**
+  //       bool isConnected = await CommonStyles.checkInternetConnectivity();
+  //       if (isConnected) {
+  //         final syncService = SyncService(dataAccessHandler);
+  //         await syncService.performRefreshTransactionsSync(context, 8);
+  //         print("✅ Data synced successfully to the server.");
+  //       } else {
+  //         print("⚠️ No internet connection. Data will sync later.");
+  //       }
+  //
+  //       return true;
+  //     }
+  //
+  //     return false;
+  //   } catch (e) {
+  //     print("❌ _insertPunchData: Error -> $e");
+  //     return false;
+  //   }
+  // }
+
+
 }
 // Future<void> _loadUserActivityRights() async {
 //   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -2435,7 +2563,7 @@ class BackgroundService {
   FlutterBackgroundService get instance => flutterBackgroundService;
 
   Future<void> initializeService() async {
-    print('initializeService called');
+    print('Initializing service...');
     appendLog('Initializing service...');
 
     await NotificationService(FlutterLocalNotificationsPlugin()).createChannel(
@@ -2482,7 +2610,7 @@ class BackgroundService {
 
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
-  print('onStart called');
+  appendLog('Service started...');
   Timer? locationTimer;
   // Initialize Dart environment and acquire wake lock
   appendLog('Initializing DartPluginRegistrant and acquiring wake lock...');
@@ -2530,8 +2658,7 @@ void onStart(ServiceInstance service) async {
       }
     }
 
-    appendLog(
-        'Location permission granted. Starting Geolocator stream for location updates.');
+    appendLog('Location permission granted. Starting Geolocator stream for location updates.');
 
     // Start Geolocator stream for location updates
     Geolocator.getPositionStream(
@@ -2540,8 +2667,7 @@ void onStart(ServiceInstance service) async {
         distanceFilter: 20,
       ),
     ).listen((Position position) async {
-      appendLog(
-          'Received new position: Lat ${position.latitude}, Lon ${position.longitude}.');
+      appendLog('Received new position: Lat ${position.latitude}, Lon ${position.longitude}.');
 
       if (permission == LocationPermission.always) {
         DateTime now = DateTime.now();
@@ -2632,7 +2758,7 @@ void onStart(ServiceInstance service) async {
             await insertLocationToDatabase(
                 hrmsDatabase, position, userID, syncService);
           }
-          //    }
+           }
           //  }
 
           if (_isPositionAccurate(position) && position.speed > 0) {
@@ -2656,7 +2782,8 @@ void onStart(ServiceInstance service) async {
           } else {
             appendLog("Skipping insert: Position inaccurate or speed is 0");
           }
-        } else {
+        }
+        else {
           appendLog("Tracking not allowed: User has leave today");
           print("Tracking not allowed: User has leave today");
         }
@@ -2667,7 +2794,7 @@ void onStart(ServiceInstance service) async {
         //     print(
         //         'Tracking not allowed: isWithinTrackingHours: $isWithinTrackingHours, isWeekend: $weekoffsString, isWeekOff: $isWeekOff');
         //   }
-      }
+    //  }
     }, onError: (e) {
       appendLog('Error in Geolocator stream: $e');
     });
@@ -2760,76 +2887,73 @@ Future<void> insertLocationToDatabase(HRMSDatabaseHelper? database,
     return;
   }
 
-  print('insertLocationToDatabase: Inserting location into database...');
+  print('Inserting location into database...');
   // appendLog('Inserting location into database...');
 
   bool locationExists = await checkIfLocationExists(
       database, position.latitude, position.longitude);
+  //
+  if (!locationExists) {
+    try {
+      // Insert the location data into the database
+      await database.insertLocationValues(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        createdByUserId: userID!,
+        serverUpdatedStatus:
+            false, // Initially false, will be updated after successful sync
+        from: '997', // Replace with appropriate source if needed
+      );
 
-  // if (!locationExists) {
-  try {
-    // Insert the location data into the database
-    await database.insertLocationValues(
-      latitude: position.latitude,
-      longitude: position.longitude,
-      createdByUserId: userID!,
-      serverUpdatedStatus:
-          false, // Initially false, will be updated after successful sync
-      from: '997', // Replace with appropriate source if needed
-    );
+      appendLog(
+          'Location inserted: Latitude: ${position.latitude}, Longitude: ${position.longitude}.');
 
-    appendLog(
-        'Location inserted: Latitude: ${position.latitude}, Longitude: ${position.longitude}.');
+      // Check if the network is available and then sync data
+      bool isConnected = await CommonStyles.checkInternetConnectivity();
+      if (isConnected) {
+        appendLog("Network is  available. Sync");
+        try {
+          // Perform the sync operation
+          await syncService.performRefreshTransactionsSync();
+          //   print("Location data synced successfully.");
+          //  appendLog("Location data synced successfully.");
+        } catch (e, stackTrace) {
+          print("Error syncing location data: $e");
+          appendLog("Error syncing location data: $e");
+          print("Error syncing location data stackTrace: $stackTrace");
+          appendLog("Error syncing location data stackTrace: $stackTrace");
+        }
+      } else {
+        // Schedule a background task to retry sync when network is available
+        Workmanager().registerOneOffTask(
+          "sync-task", // Unique task name
+          "syncLocationData", // The function defined in WorkManager
+          initialDelay: const Duration(minutes: 10), // Retry after 10 minutes
+          constraints: Constraints(
+              networkType:
+                  NetworkType.connected), // Only run if network is available
+        );
 
-    print(
-        'Location inserted: Latitude: ${position.latitude}, Longitude: ${position.longitude}.');
-
-    // Check if the network is available and then sync data
-    bool isConnected = await CommonStyles.checkInternetConnectivity();
-    if (isConnected) {
-      appendLog("Network is  available. Sync");
-      try {
-        // Perform the sync operation
-        await syncService.performRefreshTransactionsSync();
-        //   print("Location data synced successfully.");
-        //  appendLog("Location data synced successfully.");
-      } catch (e, stackTrace) {
-        print("Error syncing location data: $e");
-        appendLog("Error syncing location data: $e");
-        print("Error syncing location data stackTrace: $stackTrace");
-        appendLog("Error syncing location data stackTrace: $stackTrace");
+        Fluttertoast.showToast(
+          msg: "No network. Sync will retry later.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        print("Network is not available. Sync will retry later.");
+        appendLog("Network is not available. Sync will retry later.");
       }
-    } else {
-      // Schedule a background task to retry sync when network is available
-      Workmanager().registerOneOffTask(
-        "sync-task", // Unique task name
-        "syncLocationData", // The function defined in WorkManager
-        initialDelay: const Duration(minutes: 10), // Retry after 10 minutes
-        constraints: Constraints(
-            networkType:
-                NetworkType.connected), // Only run if network is available
-      );
-
-      Fluttertoast.showToast(
-        msg: "No network. Sync will retry later.",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-      print("Network is not available. Sync will retry later.");
-      appendLog("Network is not available. Sync will retry later.");
+    } catch (e) {
+      appendLog('Error inserting location: $e');
+      print("Error inserting location into database: $e");
     }
-  } catch (e) {
-    appendLog('Error inserting location: $e');
-    print("Error inserting location into database: $e");
+  } else {
+    print("Location already exists in the database.");
+    appendLog("Location already exists in the database.");
   }
-  // } else {
-  //   print("Location already exists in the database.");
-  //   appendLog("Location already exists in the database.");
-  // }
 }
 
 Future<bool> checkNetworkAvailability() async {
@@ -2869,11 +2993,11 @@ bool _isPositionAccurate(Position position) {
 }
 
 void appendLog(String text) async {
-/*   const String folderName = 'SmartGeoTrack';
-  const String fileName = 'UsertrackinglogTest.file';
+
+  const String fileName = 'hrmstracking.file';
   // final appFolderPath = await getApplicationDocumentsDirectory();
   Directory appFolderPath =
-      Directory('/storage/emulated/0/Download/SmartGeoTrack');
+      Directory('/storage/emulated/0/Download/HRMS');
   if (!appFolderPath.existsSync()) {
     appFolderPath.createSync(recursive: true);
   }
@@ -2893,7 +3017,7 @@ void appendLog(String text) async {
     await buf.close();
   } catch (e) {
     print("Error appending to log file: $e");
-  } */
+  }
 }
 
 class StatCard extends StatelessWidget {
