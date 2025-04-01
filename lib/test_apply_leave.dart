@@ -745,7 +745,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       padding: const EdgeInsets.only(left: 15, top: 8),
       child: const Text(
         'Please select Leave Type',
-        style: TextStyle(fontSize: 12, color: Colors.red),
+        style: TextStyle(fontSize: 12, color: Color(0xff98423a)),
       ),
     );
   }
@@ -755,7 +755,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       padding: const EdgeInsets.only(left: 15, top: 8),
       child: const Text(
         'Please select Leave Description',
-        style: TextStyle(fontSize: 12, color: Colors.red),
+        style: TextStyle(fontSize: 12, color: Color(0xff98423a)),
       ),
     );
   }
@@ -808,6 +808,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   }
 
   bool validateFields() {
+    print('_formKey selectedleaveTypeDropdownId: $selectedleaveTypeDropdownId');
     print('_formKey selectedTypeName: $selectedDropdownLeaveName');
     print('_formKey selectedTypId: $selectedDropdownLookupDetailId');
     print('_formKey selectedLeaveDescription: $selectedLeaveDescriptionId');
@@ -815,10 +816,10 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     print('_formKey From Date: ${_fromDateController.text}');
     print('_formKey To Date: ${_toDateController.text}');
     print('_formKey Leave Reason: ${_leaveReasonController.text}');
-    if (!_formKey.currentState!.validate()) {
+    /*  if (!_formKey.currentState!.validate()) {
       print('_formKey selectedLeaveDescriptionId: $selectedLeaveDescriptionId');
       return false;
-    }
+    } */
     // validationForLL();
 
     if (selectedleaveTypeDropdownId == null ||
