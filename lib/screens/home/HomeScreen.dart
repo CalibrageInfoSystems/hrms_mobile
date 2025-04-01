@@ -1577,7 +1577,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("No image captured!")),
         );
-        return;
+        throw Exception("No image captured!");
       }
 
       // await _getCurrentLocation();
@@ -2337,26 +2337,26 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         // **Insert file details into FileRepository (if file exists)**
-        // int fileResult = 0;
-        //  if (filePath != null && filePath.isNotEmpty) {
-        //    Map<String, dynamic> fileData = {
-        //      'leadsCode': null,
-        //      'FileName': filePath.split('/').last,
-        //      'FileLocation': filePath,
-        //      'FileExtension': '.png',
-        //      'IsActive': 1,
-        //      'CreatedByUserId': userId,
-        //      'CreatedDate': punchTime,
-        //      'UpdatedByUserId': userId,
-        //      'UpdatedDate': punchTime,
-        //      'ServerUpdatedStatus': false,
-        //      'LookupType': 23,
-        //    };
-        //
-        //    fileResult = await db.insert('FileRepositorys', fileData);
-        //    print("✅ FileRepository entry created: $fileResult");
-        //    await dataAccessHandler.insertFileRepository(fileData);
-        //  }
+        int fileResult = 0;
+        if (filePath != null && filePath.isNotEmpty) {
+          Map<String, dynamic> fileData = {
+            'leadsCode': null,
+            'FileName': filePath.split('/').last,
+            'FileLocation': filePath,
+            'FileExtension': '.png',
+            'IsActive': 1,
+            'CreatedByUserId': userId,
+            'CreatedDate': punchTime,
+            'UpdatedByUserId': userId,
+            'UpdatedDate': punchTime,
+            'ServerUpdatedStatus': false,
+            'LookupType': 23,
+          };
+
+          fileResult = await db.insert('FileRepositorys', fileData);
+          print("✅ FileRepository entry created: ${jsonEncode(fileData)}");
+          await dataAccessHandler.insertFileRepository(fileData);
+        }
 
         // **Check internet connection before syncing**
 
@@ -2435,7 +2435,7 @@ class BackgroundService {
   FlutterBackgroundService get instance => flutterBackgroundService;
 
   Future<void> initializeService() async {
-    print('Initializing service...');
+    print('initializeService called');
     appendLog('Initializing service...');
 
     await NotificationService(FlutterLocalNotificationsPlugin()).createChannel(
@@ -2482,7 +2482,7 @@ class BackgroundService {
 
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
-  appendLog('Service started...');
+  print('onStart called');
   Timer? locationTimer;
   // Initialize Dart environment and acquire wake lock
   appendLog('Initializing DartPluginRegistrant and acquiring wake lock...');
@@ -2760,73 +2760,76 @@ Future<void> insertLocationToDatabase(HRMSDatabaseHelper? database,
     return;
   }
 
-  print('Inserting location into database...');
+  print('insertLocationToDatabase: Inserting location into database...');
   // appendLog('Inserting location into database...');
 
   bool locationExists = await checkIfLocationExists(
       database, position.latitude, position.longitude);
-  //
-  if (!locationExists) {
-    try {
-      // Insert the location data into the database
-      await database.insertLocationValues(
-        latitude: position.latitude,
-        longitude: position.longitude,
-        createdByUserId: userID!,
-        serverUpdatedStatus:
-            false, // Initially false, will be updated after successful sync
-        from: '997', // Replace with appropriate source if needed
+
+  // if (!locationExists) {
+  try {
+    // Insert the location data into the database
+    await database.insertLocationValues(
+      latitude: position.latitude,
+      longitude: position.longitude,
+      createdByUserId: userID!,
+      serverUpdatedStatus:
+          false, // Initially false, will be updated after successful sync
+      from: '997', // Replace with appropriate source if needed
+    );
+
+    appendLog(
+        'Location inserted: Latitude: ${position.latitude}, Longitude: ${position.longitude}.');
+
+    print(
+        'Location inserted: Latitude: ${position.latitude}, Longitude: ${position.longitude}.');
+
+    // Check if the network is available and then sync data
+    bool isConnected = await CommonStyles.checkInternetConnectivity();
+    if (isConnected) {
+      appendLog("Network is  available. Sync");
+      try {
+        // Perform the sync operation
+        await syncService.performRefreshTransactionsSync();
+        //   print("Location data synced successfully.");
+        //  appendLog("Location data synced successfully.");
+      } catch (e, stackTrace) {
+        print("Error syncing location data: $e");
+        appendLog("Error syncing location data: $e");
+        print("Error syncing location data stackTrace: $stackTrace");
+        appendLog("Error syncing location data stackTrace: $stackTrace");
+      }
+    } else {
+      // Schedule a background task to retry sync when network is available
+      Workmanager().registerOneOffTask(
+        "sync-task", // Unique task name
+        "syncLocationData", // The function defined in WorkManager
+        initialDelay: const Duration(minutes: 10), // Retry after 10 minutes
+        constraints: Constraints(
+            networkType:
+                NetworkType.connected), // Only run if network is available
       );
 
-      appendLog(
-          'Location inserted: Latitude: ${position.latitude}, Longitude: ${position.longitude}.');
-
-      // Check if the network is available and then sync data
-      bool isConnected = await CommonStyles.checkInternetConnectivity();
-      if (isConnected) {
-        appendLog("Network is  available. Sync");
-        try {
-          // Perform the sync operation
-          await syncService.performRefreshTransactionsSync();
-          //   print("Location data synced successfully.");
-          //  appendLog("Location data synced successfully.");
-        } catch (e, stackTrace) {
-          print("Error syncing location data: $e");
-          appendLog("Error syncing location data: $e");
-          print("Error syncing location data stackTrace: $stackTrace");
-          appendLog("Error syncing location data stackTrace: $stackTrace");
-        }
-      } else {
-        // Schedule a background task to retry sync when network is available
-        Workmanager().registerOneOffTask(
-          "sync-task", // Unique task name
-          "syncLocationData", // The function defined in WorkManager
-          initialDelay: const Duration(minutes: 10), // Retry after 10 minutes
-          constraints: Constraints(
-              networkType:
-                  NetworkType.connected), // Only run if network is available
-        );
-
-        Fluttertoast.showToast(
-          msg: "No network. Sync will retry later.",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-        print("Network is not available. Sync will retry later.");
-        appendLog("Network is not available. Sync will retry later.");
-      }
-    } catch (e) {
-      appendLog('Error inserting location: $e');
-      print("Error inserting location into database: $e");
+      Fluttertoast.showToast(
+        msg: "No network. Sync will retry later.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      print("Network is not available. Sync will retry later.");
+      appendLog("Network is not available. Sync will retry later.");
     }
-  } else {
-    print("Location already exists in the database.");
-    appendLog("Location already exists in the database.");
+  } catch (e) {
+    appendLog('Error inserting location: $e');
+    print("Error inserting location into database: $e");
   }
+  // } else {
+  //   print("Location already exists in the database.");
+  //   appendLog("Location already exists in the database.");
+  // }
 }
 
 Future<bool> checkNetworkAvailability() async {
