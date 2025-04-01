@@ -8,6 +8,7 @@ import 'package:hrms/Constants.dart';
 import 'package:hrms/SharedPreferencesHelper.dart';
 import 'package:hrms/api%20config.dart';
 import 'package:hrms/changepassword.dart';
+import 'package:hrms/common_widgets/common_styles.dart';
 import 'package:hrms/common_widgets/custom_textfield.dart';
 import 'package:hrms/home_screen.dart';
 import 'package:hrms/security_screen.dart';
@@ -34,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isRequestProcessing = false;
   bool _commonError = false;
   String? _commonErrorMsg;
+  bool _rememberMe = false;
 
   @override
   void initState() {
@@ -42,11 +44,12 @@ class _LoginScreenState extends State<LoginScreen> {
     // _userNameController.text = 'CIS00000';
     // _passwordController.text = 'Live@291024';
 
-    _userNameController.text = 'CIS00054';
-    _passwordController.text = 'Ranjith@469';
+    // _userNameController.text = 'CIS00054';
+    // _passwordController.text = 'Ranjith@469';
 
     // _userNameController.text = 'BakiHanm';
     // _passwordController.text = 'Test@123';
+    fetchRememberCredentials();
   }
 
   @override
@@ -150,8 +153,43 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Row forgotpasswordField() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _rememberMe = !_rememberMe;
+            });
+          },
+          child: Row(
+            children: [
+              SizedBox(
+                width: 22,
+                height: 22,
+                child: Checkbox(
+                  value: _rememberMe,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  activeColor: CommonStyles.primaryTextColor,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _rememberMe = value!;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 5),
+              const Text(
+                'Remember Me',
+                style: TextStyle(
+                    color: Color(0xFFf15f22),
+                    fontSize: 14,
+                    fontFamily: 'Calibri'),
+              ),
+            ],
+          ),
+        ),
         GestureDetector(
           onTap: () {
             Navigator.push(
@@ -168,6 +206,35 @@ class _LoginScreenState extends State<LoginScreen> {
       ],
     );
   }
+
+/*   Row forgotpasswordField() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        GestureDetector(
+          onTap: () {},
+          child: const Text(
+            'Remember Me',
+            style: TextStyle(
+                color: Color(0xFFf15f22), fontSize: 14, fontFamily: 'Calibri'),
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => securityscreen()),
+            );
+          },
+          child: const Text(
+            'Forgot Password?',
+            style: TextStyle(
+                color: Color(0xFFf15f22), fontSize: 14, fontFamily: 'Calibri'),
+          ),
+        ),
+      ],
+    );
+  } */
 
   CustomTextField userNameField() {
     return CustomTextField(
@@ -269,6 +336,14 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (jsonResponse.statusCode == 200) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        print('_rememberMe: $_rememberMe');
+        if (_rememberMe) {
+          rememberLogin(prefs, username, password);
+        } else {
+          prefs.remove(Constants.userName);
+          prefs.remove(Constants.userPassword);
+        }
         Map<String, dynamic> response = json.decode(jsonResponse.body);
 
         final accessToken = response['accessToken'];
@@ -278,7 +353,6 @@ class _LoginScreenState extends State<LoginScreen> {
         final isFirstTimeLogin = decodedToken['IsFirstTimeLogin'];
         final userid = decodedToken['Id'];
         final employeeId = decodedToken['EmployeeId'];
-        SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString("accessToken", accessToken!);
         prefs.setString(SharedKeys.employeeId, employeeId!);
         prefs.setString(SharedKeys.userId, userid!);
@@ -316,6 +390,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
       print('catch: $e');
       rethrow;
+    }
+  }
+
+  void rememberLogin(
+      SharedPreferences prefs, String username, String password) {
+    prefs.setBool(Constants.rememberMe, _rememberMe);
+    prefs.setString(Constants.userName, username);
+    prefs.setString(Constants.userPassword, password);
+  }
+
+  Future<void> fetchRememberCredentials() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? username = prefs.getString(Constants.userName);
+    String? password = prefs.getString(Constants.userPassword);
+    bool? rememberMe = prefs.getBool(Constants.rememberMe);
+    print('_rememberMe: $username | $password | $rememberMe');
+    if (username != null && password != null) {
+      setState(() {
+        _userNameController.text = username;
+        _passwordController.text = password;
+        _rememberMe = rememberMe ?? false;
+      });
     }
   }
 

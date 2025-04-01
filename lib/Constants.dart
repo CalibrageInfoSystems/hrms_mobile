@@ -2,6 +2,9 @@ class Constants {
   static const String IS_LOGIN = "login_verification";
   static const String USER_ID = "userID";
   static const String WELCOME = "welcome";
+  static const String rememberMe = "rememberMe";
+  static const String userName = "userName";
+  static const String userPassword = "userPassword";
 
   static const String isPunchIn = 'isPunchIn';
   static const String punchTime = 'punchTime';
