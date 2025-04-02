@@ -11,7 +11,6 @@ import 'package:hrms/changepassword.dart';
 import 'package:hrms/common_widgets/common_styles.dart';
 import 'package:hrms/common_widgets/custom_textfield.dart';
 import 'package:hrms/home_screen.dart';
-import 'package:hrms/screens/home/HomeScreen_Bottom_nav.dart';
 import 'package:hrms/security_screen.dart';
 import 'package:hrms/shared_keys.dart';
 import 'package:hrms/styles.dart';
@@ -33,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
-    bool isRequestProcessing = false;
+  bool isRequestProcessing = false;
   bool _commonError = false;
   String? _commonErrorMsg;
   bool _rememberMe = false;
@@ -370,9 +369,8 @@ class _LoginScreenState extends State<LoginScreen> {
         bool? canAddClient = prefs.getBool("canAddClient");
         print('canAddClient: $canAddClient');
 
-
         //  showAddClient = prefs.getBool('canAddClient') ?? true;
-        empolyelogin(employeeId!, isFirstTimeLogin, userid, accessToken);
+        empolyelogin(prefs, employeeId!, isFirstTimeLogin, userid, accessToken);
       } else {
         setState(() {
           // progressDialog.dismiss();
@@ -430,8 +428,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> empolyelogin(String empolyeid, String isfirstTime, String userid,
-      String? accessToken) async {
+  Future<void> empolyelogin(SharedPreferences prefs, String empolyeid,
+      String isfirstTime, String userid, String? accessToken) async {
     try {
       final url = Uri.parse(baseUrl + getselfempolyee + empolyeid);
       final response = await http.get(
@@ -463,15 +461,14 @@ class _LoginScreenState extends State<LoginScreen> {
           DateTime loginTime = DateTime.now();
           String formattedTime =
               DateFormat('yyyy-MM-dd HH:mm:ss').format(loginTime);
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString(SharedKeys.loginTime, formattedTime);
+          prefs.setString(SharedKeys.loginTime, formattedTime);
           SharedPreferencesHelper.putBool(Constants.IS_LOGIN, true);
 
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => home_screen()), //TODO
-          // Navigator.of(context).pushReplacement(
-          //   MaterialPageRoute(builder: (context) => HomeScreen_Bottom_nav()),
-         );
+            // Navigator.of(context).pushReplacement(
+            //   MaterialPageRoute(builder: (context) => HomeScreen_Bottom_nav()),
+          );
         }
       } else {
         Commonutils.showCustomToastMessageLong(

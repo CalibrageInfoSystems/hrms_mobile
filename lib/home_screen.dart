@@ -11,6 +11,7 @@ import 'package:hrms/login_screen.dart';
 import 'package:hrms/personal_details.dart';
 import 'package:hrms/projects_screen.dart';
 import 'package:hrms/screens/AddLeads.dart';
+import 'package:hrms/screens/home/hrms_homescreen.dart';
 import 'package:hrms/test_apply_leave.dart';
 import 'package:hrms/test_projects.dart';
 import 'package:hrms/screens/test_hrms.dart';
@@ -54,7 +55,7 @@ class _home_screenState extends State<home_screen>
   late Animation<double> animation;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   int _currentIndex = 0;
-  bool? showAddClient ; // Toggle visibility for Add Client
+  bool? showAddClient; // Toggle visibility for Add Client
 
   @override
   void initState() {
@@ -162,8 +163,7 @@ class _home_screenState extends State<home_screen>
         //     // return false; // Prevent default back navigation behavior
         //   }
         ,
-        child:
-        MaterialApp(
+        child: MaterialApp(
             debugShowCheckedModeBanner: false,
             home: Scaffold(
               appBar: AppBar(
@@ -390,6 +390,26 @@ class _home_screenState extends State<home_screen>
                         );
                       },
                     ),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.logout,
+                        color: Colors.black,
+                      ),
+                      title: const Text(
+                        'Hrms Home Sreen',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'hind_semibold',
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HrmsHomeSreen()),
+                        );
+                      },
+                    ),
 
                     //MARK: Test Apply Leave
                     /* ListTile(
@@ -448,12 +468,13 @@ class _home_screenState extends State<home_screen>
                 onTap: (index) => setState(() {
                   _currentIndex = index;
                 }),
-                selectedItemColor:  const Color(0xFFf15f22),
+                selectedItemColor: const Color(0xFFf15f22),
                 items: [
                   _buildNavItem('assets/home.svg', 'Home'),
                   _buildNavItem('assets/2560114.svg', 'Projects'),
                   _buildNavItem('assets/leave_8.svg', ' Leaves'),
-                  if (showAddClient!) _buildNavItem('assets/atten.svg', 'Add Client'),
+                  if (showAddClient!)
+                    _buildNavItem('assets/atten.svg', 'Add Client'),
                   _buildNavItem('assets/Profile_new.svg', 'Profile'),
                 ],
               ),
@@ -762,11 +783,10 @@ class _home_screenState extends State<home_screen>
     );
   }
 
-
   void checkLoginuserdata() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      showAddClient = prefs.getBool('canAddClient') ;
+      showAddClient = prefs.getBool('canAddClient');
       print('showAddClient: $showAddClient');
     });
   }
@@ -805,6 +825,7 @@ class _home_screenState extends State<home_screen>
         return HomeScreen();
     }
   }
+
   String buildTitle(int currentIndex) {
     switch (currentIndex) {
       case 0:
