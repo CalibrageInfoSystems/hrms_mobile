@@ -10,6 +10,7 @@ import 'package:hrms/apply_leave.dart';
 import 'package:hrms/login_screen.dart';
 import 'package:hrms/personal_details.dart';
 import 'package:hrms/projects_screen.dart';
+import 'package:hrms/screens/AddLeads.dart';
 import 'package:hrms/test_apply_leave.dart';
 import 'package:hrms/test_projects.dart';
 import 'package:hrms/screens/test_hrms.dart';
@@ -19,6 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Constants.dart';
 
 import 'Holiday_screen.dart';
+import 'common_widgets/CommonUtils.dart';
 import 'screens/home/HomeScreen.dart';
 import 'Myleaveslist.dart';
 import 'Resginaton_request.dart';
@@ -51,9 +53,12 @@ class _home_screenState extends State<home_screen>
   late Animation<double> scalAnimation;
   late Animation<double> animation;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  int _currentIndex = 0;
+  bool? showAddClient ; // Toggle visibility for Add Client
 
   @override
   void initState() {
+    checkLoginuserdata();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
@@ -157,7 +162,8 @@ class _home_screenState extends State<home_screen>
         //     // return false; // Prevent default back navigation behavior
         //   }
         ,
-        child: MaterialApp(
+        child:
+        MaterialApp(
             debugShowCheckedModeBanner: false,
             home: Scaffold(
               appBar: AppBar(
@@ -436,218 +442,233 @@ class _home_screenState extends State<home_screen>
                   ],
                 ),
               ),
-              body: _buildBody(),
-              floatingActionButton: FloatingActionButton(
-                elevation: 0,
-                //   mini: true,
-                child: Image.asset(
-                  'assets/app_logo.png',
-                  // 'assets/user_1.png',
-                  width: 18,
-                  height: 23,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  setState(() {
-                    currentTab = 0;
-                    //_selectTab(0);
-                  });
-                },
-                backgroundColor: const Color(0xFFf15f22),
-                // Set the background color to orange
-                shape: RoundedRectangleBorder(
-                  side: const BorderSide(
-                      color: Colors.white,
-                      width: 3.0), // Set border color and width
-                  borderRadius:
-                      BorderRadius.circular(60), // Adjust the radius as needed
-                ),
+              body: _buildScreens(_currentIndex),
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: _currentIndex,
+                onTap: (index) => setState(() {
+                  _currentIndex = index;
+                }),
+                selectedItemColor:  const Color(0xFFf15f22),
+                items: [
+                  _buildNavItem('assets/home.svg', 'Home'),
+                  _buildNavItem('assets/2560114.svg', 'Projects'),
+                  _buildNavItem('assets/leave_8.svg', ' Leaves'),
+                  if (showAddClient!) _buildNavItem('assets/atten.svg', 'Add Client'),
+                  _buildNavItem('assets/Profile_new.svg', 'Profile'),
+                ],
               ),
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.centerDocked,
-              bottomNavigationBar: BottomAppBar(
-                height: 58,
-                shape: const CircularNotchedRectangle(),
-                padding: const EdgeInsets.only(bottom: 10.0),
-                notchMargin: currentTab == 0 ? 8 : 0,
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        InkWell(
-                            onTap: () {
-                              setState(() {
-                                currentTab = 1;
-                                //    _selectTab(1  );
-                              });
-                              _projectsFocusNode.requestFocus();
-                            },
-                            child: Container(
-                              width: MediaQuery.of(context).size.width / 3 / 1,
-                              //    padding: EdgeInsets.only(left: 25.0),
-                              margin: const EdgeInsets.only(left: 25.0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    currentTab = 1;
-                                    //  _selectTab(1);
-                                  });
-                                  _projectsFocusNode.requestFocus();
-                                },
-                                // child: Container(
-                                // width: MediaQuery.of(context).size.width,
-
-                                child: Focus(
-                                    focusNode: _projectsFocusNode,
-                                    child: Stack(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              currentTab = 1;
-                                              //  _selectTab(1);
-                                            });
-                                          },
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.all(14.0),
-                                                child: SvgPicture.asset(
-                                                  'assets/2560114.svg', // Replace with the actual path to your SVG icon
-                                                  height:
-                                                      20, // Adjust the height as needed
-                                                  width:
-                                                      20, // Adjust the width as needed
-                                                  color:
-                                                      const Color(0xFFf15f22),
-                                                ),
-                                              ),
-                                              const Text(
-                                                "Projects",
-                                                style: TextStyle(
-                                                    color: Color(0xFFf15f22),
-                                                    fontWeight: FontWeight.bold,
-                                                    fontFamily: 'Calibri'),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 0,
-                                          left: 0,
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              3 /
-                                              1,
-                                          height: 4,
-                                          child: Container(
-                                            color: currentTab == 1
-                                                ? const Color(0xFFf15f22)
-                                                : Colors.transparent,
-                                          ),
-                                        ),
-                                      ],
-                                    )),
-                                // ),
-                              ),
-                            )),
-
-                        // SizedBox(width: 10.0),
-                        InkWell(
-                          onTap: () {
-                            setState(() {
-                              currentTab = 2;
-                              //  _selectTab(2);
-                            });
-                            _leavesFocusNode.requestFocus();
-                          },
-                          child: Container(
-                            width: MediaQuery.of(context).size.width / 2.7 / 1,
-                            padding: const EdgeInsets.only(right: 15.0),
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  currentTab = 2;
-                                  // _selectTab(2);
-                                });
-                                _leavesFocusNode.requestFocus();
-                              },
-                              child: Container(
-                                // padding: EdgeInsets.only(right: 20.0),
-                                child: Focus(
-                                    focusNode: _leavesFocusNode,
-                                    child: Stack(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.all(13.0),
-                                              child: SvgPicture.asset(
-                                                'assets/leave_8.svg', // Replace with the actual path to your SVG icon
-                                                height:
-                                                    22, // Adjust the height as needed
-                                                width:
-                                                    20, // Adjust the width as needed
-                                                color: const Color(0xFFf15f22),
-                                              ),
-                                            ),
-                                            const Text(
-                                              "Leaves",
-                                              style: TextStyle(
-                                                  color: Color(0xFFf15f22),
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily: 'Calibri'),
-                                            ),
-                                          ],
-                                        ),
-                                        Positioned(
-                                          top: 0,
-                                          left: 0,
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              2.5 /
-                                              1,
-                                          height: 4,
-                                          child: Container(
-                                            color: currentTab == 2
-                                                ? const Color(0xFFf15f22)
-                                                : Colors.transparent,
-                                          ),
-                                        ),
-                                      ],
-                                    )),
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-                // BottomNavigationBar(
-                //   currentIndex: currentTab,
-                //   items: [
-                //     BottomNavigationBarItem(
-                //       icon: Icon(Icons.home),
-                //       label: 'Home',
-                //     ),
-                //     BottomNavigationBarItem(
-                //       icon: Icon(Icons.search),
-                //       label: 'Search',
-                //     ),
-                //   ],
-                //   onTap: _onNavItemTapped,
-                // ),
-              ),
+              // body: _buildBody(),
+              // floatingActionButton: FloatingActionButton(
+              //   elevation: 0,
+              //   //   mini: true,
+              //   child: Image.asset(
+              //     'assets/app_logo.png',
+              //     // 'assets/user_1.png',
+              //     width: 18,
+              //     height: 23,
+              //     color: Colors.white,
+              //   ),
+              //   onPressed: () {
+              //     setState(() {
+              //       currentTab = 0;
+              //       //_selectTab(0);
+              //     });
+              //   },
+              //   backgroundColor: const Color(0xFFf15f22),
+              //   // Set the background color to orange
+              //   shape: RoundedRectangleBorder(
+              //     side: const BorderSide(
+              //         color: Colors.white,
+              //         width: 3.0), // Set border color and width
+              //     borderRadius:
+              //         BorderRadius.circular(60), // Adjust the radius as needed
+              //   ),
+              // ),
+              // floatingActionButtonLocation:
+              //     FloatingActionButtonLocation.centerDocked,
+              // bottomNavigationBar: BottomAppBar(
+              //   height: 58,
+              //   shape: const CircularNotchedRectangle(),
+              //   padding: const EdgeInsets.only(bottom: 10.0),
+              //   notchMargin: currentTab == 0 ? 8 : 0,
+              //   child: Column(
+              //     children: [
+              //       Row(
+              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //         children: [
+              //           InkWell(
+              //               onTap: () {
+              //                 setState(() {
+              //                   currentTab = 1;
+              //                   //    _selectTab(1  );
+              //                 });
+              //                 _projectsFocusNode.requestFocus();
+              //               },
+              //               child: Container(
+              //                 width: MediaQuery.of(context).size.width / 3 / 1,
+              //                 //    padding: EdgeInsets.only(left: 25.0),
+              //                 margin: const EdgeInsets.only(left: 25.0),
+              //                 child: GestureDetector(
+              //                   onTap: () {
+              //                     setState(() {
+              //                       currentTab = 1;
+              //                       //  _selectTab(1);
+              //                     });
+              //                     _projectsFocusNode.requestFocus();
+              //                   },
+              //                   // child: Container(
+              //                   // width: MediaQuery.of(context).size.width,
+              //
+              //                   child: Focus(
+              //                       focusNode: _projectsFocusNode,
+              //                       child: Stack(
+              //                         children: [
+              //                           GestureDetector(
+              //                             onTap: () {
+              //                               setState(() {
+              //                                 currentTab = 1;
+              //                                 //  _selectTab(1);
+              //                               });
+              //                             },
+              //                             child: Row(
+              //                               mainAxisAlignment:
+              //                                   MainAxisAlignment.start,
+              //                               children: [
+              //                                 Container(
+              //                                   padding:
+              //                                       const EdgeInsets.all(14.0),
+              //                                   child: SvgPicture.asset(
+              //                                     'assets/2560114.svg', // Replace with the actual path to your SVG icon
+              //                                     height:
+              //                                         20, // Adjust the height as needed
+              //                                     width:
+              //                                         20, // Adjust the width as needed
+              //                                     color:
+              //                                         const Color(0xFFf15f22),
+              //                                   ),
+              //                                 ),
+              //                                 const Text(
+              //                                   "Projects",
+              //                                   style: TextStyle(
+              //                                       color: Color(0xFFf15f22),
+              //                                       fontWeight: FontWeight.bold,
+              //                                       fontFamily: 'Calibri'),
+              //                                 ),
+              //                               ],
+              //                             ),
+              //                           ),
+              //                           Positioned(
+              //                             top: 0,
+              //                             left: 0,
+              //                             width: MediaQuery.of(context)
+              //                                     .size
+              //                                     .width /
+              //                                 3 /
+              //                                 1,
+              //                             height: 4,
+              //                             child: Container(
+              //                               color: currentTab == 1
+              //                                   ? const Color(0xFFf15f22)
+              //                                   : Colors.transparent,
+              //                             ),
+              //                           ),
+              //                         ],
+              //                       )),
+              //                   // ),
+              //                 ),
+              //               )),
+              //
+              //           // SizedBox(width: 10.0),
+              //           InkWell(
+              //             onTap: () {
+              //               setState(() {
+              //                 currentTab = 2;
+              //                 //  _selectTab(2);
+              //               });
+              //               _leavesFocusNode.requestFocus();
+              //             },
+              //             child: Container(
+              //               width: MediaQuery.of(context).size.width / 2.7 / 1,
+              //               padding: const EdgeInsets.only(right: 15.0),
+              //               child: GestureDetector(
+              //                 onTap: () {
+              //                   setState(() {
+              //                     currentTab = 2;
+              //                     // _selectTab(2);
+              //                   });
+              //                   _leavesFocusNode.requestFocus();
+              //                 },
+              //                 child: Container(
+              //                   // padding: EdgeInsets.only(right: 20.0),
+              //                   child: Focus(
+              //                       focusNode: _leavesFocusNode,
+              //                       child: Stack(
+              //                         children: [
+              //                           Row(
+              //                             mainAxisAlignment:
+              //                                 MainAxisAlignment.start,
+              //                             children: [
+              //                               Container(
+              //                                 padding:
+              //                                     const EdgeInsets.all(13.0),
+              //                                 child: SvgPicture.asset(
+              //                                   'assets/leave_8.svg', // Replace with the actual path to your SVG icon
+              //                                   height:
+              //                                       22, // Adjust the height as needed
+              //                                   width:
+              //                                       20, // Adjust the width as needed
+              //                                   color: const Color(0xFFf15f22),
+              //                                 ),
+              //                               ),
+              //                               const Text(
+              //                                 "Leaves",
+              //                                 style: TextStyle(
+              //                                     color: Color(0xFFf15f22),
+              //                                     fontWeight: FontWeight.bold,
+              //                                     fontFamily: 'Calibri'),
+              //                               ),
+              //                             ],
+              //                           ),
+              //                           Positioned(
+              //                             top: 0,
+              //                             left: 0,
+              //                             width: MediaQuery.of(context)
+              //                                     .size
+              //                                     .width /
+              //                                 2.5 /
+              //                                 1,
+              //                             height: 4,
+              //                             child: Container(
+              //                               color: currentTab == 2
+              //                                   ? const Color(0xFFf15f22)
+              //                                   : Colors.transparent,
+              //                             ),
+              //                           ),
+              //                         ],
+              //                       )),
+              //                 ),
+              //               ),
+              //             ),
+              //           )
+              //         ],
+              //       ),
+              //     ],
+              //   ),
+              //   // BottomNavigationBar(
+              //   //   currentIndex: currentTab,
+              //   //   items: [
+              //   //     BottomNavigationBarItem(
+              //   //       icon: Icon(Icons.home),
+              //   //       label: 'Home',
+              //   //     ),
+              //   //     BottomNavigationBarItem(
+              //   //       icon: Icon(Icons.search),
+              //   //       label: 'Search',
+              //   //     ),
+              //   //   ],
+              //   //   onTap: _onNavItemTapped,
+              //   // ),
+              // ),
             )));
   }
 
@@ -739,5 +760,65 @@ class _home_screenState extends State<home_screen>
       MaterialPageRoute(builder: (context) => const LoginScreen()),
       (route) => false,
     );
+  }
+
+
+  void checkLoginuserdata() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      showAddClient = prefs.getBool('canAddClient') ;
+      print('showAddClient: $showAddClient');
+    });
+  }
+
+  BottomNavigationBarItem _buildNavItem(String iconPath, String label) {
+    return BottomNavigationBarItem(
+      icon: SvgPicture.asset(
+        iconPath,
+        width: 20,
+        height: 20,
+        color: Colors.black.withOpacity(0.6),
+      ),
+      activeIcon: SvgPicture.asset(
+        iconPath,
+        width: 20,
+        height: 20,
+        color: CommonUtils.primaryTextColor,
+      ),
+      label: label,
+    );
+  }
+
+  Widget _buildScreens(int index) {
+    switch (index) {
+      case 0:
+        return HomeScreen();
+      case 1:
+        return TestProjectsScreen();
+      case 2:
+        return leaves_screen();
+      case 3:
+        return AddLeads();
+      case 4:
+        return personal_details();
+      default:
+        return HomeScreen();
+    }
+  }
+  String buildTitle(int currentIndex) {
+    switch (currentIndex) {
+      case 0:
+        return 'Home';
+      case 1:
+        return 'Projects';
+      case 2:
+        return 'Apply Leave';
+      case 3:
+        return 'Add Client Visits';
+      case 4:
+        return 'Profile';
+      default:
+        return '';
+    }
   }
 }

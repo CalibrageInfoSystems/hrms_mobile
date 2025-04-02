@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hrms/Constants.dart';
 import 'package:hrms/SharedPreferencesHelper.dart';
 import 'package:hrms/home_screen.dart';
+import 'package:hrms/screens/home/HomeScreen_Bottom_nav.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'database/HRMSDatabaseHelper.dart';
@@ -84,6 +85,9 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void navigateToHome() {
+    // Navigator.of(context).pushReplacement(
+    //   MaterialPageRoute(builder: (context) => HomeScreen_Bottom_nav()),
+    // );
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => home_screen()),
     );

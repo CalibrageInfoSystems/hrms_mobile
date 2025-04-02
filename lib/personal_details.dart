@@ -537,27 +537,27 @@ class _personal_screen_screenState extends State<personal_details> {
         return true; // Prevent default back navigation behavior
       },
       child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Color(0xFFf15f22),
-          title: Text(
-            'HRMS',
-            style: TextStyle(color: Colors.white),
-          ),
-          centerTitle: true,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => home_screen()),
-              );
-              // Implement your logic to navigate back
-            },
-          ),
-        ),
+        // appBar: AppBar(
+        //   elevation: 0,
+        //   backgroundColor: Color(0xFFf15f22),
+        //   title: Text(
+        //     'HRMS',
+        //     style: TextStyle(color: Colors.white),
+        //   ),
+        //   centerTitle: true,
+        //   leading: IconButton(
+        //     icon: Icon(
+        //       Icons.arrow_back,
+        //       color: Colors.white,
+        //     ),
+        //     onPressed: () {
+        //       Navigator.of(context).pushReplacement(
+        //         MaterialPageRoute(builder: (context) => home_screen()),
+        //       );
+        //       // Implement your logic to navigate back
+        //     },
+        //   ),
+        // ),
         body:
             // SingleChildScrollView(
             //   physics: NeverScrollableScrollPhysics(),

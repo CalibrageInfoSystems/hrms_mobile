@@ -197,24 +197,24 @@ class _AddLeadScreenState extends State<AddLeads>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Color(0xFFf15f22),
-        title: Text(
-          'Add Client Visits',
-          style: TextStyle(color: Colors.white, fontFamily: 'Calibri'),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
+      // appBar: AppBar(
+      //   elevation: 0,
+      //   backgroundColor: Color(0xFFf15f22),
+      //   title: Text(
+      //     'Add Client Visits',
+      //     style: TextStyle(color: Colors.white, fontFamily: 'Calibri'),
+      //   ),
+      //   centerTitle: true,
+      //   leading: IconButton(
+      //     icon: Icon(
+      //       Icons.arrow_back,
+      //       color: Colors.white,
+      //     ),
+      //     onPressed: () {
+      //       Navigator.pop(context);
+      //     },
+      //   ),
+      // ),
       // AppBar(
       //   backgroundColor: Colors.lightBlue[50], // Background color
       //   elevation: 0, // Remove the shadow under the AppBar

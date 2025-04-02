@@ -11,6 +11,7 @@ import 'package:hrms/changepassword.dart';
 import 'package:hrms/common_widgets/common_styles.dart';
 import 'package:hrms/common_widgets/custom_textfield.dart';
 import 'package:hrms/home_screen.dart';
+import 'package:hrms/screens/home/HomeScreen_Bottom_nav.dart';
 import 'package:hrms/security_screen.dart';
 import 'package:hrms/shared_keys.dart';
 import 'package:hrms/styles.dart';
@@ -32,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
-  bool isRequestProcessing = false;
+    bool isRequestProcessing = false;
   bool _commonError = false;
   String? _commonErrorMsg;
   bool _rememberMe = false;
@@ -356,7 +357,21 @@ class _LoginScreenState extends State<LoginScreen> {
         prefs.setString("accessToken", accessToken!);
         prefs.setString(SharedKeys.employeeId, employeeId!);
         prefs.setString(SharedKeys.userId, userid!);
+        print('employeeId: $employeeId');
 
+// Ensure employeeId is an integer before comparison
+        if (int.tryParse(employeeId.toString()) == 329) {
+          await prefs.setBool("canAddClient", true);
+        } else {
+          await prefs.setBool("canAddClient", false);
+        }
+
+// Verify the stored value
+        bool? canAddClient = prefs.getBool("canAddClient");
+        print('canAddClient: $canAddClient');
+
+
+        //  showAddClient = prefs.getBool('canAddClient') ?? true;
         empolyelogin(employeeId!, isFirstTimeLogin, userid, accessToken);
       } else {
         setState(() {
@@ -453,8 +468,10 @@ class _LoginScreenState extends State<LoginScreen> {
           SharedPreferencesHelper.putBool(Constants.IS_LOGIN, true);
 
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => home_screen()),
-          );
+            MaterialPageRoute(builder: (context) => home_screen()), //TODO
+          // Navigator.of(context).pushReplacement(
+          //   MaterialPageRoute(builder: (context) => HomeScreen_Bottom_nav()),
+         );
         }
       } else {
         Commonutils.showCustomToastMessageLong(

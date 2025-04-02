@@ -87,7 +87,7 @@ class CommonUtils{
   static const blackColor = Colors.black;
   static const blackColorShade = Color(0xFF5f5f5f);
   static const primaryColor = Color(0xFFf7ebff);
-  static const primaryTextColor = Color(0xFF11528f);
+  static const primaryTextColor =   Color(0xFFf15f22);
   static const formFieldErrorBorderColor = Color(0xFFff0000);
   static const blueColor = Color(0xFF0f75bc);
   static const primarylightColor = Color(0xffe2f0fd);
