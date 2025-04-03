@@ -207,29 +207,29 @@ class _home_screenState extends State<home_screen>
                         height: 100, // Adjust the height as needed
                       ),
                     ),
-                    ListTile(
-                      leading: SvgPicture.asset(
-                        'assets/atten.svg',
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.contain,
-                        color: Colors.black,
-                      ),
-                      title: const Text(
-                        'My Profile',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'hind_semibold',
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => personal_details()),
-                        );
-                      },
-                    ),
+                    // ListTile(
+                    //   leading: SvgPicture.asset(
+                    //     'assets/atten.svg',
+                    //     width: 20,
+                    //     height: 20,
+                    //     fit: BoxFit.contain,
+                    //     color: Colors.black,
+                    //   ),
+                    //   title: const Text(
+                    //     'My Profile',
+                    //     style: TextStyle(
+                    //       color: Colors.black,
+                    //       fontFamily: 'hind_semibold',
+                    //     ),
+                    //   ),
+                    //   onTap: () {
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //           builder: (context) => personal_details()),
+                    //     );
+                    //   },
+                    // ),
                     ListTile(
                       leading: SvgPicture.asset(
                         'assets/atten.svg',
@@ -473,9 +473,9 @@ class _home_screenState extends State<home_screen>
                   _buildNavItem('assets/home.svg', 'Home'),
                   _buildNavItem('assets/2560114.svg', 'Projects'),
                   _buildNavItem('assets/leave_8.svg', ' Leaves'),
-                  if (showAddClient!)
-                    _buildNavItem('assets/atten.svg', 'Add Client'),
                   _buildNavItem('assets/Profile_new.svg', 'Profile'),
+                  if (showAddClient!)
+                    _buildNavItem('assets/atten.svg', 'Add Client Visits'),
                 ],
               ),
               // body: _buildBody(),
@@ -713,35 +713,35 @@ class _home_screenState extends State<home_screen>
   //     //return Container();
   //   }
   // }
-  Widget _buildBody() {
-    Widget bodyContent;
-    switch (currentTab) {
-      case 0:
-        bodyContent = const HomeScreen();
-        break;
-      case 1:
-        bodyContent = const TestProjectsScreen();
-        // bodyContent = projects_screen();
-        break;
-      case 2:
-        bodyContent = leaves_screen();
-        break;
-      default:
-        bodyContent = home_screen();
-    }
-
-    return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        if (currentTab != 0 && details.primaryVelocity! > 0) {
-          // Swipe right detected
-          setState(() {
-            currentTab = 0;
-          });
-        }
-      },
-      child: bodyContent,
-    );
-  }
+  // Widget _buildBody() {
+  //   Widget bodyContent;
+  //   switch (currentTab) {
+  //     case 0:
+  //       bodyContent = const HomeScreen();
+  //       break;
+  //     case 1:
+  //       bodyContent = const TestProjectsScreen();
+  //       // bodyContent = projects_screen();
+  //       break;
+  //     case 2:
+  //       bodyContent = leaves_screen();
+  //       break;
+  //     default:
+  //       bodyContent = home_screen();
+  //   }
+  //
+  //   return GestureDetector(
+  //     onHorizontalDragEnd: (details) {
+  //       if (currentTab != 0 && details.primaryVelocity! > 0) {
+  //         // Swipe right detected
+  //         setState(() {
+  //           currentTab = 0;
+  //         });
+  //       }
+  //     },
+  //     child: bodyContent,
+  //   );
+  // }
 
   void logOutDialog() {
     showDialog(
@@ -812,17 +812,17 @@ class _home_screenState extends State<home_screen>
   Widget _buildScreens(int index) {
     switch (index) {
       case 0:
-        return HomeScreen();
+        return HrmsHomeSreen();
       case 1:
         return TestProjectsScreen();
       case 2:
         return leaves_screen();
       case 3:
-        return AddLeads();
-      case 4:
         return personal_details();
+      case 4:
+        return AddLeads();
       default:
-        return HomeScreen();
+        return HrmsHomeSreen();
     }
   }
 
@@ -835,9 +835,9 @@ class _home_screenState extends State<home_screen>
       case 2:
         return 'Apply Leave';
       case 3:
-        return 'Add Client Visits';
-      case 4:
         return 'Profile';
+      case 4:
+        return 'Add Client Visits';
       default:
         return '';
     }

@@ -12,6 +12,7 @@ import '../Model Class/DailyPunch.dart';
 import '../Model Class/FileRepositoryModel.dart';
 import '../Model Class/GeoBoundariesModel.dart';
 import '../Model Class/LeadsModel.dart';
+import '../screens/home/hrms_homescreen.dart';
 
 class HRMSDatabaseHelper {
   static const String _databaseName = "hrmsgeotrack.sqlite";
@@ -719,7 +720,7 @@ class HRMSDatabaseHelper {
   Future<List<FileRepositoryModel>> getFileRepositoryDetails() async {
     final db = await database;
     final List<Map<String, dynamic>> result = await db.query(
-      'FileRepositorys',
+      'FileRepository',
       where: 'ServerUpdatedStatus = ?',
       whereArgs: [0],
     );

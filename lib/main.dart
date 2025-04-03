@@ -10,6 +10,7 @@ import 'package:hrms/Splash_screen.dart';
 
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/screens/home/HomeScreen.dart';
+import 'package:hrms/screens/home/hrms_homescreen.dart';
 
 import 'package:provider/provider.dart';
 

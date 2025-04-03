@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:synchronized/synchronized.dart';
 
+import '../screens/home/hrms_homescreen.dart';
+import '../shared_keys.dart';
 import 'DatabaseHelper.dart';
 
 class DataAccessHandler with ChangeNotifier {
@@ -188,7 +190,7 @@ class DataAccessHandler with ChangeNotifier {
   Future<int> insertFileRepository(Map<String, dynamic> fileData) async {
     final db = await dbHelper.database;
     return await db.insert(
-      'FileRepositorys',
+      'FileRepository',
       fileData,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -333,7 +335,7 @@ class DataAccessHandler with ChangeNotifier {
   }
 
   Future<List<Map<String, dynamic>>> getTodayLeadsuser(
-      String today, int? userID) async {
+      String today, String? userID) async {
     final db = await dbHelper.database;
 
     String query =
@@ -521,7 +523,7 @@ class DataAccessHandler with ChangeNotifier {
 
     // Retrieve userID from SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? userID = prefs.getInt('userID');
+    String  userID = prefs.getString(SharedKeys.userId) ?? "";
     print('Retrieved userID: $userID');
 
     if (userID == null) {

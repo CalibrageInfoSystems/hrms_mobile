@@ -41,4 +41,4 @@ var getemployedata = '/hrmsapi/Employee/GetEmployeeBasedOnId/';
 var getleaveStatistics = '/hrmsapi/Attendance/GetLeaveStatistics/';
 /* const testLeaveApplyURL = 'http://182.18.157.215:/';
 const uatLeaveApplyURL = 'https://hrms.calibrage.in:/'; */
-var SyncTransactions = "/api/Track/SyncTransactions";
+var SyncTransactions = "/hrmsapi/Track/SyncTransactions";

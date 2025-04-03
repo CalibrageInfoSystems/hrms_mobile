@@ -58,6 +58,7 @@ class FileRepositoryModel {
       'UpdatedByUserId': updatedByUserId,
       'UpdatedDate': updatedDate,
       'ServerUpdatedStatus': serverUpdatedStatus,
+      'LookupType': LookupType
     };
   }
 }
@@ -75,28 +76,28 @@ Future<String> convertFileToBase64(String filePath) async {
   }
 }
 
-Future<void> prepareAndSendFile(String filePath, FileRepositoryModel model) async {
-  try {
-    // Log the file path to ensure it's being passed correctly
-    print("File path: $filePath");
-
-    // Convert the file to a Base64 string
-    String base64File = await convertFileToBase64(filePath);
-
-    // Check if the Base64 string is not null or empty
-    if (base64File.isEmpty) {
-      print("Base64 string is empty");
-    } else {
-      print("Base64 string generated successfully");
-    }
-
-    // Directly update the model with the Base64 string in the fileName field
-    model.fileName = base64File;
-
-    // Log updated model to ensure it contains the Base64 content
-    print("Updated model with Base64 in fileName: ${model.toJson()}");
-
-  } catch (e) {
-    print("Error: $e");
-  }
-}
+// Future<void> prepareAndSendFile(String filePath, FileRepositoryModel model) async {
+//   try {
+//     // Log the file path to ensure it's being passed correctly
+//     print("File path: $filePath");
+//
+//     // Convert the file to a Base64 string
+//     String base64File = await convertFileToBase64(filePath);
+//
+//     // Check if the Base64 string is not null or empty
+//     if (base64File.isEmpty) {
+//       print("Base64 string is empty");
+//     } else {
+//       print("Base64 string generated successfully");
+//     }
+//
+//     // Directly update the model with the Base64 string in the fileName field
+//     model.fileName = base64File;
+//
+//     // Log updated model to ensure it contains the Base64 content
+//     print("Updated model with Base64 in fileName: ${model.toJson()}");
+//
+//   } catch (e) {
+//     print("Error: $e");
+//   }
+// }

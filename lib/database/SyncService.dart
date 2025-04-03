@@ -31,7 +31,7 @@ class SyncService {
  //var apiUrl = Uri.parse('$baseUrl$SyncTransactions');
   static const String geoBoundariesTable = 'geoBoundaries';
   static const String leadsTable = 'leads';
-  static const String fileRepositoryTable = 'FileRepositorys';
+  static const String fileRepositoryTable = 'FileRepository';
  static const String dailyPunchTable = 'DailyPunchInAndOut';
  final dbHelper = HRMSDatabaseHelper();
 
@@ -122,7 +122,7 @@ class SyncService {
    }
 
    // Fetching fileRepoList - Make sure this happens regardless of other data
-   List<FileRepositoryModel> fileRepoList = await _fetchData(dbHelper.getFileRepositoryDetails, 'FileRepositorys');
+   List<FileRepositoryModel> fileRepoList = await _fetchData(dbHelper.getFileRepositoryDetails, 'FileRepository');
 
    if (fileRepoList.isNotEmpty) {
      List<FileRepositoryModel> updatedFileRepoList = [];
@@ -391,8 +391,8 @@ class SyncService {
      }
 
      // Update model (use a proper field for Base64)
-     model.fileName = base64File; // Ensure `fileContent` exists in `FileRepositoryModel`
-
+   //  model.fileName = base64File; // Ensure `fileContent` exists in `FileRepositoryModel` //TODO
+     model.fileName = filePath;
      // Ensure correct JSON structure before sending
      Map<String, dynamic> requestData = model.toJson();
      print("📤 Sending data: $requestData");
