@@ -159,6 +159,13 @@ flutter:
     - assets/nextcircle.png
     - assets/home.svg
     - assets/Profile_new.svg
+    - assets/circleuser.svg
+    - assets/overview.svg
+    - assets/addlead.svg
+    - assets/calendar-day.svg
+    - assets/refresh.svg
+
+
 
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see

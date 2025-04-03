@@ -55,6 +55,10 @@ class CommonStyles {
       fontWeight: FontWeight.w500,
       color: CommonStyles.blackColor);
 
+  static const txStyF20CwFF5 = TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w500,
+      color: CommonStyles.whiteColor);
   static const txStyF20CbluFF5 = TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.w500,

@@ -12,6 +12,7 @@ import 'package:hrms/personal_details.dart';
 import 'package:hrms/projects_screen.dart';
 import 'package:hrms/screens/AddLeads.dart';
 import 'package:hrms/screens/home/hrms_homescreen.dart';
+import 'package:hrms/screens/home/sync_screen.dart';
 import 'package:hrms/test_apply_leave.dart';
 import 'package:hrms/test_projects.dart';
 import 'package:hrms/screens/test_hrms.dart';
@@ -174,26 +175,51 @@ class _home_screenState extends State<home_screen>
                   style: TextStyle(color: Colors.white),
                 ),
                 centerTitle: true,
+                // leading: IconButton(
+                //   icon: const Icon(Icons.menu, color: Colors.white),
+                //   onPressed: () {
+                //     // Add your menu action here
+                //   },
+                // ),
                 actions: [
                   InkWell(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const Notifications()),
+                          builder: (context) => const Notifications(),
+                        ),
                       );
                     },
                     child: const Icon(
                       Icons.notification_important,
-                      //  size: 15.0,
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(
-                    width: 15.0,
-                  )
+                  const SizedBox(width: 15.0),
+
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                          builder: (context) =>
+                          SyncScreen(),
+                      ),);
+                      // Add action for the new icon
+                    },
+                    child: SvgPicture.asset(
+                      'assets/backup.svg',
+                      width: 24,
+                      height: 24,
+                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                    ),
+                  ),
+
+                  const SizedBox(width: 15.0),
                 ],
               ),
+
               drawer: Drawer(
                 child: ListView(
                   children: [
@@ -471,11 +497,11 @@ class _home_screenState extends State<home_screen>
                 selectedItemColor: const Color(0xFFf15f22),
                 items: [
                   _buildNavItem('assets/home.svg', 'Home'),
-                  _buildNavItem('assets/2560114.svg', 'Projects'),
-                  _buildNavItem('assets/leave_8.svg', ' Leaves'),
-                  _buildNavItem('assets/Profile_new.svg', 'Profile'),
+                  _buildNavItem('assets/overview.svg', 'Projects'),
+                  _buildNavItem('assets/calendar-day.svg', ' Leaves'),
+                  _buildNavItem('assets/circleuser.svg', 'Profile'),
                   if (showAddClient!)
-                    _buildNavItem('assets/atten.svg', 'Add Client Visits'),
+                    _buildNavItem('assets/addlead.svg', 'Add Client Visits'),
                 ],
               ),
               // body: _buildBody(),
