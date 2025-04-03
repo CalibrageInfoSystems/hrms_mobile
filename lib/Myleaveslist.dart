@@ -1,14 +1,14 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/api%20config.dart';
+import 'package:hrms/common_widgets/CommonUtils.dart';
+import 'package:hrms/common_widgets/common_styles.dart';
 import 'package:hrms/home_screen.dart';
 import 'package:hrms/login_screen.dart';
-import 'package:hrms/personal_details.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -16,51 +16,53 @@ import 'Commonutils.dart';
 import 'Constants.dart';
 import 'Model Class/EmployeeLeave.dart';
 import 'SharedPreferencesHelper.dart';
-import 'main.dart';
 
 class Myleaveslist extends StatefulWidget {
+  const Myleaveslist({super.key});
+
   @override
-  Myleaveslist_screenState createState() => Myleaveslist_screenState();
+  State<Myleaveslist> createState() => _MyleaveslistState();
 }
 
-class Myleaveslist_screenState extends State<Myleaveslist> {
+class _MyleaveslistState extends State<Myleaveslist> {
   String accessToken = '';
   String empolyeid = '';
   String todate = "";
   String logintime = "";
+  final _fromToDatesController = TextEditingController();
+  int? _selectedLeave;
+  DateTime? selectedDate;
+  String showYear = 'Select Year';
+  DateTime _selectedYear = DateTime.now();
+  static const List<String> leavesList = [
+    'Pending',
+    'Accepted',
+    'Approved',
+    'Rejected',
+    'Cancelled'
+  ];
 
   // List<Map<String, dynamic>> leaveData = [];
   List<EmployeeLeave> leaveData = [];
   bool isLoading = true;
   bool ismatchedlogin = false;
 
-  late Future<List<EmployeeLeave>> EmployeeLeaveData;
+  late Future<List<EmployeeLeave>> employeeLeaves;
+  List<EmployeeLeave> allLeaves = [];
+  List<EmployeeLeave> filteredLeaves = [];
   @override
   void initState() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.portraitUp,
-    ]);
+    super.initState();
 
-    Commonutils.checkInternetConnectivity().then((isConnected) {
-      if (isConnected) {
-        print('The Internet Is Connected');
-        loadAccessToken();
-        loademployeid();
-        getLoginTime();
-      } else {
-        print('The Internet Is not  Connected');
-      }
-    });
+    employeeLeaves = _loadleaveslist(empolyeid);
   }
 
-  Future<String?> getLoginTime() async {
+/*   Future<String?> getLoginTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    logintime = prefs.getString('loginTime') ?? 'Unknown';
     print('Login Time: $logintime');
     login(logintime!);
     return logintime;
-  }
+  } */
 
   Future<void> deleteLoginTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -80,7 +82,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
               title: Column(
                 //mainAxisAlignment: MainAxisAlignment.,
                 children: [
-                  Container(
+                  SizedBox(
                     height: 50.0,
                     width: 60.0,
                     child: SvgPicture.asset(
@@ -89,10 +91,10 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                       width: 55.0,
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 7.0,
                   ),
-                  Text(
+                  const Text(
                     "Session Time Out",
                     style: TextStyle(
                       fontSize: 16,
@@ -100,10 +102,10 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 3.0,
                   ),
-                  Text(
+                  const Text(
                     "Please Login Again",
                     style: TextStyle(
                       fontSize: 16,
@@ -120,14 +122,14 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                     onConfirmLogout(context);
                     // Navigator.of(context).pop();
                   },
-                  child: Text(
+                  child: const Text(
                     'Ok',
                     style: TextStyle(
                         color: Colors.white,
                         fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(
+                    backgroundColor: const Color(
                         0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
                       borderRadius:
@@ -149,7 +151,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
         "Logout Successfully", context, 0, 3);
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
       (route) => false,
     );
   }
@@ -180,25 +182,28 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
     }
   }
 
-  Future<void> loadAccessToken() async {
+/*   Future<void> loadAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      accessToken = prefs.getString("accessToken") ?? "";
     });
     print("accestokeninapplyleave:$accessToken");
   }
 
   Future<void> loademployeid() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       empolyeid = prefs.getString("employeeId") ?? "";
-      //_loadleaveslist(empolyeid);
-      EmployeeLeaveData = _loadleaveslist(empolyeid);
+      employeeLeaveData = _loadleaveslist(empolyeid);
     });
     print("empolyeidinapplyleave:$empolyeid");
-  }
+  } */
 
   Future<List<EmployeeLeave>> _loadleaveslist(String empolyeid) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      accessToken = prefs.getString("accessToken") ?? "";
+      logintime = prefs.getString('loginTime') ?? 'Unknown';
+      empolyeid = prefs.getString("employeeId") ?? "";
+    });
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (isConnected) {
       print('Connected to the internet');
@@ -208,20 +213,8 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
       FocusScope.of(context).unfocus();
       print('Not connected to the internet');
     }
-    // Specify the API endpoint
-    // final String apiUrl =
-
-    // final url = Uri.parse(baseUrl + getleavesapi + empolyeid);
-    // print('myleavesapi$url');
-    // Check if accessToken is not null before using it
-
-    // Get the current date and time
     DateTime now = DateTime.now();
-
-    // Extract the current year
     int currentYear = now.year;
-
-    // Print the current year
     print('Current Year: $currentYear');
 
     if (accessToken != null) {
@@ -260,94 +253,26 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
           print('API Response jsonList : $data');
           print('API Response leaveData: $leaveData');
           print('API Response leaveData: ${leaveData.length}');
+          allLeaves = leaveData;
+          filteredLeaves = leaveData;
           return leaveData;
         } else {
           Commonutils.showCustomToastMessageLong(
               'Error: ${response.body}', context, 1, 4);
-          // Handle error if the request was not successful
           print('Error: ${response.statusCode} - ${response.reasonPhrase}');
         }
       } catch (error) {
-        // Handle any exceptions that occurred during the request
         print('Error: $error');
       }
     } else {
-      // Handle the case where accessToken is null
       print('Error: accessToken is null');
     }
     return [];
   }
-  // void _loadleaveslist(String empolyeid) async {
-  //   // Specify the API endpoint
-  //   // final String apiUrl =
-  //   // print('API apiUrl: $apiUrl');
-  //
-  //   // final url = Uri.parse(baseUrl + getleavesapi + empolyeid);
-  //   // print('myleavesapi$url');
-  //   // Check if accessToken is not null before using it
-  //
-  //   // Get the current date and time
-  //   DateTime now = DateTime.now();
-  //
-  //   // Extract the current year
-  //   int currentYear = now.year;
-  //
-  //   // Print the current year
-  //   print('Current Year: $currentYear');
-  //
-  //   if (accessToken != null) {
-  //     try {
-  //       final url = Uri.parse(baseUrl + getleavesapi + empolyeid + '/$currentYear');
-  //       print('myleavesapi$url');
-  //       Map<String, String> headers = {
-  //         'Content-Type': 'application/json',
-  //         'Authorization': '$accessToken',
-  //       };
-  //       print('API headers: $accessToken');
-  //
-  //       final response = await http.get(url, headers: headers);
-  //       print('response body : ${response.body}');
-  //       //  final response = await http.get(Uri.parse(url), headers: headers);
-  //       print("responsecode ${response.statusCode}");
-  //       // Check if the request was successful (status code 200)
-  //       if (response.statusCode == 200) {
-  //         // Parse the JSON response
-  //         final List<dynamic> data = json.decode(response.body);
-  //         setState(() {
-  //           // leaveData = data.map((json) => EmployeeLeave.fromJson(json)).toList();
-  //           List<EmployeeLeave> validLeaves = [];
-  //           data.forEach((leave) {
-  //             if (leave['isDeleted'] == false || leave['isDeleted'] == null) {
-  //               validLeaves.add(EmployeeLeave.fromJson(leave));
-  //             }
-  //           });
-  //           leaveData = validLeaves;
-  //           isLoading = false;
-  //         });
-  //         print('leaveData${leaveData.length}');
-  //         // Process the data as needed
-  //         print('API Response jsonList : $data');
-  //         print('API Response leaveData: $leaveData');
-  //         print('API Response leaveData: ${leaveData.length}');
-  //       } else {
-  //         Commonutils.showCustomToastMessageLong('Error: ${response.body}', context, 1, 4);
-  //         // Handle error if the request was not successful
-  //         print('Error: ${response.statusCode} - ${response.reasonPhrase}');
-  //       }
-  //     } catch (error) {
-  //       // Handle any exceptions that occurred during the request
-  //       print('Error: $error');
-  //     }
-  //   } else {
-  //     // Handle the case where accessToken is null
-  //     print('Error: accessToken is null');
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
     final textscale = MediaQuery.of(context).textScaleFactor;
-    // TextDirection? textDirection = Directionality.maybeOf(context);
     if (ismatchedlogin) {
       Future.microtask(() => _showtimeoutdialog(context));
     }
@@ -360,51 +285,64 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
         },
         child: Scaffold(
             appBar: AppBar(
-              elevation: 0,
-              backgroundColor: Color(0xFFf15f22),
-              title: Text(
-                'HRMS',
-                style: TextStyle(color: Colors.white),
-              ),
-              centerTitle: true,
-              leading: IconButton(
-                icon: Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
+                elevation: 0,
+                backgroundColor: const Color(0xFFf15f22),
+                leading: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => home_screen()),
+                    );
+                  },
                 ),
-                onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => home_screen()),
-                  );
-                  // Implement your logic to navigate back
-                },
-              ),
-            ),
-            body:
-                // isLoading
-                //     ? Center(child: CircularProgressIndicator())
-                //     : leaveData.isEmpty
-                //         ? Center(child: Text('No Leaves Applied!'))
-                //         :
-                FutureBuilder(
-              future: EmployeeLeaveData,
+                title: const Text(
+                  'HRMS',
+                  style: TextStyle(color: Colors.white),
+                ),
+                centerTitle: true,
+                actions: [
+                  //MARK: Filter
+                  IconButton(
+                    icon: const Icon(
+                      Icons.menu,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        isScrollControlled: true,
+                        context: context,
+                        builder: (context) => Padding(
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).viewInsets.bottom,
+                          ),
+                          child: filterMyLeaves(),
+                        ),
+                      );
+                    },
+                  ),
+                ]),
+            body: FutureBuilder(
+              future: employeeLeaves,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CustomCircularProgressIndicator();
+                  return const CustomCircularProgressIndicator();
                 } else if (snapshot.connectionState == ConnectionState.done) {
                   // EmployeeLeave employeeLeave = EmployeeLeaveData
-                  List<EmployeeLeave> data = snapshot.data!;
+                  List<EmployeeLeave> data = filteredLeaves;
                   if (data.isEmpty) {
                     return Center(
                         child: Container(
-                      padding: EdgeInsets.only(top: 5.0),
-                      child: Text('No Leaves Applied!'),
+                      padding: const EdgeInsets.only(top: 5.0),
+                      child: const Text('No Leaves Found'),
                     ));
                   } else {
                     return ListView.builder(
-                      itemCount: leaveData.length,
+                      itemCount: data.length,
                       itemBuilder: (context, index) {
-                        final leave = leaveData[index];
+                        final leave = data[index];
                         final borderColor = _getStatusBorderColor(leave.status);
                         String? leavetodate;
                         DateTime from_date = DateTime.parse(leave.fromDate);
@@ -426,7 +364,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                 .shade300 // Grey background if marked for deletion
                             : leave.isDeleted == null ||
                                     leave.isDeleted == false
-                                ? Color(0xFFfbf2ed) // Default color
+                                ? const Color(0xFFfbf2ed) // Default color
                                 : Colors.grey.shade300;
 
                         DateTime from_datefordelete =
@@ -449,11 +387,11 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Padding(
-                                    padding:
-                                        EdgeInsets.only(top: 5.0, bottom: 0.0),
+                                    padding: const EdgeInsets.only(
+                                        top: 5.0, bottom: 0.0),
                                     child: Row(
                                       children: [
-                                        Text(
+                                        const Text(
                                           'Leave Type: ',
                                           style: TextStyle(
                                             color: Color(0xFFf37345),
@@ -464,15 +402,15 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                         ),
                                         Text(
                                           '${leave.leaveType}',
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: Color(0xFF000000),
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
                                             fontFamily: 'Calibri',
                                           ),
                                         ),
-                                        Spacer(),
-                                        SizedBox(width: 16.0),
+                                        const Spacer(),
+                                        const SizedBox(width: 16.0),
                                         GestureDetector(
                                           onTap: () {
                                             _showConfirmationDialog(leave);
@@ -485,7 +423,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                           // ),
                                           child: hideDeleteIcon
                                               ? Container()
-                                              : Icon(
+                                              : const Icon(
                                                   CupertinoIcons.delete,
                                                   color: Colors.red,
                                                 ),
@@ -496,7 +434,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                   Container(
                                     child: Row(
                                       children: [
-                                        Text(
+                                        const Text(
                                           'Half Day Leave :',
                                           style: TextStyle(
                                             color: Color(0xFFf37345),
@@ -507,7 +445,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                         ),
                                         leave.isHalfDayLeave == null ||
                                                 leave.isHalfDayLeave == false
-                                            ? Text(
+                                            ? const Text(
                                                 ' No',
                                                 style: TextStyle(
                                                   color: Color(0xFF000000),
@@ -516,7 +454,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                                   fontFamily: 'Calibri',
                                                 ),
                                               )
-                                            : Text(
+                                            : const Text(
                                                 ' Yes',
                                                 style: TextStyle(
                                                   color: Color(0xFF000000),
@@ -529,11 +467,11 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.only(bottom: 4.0),
+                                    padding: const EdgeInsets.only(bottom: 4.0),
                                     child: RichText(
                                       text: TextSpan(
                                         children: [
-                                          TextSpan(
+                                          const TextSpan(
                                             text: 'Leave Status :',
                                             style: TextStyle(
                                                 color: Color(0xFFf37345),
@@ -555,11 +493,11 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.only(bottom: 4.0),
+                                    padding: const EdgeInsets.only(bottom: 4.0),
                                     child: RichText(
                                       text: TextSpan(
                                         children: [
-                                          TextSpan(
+                                          const TextSpan(
                                             text: 'From Date: ',
                                             style: TextStyle(
                                               color: Color(0xFFf37345),
@@ -570,14 +508,14 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                           ),
                                           TextSpan(
                                             text: '${leavefromdate}',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Color(0xFF000000),
                                               fontSize: 16,
                                               fontWeight: FontWeight.w700,
                                               fontFamily: 'Calibri',
                                             ),
                                           ),
-                                          TextSpan(
+                                          const TextSpan(
                                             text: '   To Date:  ',
                                             style: TextStyle(
                                               color: Color(0xFFf37345),
@@ -590,7 +528,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                             text: {leavetodate} != null
                                                 ? leavetodate
                                                 : '${leavefromdate}',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Color(0xFF000000),
                                               fontWeight: FontWeight.w700,
                                               fontSize: 16,
@@ -602,11 +540,11 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.only(bottom: 4.0),
+                                    padding: const EdgeInsets.only(bottom: 4.0),
                                     child: RichText(
                                       text: TextSpan(
                                         children: [
-                                          TextSpan(
+                                          const TextSpan(
                                             text: 'Leave Description : ',
                                             style: TextStyle(
                                                 color: Color(0xFFF44614),
@@ -616,7 +554,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                                           ),
                                           TextSpan(
                                             text: '${leave.note}',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Color(0xFF000000),
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
@@ -650,7 +588,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                     );
                   }
                 } else {
-                  return Text('Error: Unable to fetch data');
+                  return const Text('Error: Unable to fetch data');
                 }
               },
             )));
@@ -701,7 +639,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     "Confirmation",
                     style: TextStyle(
                       fontSize: 16,
@@ -715,7 +653,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                       Navigator.of(context).pop();
                       //  Navigator.of(context, rootNavigator: true).pop(context);
                     },
-                    child: Icon(
+                    child: const Icon(
                       CupertinoIcons.multiply,
                       color: Colors.grey,
                     ),
@@ -754,10 +692,10 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                       height: 30,
                       width: 30,
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 8.0,
                     ),
-                    Flexible(
+                    const Flexible(
                       child: Text(
                         'Are You Sure You Want To Delete?',
                         style:
@@ -773,14 +711,14 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                     deleteapi(leave.employeeLeaveId);
                     Navigator.of(context).pop();
                   },
-                  child: Text(
+                  child: const Text(
                     'Yes',
                     style: TextStyle(
                         color: Colors.white,
                         fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(
+                    backgroundColor: const Color(
                         0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
                       borderRadius:
@@ -792,14 +730,14 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text(
+                  child: const Text(
                     'No',
                     style: TextStyle(
                         color: Colors.white,
                         fontFamily: 'Calibri'), // Set text color to white
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(
+                    backgroundColor: const Color(
                         0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
                       borderRadius:
@@ -864,7 +802,7 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
             if (isConnected) {
               print('The Internet Is Connected');
               Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => Myleaveslist()),
+                MaterialPageRoute(builder: (context) => const Myleaveslist()),
               );
             } else {
               Commonutils.showCustomToastMessageLong(
@@ -891,13 +829,295 @@ class Myleaveslist_screenState extends State<Myleaveslist> {
       });
     }
   }
+
+  Widget filterMyLeaves() {
+    return StatefulBuilder(builder: (context, setState) {
+      return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  const Text(
+                    'Filter By',
+                  ),
+                  GestureDetector(
+                    onTap: onClearAllFilters,
+                    //MARK: Clear all filters
+                    child: const Text(
+                      'Clear All Filters',
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Container(
+                  width: double.infinity,
+                  height: 0.3,
+                  color: CommonUtils.primaryTextColor,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.only(left: 5, right: 5),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextFormField(
+                      controller: _fromToDatesController,
+                      keyboardType: TextInputType.visiblePassword,
+                      onTap: () => showYearPicker(context),
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.only(
+                            top: 15, bottom: 10, left: 15, right: 15),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: CommonStyles.primaryColor,
+                          ),
+                          borderRadius: BorderRadius.circular(6.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: CommonUtils.primaryTextColor,
+                          ),
+                          borderRadius: BorderRadius.circular(6.0),
+                        ),
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
+                          ),
+                        ),
+                        counterText: "",
+                        hintText: 'Select Year',
+                        prefixIcon: const Icon(Icons.calendar_today),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Wrap(
+                      spacing: 5.0,
+                      children: List<ChoiceChip>.generate(
+                        leavesList.length,
+                        (int index) => ChoiceChip(
+                          selectedColor: _selectedLeave == index
+                              ? CommonStyles.primaryColor.withOpacity(0.4)
+                              : CommonStyles.primaryColor,
+                          backgroundColor: Colors.white,
+                          label: Text(
+                            leavesList[index],
+                            style: const TextStyle(
+                              fontFamily: 'Outfit',
+                              color: CommonStyles.primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          side: const BorderSide(
+                              color: CommonStyles.primaryColor),
+                          selected: _selectedLeave == index,
+                          showCheckmark: false,
+                          onSelected: (bool selected) {
+                            setState(() {
+                              print('Selected Leave22: ${leavesList[index]}');
+                              ;
+                              _selectedLeave = selected ? index : null;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              textStyle: const TextStyle(
+                                color: CommonUtils.primaryTextColor,
+                              ),
+                              side: const BorderSide(
+                                color: CommonUtils.primaryTextColor,
+                              ),
+                              backgroundColor: Colors.white,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(5),
+                                ),
+                              ),
+                            ),
+                            child: const Text(
+                              'Close',
+                              style: TextStyle(
+                                fontFamily: 'Outfit',
+                                fontSize: 14,
+                                color: CommonUtils.primaryTextColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: SizedBox(
+                            child: Center(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+
+                                  print('Selected Year: $showYear');
+                                  print('Selected Leave Type: $_selectedLeave');
+                                  // Call the filter method with the selected values
+                                  filterLeaves(
+                                    showYear == 'Select Year' ? null : showYear,
+                                    _selectedLeave == null
+                                        ? null
+                                        : leavesList[_selectedLeave!],
+                                  );
+                                },
+                                //MARK: Apply Filter
+                                child: Container(
+                                  height: 40.0,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                    color: CommonUtils.primaryTextColor,
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'Apply',
+                                      style: TextStyle(
+                                        fontFamily: 'Outfit',
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  void filterLeaves(String? selectedYear, String? selectedStatus) {
+    setState(() {
+      // If both are null, close the filter and display all data
+      if ((selectedYear == null || selectedYear == 'Select Year') &&
+          selectedStatus == null) {
+        filteredLeaves = allLeaves;
+        return;
+      }
+
+      // If only selectedYear is null, filter by status
+      if (selectedYear == null || selectedYear == 'Select Year') {
+        filteredLeaves = allLeaves.where((leave) {
+          return leave.status == selectedStatus;
+        }).toList();
+        return;
+      }
+
+      // If only selectedStatus is null, filter by year
+      if (selectedStatus == null) {
+        filteredLeaves = allLeaves.where((leave) {
+          DateTime fromDate = DateTime.parse(leave.fromDate);
+          return fromDate.year.toString() == selectedYear;
+        }).toList();
+        return;
+      }
+
+      // If both are not null, filter by both year and status
+      filteredLeaves = allLeaves.where((leave) {
+        DateTime fromDate = DateTime.parse(leave.fromDate);
+        bool matchesYear = fromDate.year.toString() == selectedYear;
+        bool matchesStatus = leave.status == selectedStatus;
+        return matchesYear && matchesStatus;
+      }).toList();
+    });
+
+    print('Filtered Leaves: ${filteredLeaves.length}');
+  }
+
+  Future<void> showYearPicker(context) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Select Year"),
+          content: SizedBox(
+            width: 300,
+            height: 300,
+            child: YearPicker(
+              firstDate: DateTime(DateTime.now().year - 10, 1),
+              // lastDate: DateTime.now(),
+              lastDate: DateTime(2025),
+              initialDate: DateTime.now(),
+              selectedDate: _selectedYear,
+              onChanged: (DateTime dateTime) {
+                print(dateTime.year);
+                setState(() {
+                  _selectedYear = dateTime;
+                  showYear = "${dateTime.year}";
+                  _fromToDatesController.text = showYear;
+                });
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void onClearAllFilters() {
+    Navigator.of(context).pop();
+    setState(() {
+      showYear = 'Select Year';
+      _selectedLeave = null;
+      _fromToDatesController.clear();
+
+      filteredLeaves = allLeaves;
+    });
+  }
 }
 
 class CustomCircularProgressIndicator extends StatelessWidget {
+  const CustomCircularProgressIndicator({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
+      child: SizedBox(
         width: 50, // Adjust the width as needed
         height: 50, // Adjust the height as needed
         // decoration: BoxDecoration(
@@ -918,7 +1138,7 @@ class CustomCircularProgressIndicator extends StatelessWidget {
             Container(
               height: 33.0,
               width: 33.0,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
@@ -928,7 +1148,7 @@ class CustomCircularProgressIndicator extends StatelessWidget {
                 width: 30.0,
               ),
             ),
-            CircularProgressIndicator(
+            const CircularProgressIndicator(
               strokeWidth:
                   3, // Adjust the stroke width of the CircularProgressIndicator
               valueColor: AlwaysStoppedAnimation<Color>(
