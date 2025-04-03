@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/api%20config.dart';
 import 'package:hrms/common_widgets/CommonUtils.dart';
@@ -18,7 +17,8 @@ import 'Model Class/EmployeeLeave.dart';
 import 'SharedPreferencesHelper.dart';
 
 class Myleaveslist extends StatefulWidget {
-  const Myleaveslist({super.key});
+  final String? leaveType;
+  const Myleaveslist({super.key, this.leaveType});
 
   @override
   State<Myleaveslist> createState() => _MyleaveslistState();
@@ -54,7 +54,8 @@ class _MyleaveslistState extends State<Myleaveslist> {
   void initState() {
     super.initState();
 
-    employeeLeaves = _loadleaveslist(empolyeid);
+    employeeLeaves =
+        _loadleaveslist(empolyeid, leaveTypeValue: widget.leaveType);
   }
 
 /*   Future<String?> getLoginTime() async {
@@ -197,7 +198,8 @@ class _MyleaveslistState extends State<Myleaveslist> {
     print("empolyeidinapplyleave:$empolyeid");
   } */
 
-  Future<List<EmployeeLeave>> _loadleaveslist(String empolyeid) async {
+  Future<List<EmployeeLeave>> _loadleaveslist(String empolyeid,
+      {String? leaveTypeValue}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       accessToken = prefs.getString("accessToken") ?? "";
@@ -246,6 +248,11 @@ class _MyleaveslistState extends State<Myleaveslist> {
                 validLeaves.add(EmployeeLeave.fromJson(leave));
               }
             });
+            if (leaveTypeValue != null) {
+              validLeaves = validLeaves
+                  .where((leave) => leave.leaveType == leaveTypeValue)
+                  .toList();
+            }
             leaveData = validLeaves;
           });
           print('leaveData${leaveData.length}');
