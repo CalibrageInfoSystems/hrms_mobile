@@ -1223,7 +1223,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       await file.writeAsBytes(pngBytes);
       // Insert into DailyPunchInAndOut table
       await _insertPunchData(
-        DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+        DateTime.now().toIso8601String(),
         _latitude,
         _longitude,
         _address,

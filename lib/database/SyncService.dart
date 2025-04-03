@@ -391,8 +391,8 @@ class SyncService {
      }
 
      // Update model (use a proper field for Base64)
-   //  model.fileName = base64File; // Ensure `fileContent` exists in `FileRepositoryModel` //TODO
-     model.fileName = filePath;
+     model.fileName = base64File; // Ensure `fileContent` exists in `FileRepositoryModel` //TODO
+     //model.fileName = filePath;
      // Ensure correct JSON structure before sending
      Map<String, dynamic> requestData = model.toJson();
      print("📤 Sending data: $requestData");

@@ -31,7 +31,7 @@ class FileRepositoryModel {
   // Factory method to create an instance from a JSON map
   factory FileRepositoryModel.fromJson(Map<String, dynamic> json) {
     return FileRepositoryModel(
-      leadsCode: json['leadsCode'] ?? '', // Ensure it has a default value
+      leadsCode: json['leadsCode'] ?? null, // Ensure it has a default value
       fileName: json['FileName'], // The base64 encoded file
       fileLocation: json['FileLocation'], // Check the key here
       fileExtension: json['FileExtension'], // Check the key here
@@ -41,7 +41,7 @@ class FileRepositoryModel {
       updatedByUserId: json['UpdatedByUserId'] ?? 0, // Default to 0 if null
       updatedDate: json['UpdatedDate'] ?? '', // Ensure it has a default value
       serverUpdatedStatus: json['ServerUpdatedStatus'] == 1,
-      LookupType: json['LookupType'] ?? 0,// Handle conversion from int to bool
+      LookupType: json['LookupType'] ?? null,// Handle conversion from int to bool
     );
   }
 
