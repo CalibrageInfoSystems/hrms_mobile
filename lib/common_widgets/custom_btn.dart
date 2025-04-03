@@ -35,20 +35,20 @@ class CustomBtn extends StatelessWidget {
       ),
       icon: isLoading
           ? const SizedBox(
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(
-          color: Colors.white,
-          strokeWidth: 2,
-        ),
-      )
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
           : Icon(
-        icon ?? Icons.camera_alt_outlined,
-        size: 20,
-        color: btnTextColor,
-      ),
+              icon ?? Icons.camera_alt_outlined,
+              size: 20,
+              color: btnTextColor,
+            ),
       label: Text(
-        btnText,
+        isLoading ? 'Checking...' : btnText,
         style: TextStyle(color: btnTextColor),
       ),
     );
