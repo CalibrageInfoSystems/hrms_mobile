@@ -7,6 +7,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hrms/Constants.dart';
 import 'package:hrms/Database/HRMSDatabaseHelper.dart';
+import 'package:hrms/Myleaveslist.dart';
 
 import 'package:hrms/screens/AddLeads.dart';
 import 'package:hrms/screens/BatteryOptimization.dart';
@@ -40,7 +41,6 @@ import '../../common_widgets/custom_lead_template.dart';
 import 'dart:ui' as ui;
 import '../../location_service/logic/location_controller/location_controller_cubit.dart';
 import '../../location_service/notification/notification.dart';
-import '../../location_service/tools/background_service.dart';
 import 'dart:math' show cos, sqrt, asin;
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:hrms/database/DataAccessHandler.dart';
@@ -50,6 +50,7 @@ import '../../shared_keys.dart';
 import 'package:flutter_carousel_widget/flutter_carousel_widget.dart';
 
 import 'package:hrms/common_widgets/custom_btn.dart';
+
 class HrmsHomeSreen extends StatefulWidget {
   const HrmsHomeSreen({super.key});
 
@@ -89,14 +90,14 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   bool isButtonEnabled = false;
   String? selectedOptionbottom = null; // Default selected option
   DateTime selectedDatemark =
-  DateTime.now().add(const Duration(days: 1)); // Default current date
+      DateTime.now().add(const Duration(days: 1)); // Default current date
   TextEditingController remarksController = TextEditingController();
   bool? isLeave;
   int? toastcount = 0; // Controller for remarks
   String _currentDateTime = "";
   String _currentLocation = "Fetching location...";
   TextEditingController dateController =
-  TextEditingController(); // Controller for displaying date
+      TextEditingController(); // Controller for displaying date
   List<int> userActivityRights = [];
   List<String> menuItems = [];
   static const String PREVIOUS_SYNC_DATE = 'previous_sync_date';
@@ -130,15 +131,19 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   double availablepls = 0.0;
   double availablecls = 0.0;
   double usedCasualLeavesInMonth = 0.0;
+
   @override
   void initState() {
     super.initState();
-   // loadPunchInfo();
+    print('www: initState called');
+    loadPunchInfo();
+    loadCurrentLocation();
     getuserdata();
     _loademployeleaves();
     fetchLeadCounts();
     fetchpendingrecordscount();
-    backgroundService = BackgroundService(userId: userID, dataAccessHandler: dataAccessHandler);
+    backgroundService =
+        BackgroundService(userId: userID, dataAccessHandler: dataAccessHandler);
     backgroundService.initializeService();
     checkLocationEnabled();
     startService();
@@ -177,6 +182,14 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     //  dateController.text = DateFormat('dd-MM-yyyy').format(selectedDatemark);
   }
 
+  Future<void> loadCurrentLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      _currentPosition = position;
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -185,7 +198,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   }
 
   @override
-  void  didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       // App is in the foreground
       WakelockPlus.enable();
@@ -203,7 +216,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     });
     final now = DateTime.now();
     final int currentHour = now.hour;
-    if (currentHour >= 9 && currentHour < 18) {
+    if (currentHour >= 9 && currentHour < 12) {
       if (!isPunchedIn) {
         setState(() {
           isRequestProcessing = true;
@@ -251,7 +264,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               header(),
               SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 14.0,right: 14.0,top: 10,bottom: 10),
+                  padding: const EdgeInsets.only(
+                      left: 14.0, right: 14.0, top: 10, bottom: 10),
                   child: Column(
                     children: [
                       Container(
@@ -264,7 +278,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                               shiftTimingAndStatus(),
+                            shiftTimingAndStatus(),
                             const SizedBox(height: 10),
                             checkInNOut(),
                           ],
@@ -275,14 +289,12 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                       const SizedBox(height: 10),
                       sgtSection(),
                       const SizedBox(height: 10),
-
                       bannersCarosuel(context),
                       const SizedBox(height: 10),
                     ],
                   ),
                 ),
               ),
-
             ],
           ),
           floatingActionButton: FloatingActionButton(
@@ -309,18 +321,32 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       children: [
         customLeaveTypeBox(
           leaveType: 'PL\'s',
-          data:   "$usedPrivilegeLeavesInYear/$allottedPrivilegeLeaves",
+          data: "$usedPrivilegeLeavesInYear/$allottedPrivilegeLeaves",
           icon: Icons.edit_calendar_outlined,
           themeColor: const Color(0xffDC2626),
-          // themeColor: Color(0xffFBBF24),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Myleaveslist(leaveType: 'PL'),
+              ),
+            );
+          },
         ),
         const SizedBox(width: 12),
         customLeaveTypeBox(
           leaveType: 'CL\'s',
-          data:   "$usedCasualLeavesInYear/$allotcausalleaves",
+          data: "$usedCasualLeavesInYear/$allotcausalleaves",
           icon: Icons.calendar_month,
           themeColor: const Color(0xff2563EB),
-          // themeColor: CommonStyles.greenColor,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Myleaveslist(leaveType: 'CL'),
+              ),
+            );
+          },
         ),
         const SizedBox(width: 12),
         customLeaveTypeBox(
@@ -339,13 +365,12 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       children: [
         customLeaveTypeBox(
           leaveType: 'Travelled',
-          data: totalDistance.toStringAsFixed(2)+' KM',
+          data: totalDistance.toStringAsFixed(2) + ' KM',
           icon: Icons.mode_of_travel_outlined,
           themeColor: const Color(0xffFBBF24),
           // themeColor: Color(0xffFBBF24),
         ),
-
-         SizedBox(width: 12),
+        const SizedBox(width: 12),
         customLeaveTypeBox(
           leaveType: 'Today Visits',
           data: '$totalLeadsCount',
@@ -423,25 +448,52 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isPunchedIn
-                    ? "Punch In"
-                    : "Shift Timings",
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                isPunchedIn ? "Punch In" : "Shift Timings",
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
-                isPunchedIn ? "at ${formatPunchTime(_time)}" : "09:00 AM to 6:00 PM",
+                isPunchedIn
+                    ? "at ${formatPunchTime(_time)}"
+                    : "09:00 AM to 6:00 PM",
                 style: TextStyle(fontSize: 14, color: Colors.grey[700]),
               ),
             ],
           ),
         ),
-        CustomBtn(
+        isPunchedIn
+            ? CustomBtn(
+                icon: Icons.logout_outlined,
+                btnText: 'Check Out',
+                isLoading: isRequestProcessing,
+                backgroundColor: CommonStyles.whiteColor,
+                btnTextColor: CommonStyles.primaryColor,
+                onTap: checkInOut,
+                /* onTap: () async {
+                  setState(() {
+                    isRequestProcessing = true;
+                  });
+
+                  await showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => punchInOutDialog(context),
+                  );
+                }, */
+              )
+            : CustomBtn(
+                btnText: 'Check In',
+                isLoading: isRequestProcessing,
+                onTap: checkInOut,
+              ),
+        /* CustomBtn(
           btnText: isRequestProcessing
-              ? "Processing..."
+              ? "Checking..."
               : (isPunchedIn ? "Check Out" : "Check In"),
           isLoading: isRequestProcessing,
+          icon: isPunchedIn ? Icons.logout_outlined : Icons.camera_alt_outlined,
+          backgroundColor: isPunchedIn ? null : CommonStyles.whiteColor,
+          btnTextColor: isPunchedIn ? null : CommonStyles.primaryColor,
           onTap: () async {
             setState(() {
               isRequestProcessing = true;
@@ -453,15 +505,41 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               builder: (context) => punchInOutDialog(context),
             );
 
-            setState(() {
+            /* setState(() {
               isRequestProcessing = false;
-            });
+            }); */
           },
-        ),
+        ), */ /* Column(
+                            children: [
+                              CustomBtn(
+                                btnText: 'Check In',
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              CustomBtn(
+                                icon: Icons.logout_outlined,
+                                btnText: 'Check Out',
+                                backgroundColor: CommonStyles.whiteColor,
+                                btnTextColor: CommonStyles.primaryColor,
+                              ),
+                            ],
+                          ), */
       ],
     );
   }
 
+  Future<void> checkInOut() async {
+    setState(() {
+      isRequestProcessing = true;
+    });
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => punchInOutDialog(context),
+    );
+  }
 
   Row shiftTimingAndStatus() {
     return Row(
@@ -472,7 +550,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           size: 20,
         ),
         const SizedBox(width: 5),
-         Text(
+        Text(
           _getFormattedDate(),
         ),
         const SizedBox(width: 10),
@@ -496,26 +574,25 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-
   Container header() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       color: Colors.white,
       child: Row(
         children: [
-
-      _buildProfileImage(),
+          _buildProfileImage(),
           const SizedBox(width: 12),
-           Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 '$EmployeName',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               Text(
                 '$employee_designation',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ],
           ),
@@ -536,15 +613,15 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   final List<Map<String, dynamic>> _items = [
     {
       'img':
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
     },
     {
       'img':
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
     },
     {
       'img':
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
     },
   ];
 
@@ -600,11 +677,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-
-
-
-
-
   Future<void> startService() async {
     // await Fluttertoast.showToast(
     //     msg: "Wait for a while, Initializing the service...");
@@ -621,7 +693,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       if (permission) {
         // Check background permission
         LocationPermission backgroundPermission =
-        await Geolocator.checkPermission();
+            await Geolocator.checkPermission();
         print('Initial background permission check: $backgroundPermission');
         appendLog('Initial background permission check: $backgroundPermission');
 
@@ -684,7 +756,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     }
   }
 
-
   void stopService() {
     backgroundService.stopService();
     context.read<LocationControllerCubit>().stopLocationFetch();
@@ -703,7 +774,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     // Directory appFolderPath = Directory(
     //     '/storage/emulated/0/Download/$folderName');
     Directory appFolderPath =
-    Directory('/storage/emulated/0/Download/SmartGeoTrack');
+        Directory('/storage/emulated/0/Download/SmartGeoTrack');
     if (!appFolderPath.existsSync()) {
       appFolderPath.createSync(recursive: true);
     }
@@ -715,7 +786,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
     // Get the current date and time in a readable format
     String currentDateTime =
-    DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+        DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
     try {
       final buf = logFile.openWrite(mode: FileMode.append);
@@ -730,7 +801,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   Future<void> getuserdata() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userID = prefs.getString(SharedKeys.userId) ?? "";
- //   userID = prefs.getInt('userID');
+    //   userID = prefs.getInt('userID');
     RoleId = prefs.getInt('roleID');
     username = prefs.getString('username') ?? '';
 
@@ -787,7 +858,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         return AlertDialog(
           title: const Text("Location Services Disabled"),
           content:
-          const Text("Please enable location services to use this app."),
+              const Text("Please enable location services to use this app."),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -814,16 +885,14 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     });
 
     String currentDate =
-    getCurrentDate(); // Assuming this returns a string in 'YYYY-MM-DD' format
+        getCurrentDate(); // Assuming this returns a string in 'YYYY-MM-DD' format
     SharedPreferences prefs = await SharedPreferences.getInstance();
     //   userID = prefs.getInt('userID'); //TODO
     RoleId = prefs.getInt('roleID');
 
-
     // Fetch total lead counts based on CreatedByUserId
     totalLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
         "SELECT COUNT(*) AS totalLeadsCount FROM Leads WHERE CreatedByUserId = '$userID'");
-
 
     // Fetch today's lead counts for the current date and userID
     todayLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
@@ -881,9 +950,9 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     String currentDate = getCurrentDate();
     try {
       final dataAccessHandler =
-      Provider.of<DataAccessHandler>(context, listen: false);
+          Provider.of<DataAccessHandler>(context, listen: false);
       List<dynamic> leads =
-      await dataAccessHandler.getTodayLeadsuser(currentDate, userID);
+          await dataAccessHandler.getTodayLeadsuser(currentDate, userID);
       return leads.map((item) => LeadsModel.fromMap(item)).toList();
     } catch (e) {
       throw Exception('catch: ${e.toString()}');
@@ -909,7 +978,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     // Replace this list with dynamically fetched data
     // Fetch latitude and longitude data for the given date range
     List<Map<String, double>> data =
-    await dataAccessHandler.fetchLatLongsFromDatabase(startday, today);
+        await dataAccessHandler.fetchLatLongsFromDatabase(startday, today);
 
     print('Data: $data km');
     totalDistance = 0.0;
@@ -993,7 +1062,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     List<String>? storedList = prefs.getStringList('userActivityRights');
     userActivityRights = storedList?.map(int.parse).toList() ?? [];
     print('===> storedList: $storedList');
-
 
     return storedList?.map(int.parse).toList() ?? [];
   }
@@ -1118,11 +1186,11 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       );
 
       List<Placemark> placemarks =
-      await placemarkFromCoordinates(position.latitude, position.longitude);
+          await placemarkFromCoordinates(position.latitude, position.longitude);
 
       Placemark place = placemarks.first;
       String currentTime =
-      DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
       // Check if the widget is still mounted before calling setState
       if (!mounted) return;
@@ -1133,7 +1201,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         _latitude = position.latitude.toString();
         _longitude = position.longitude.toString();
         _address =
-        "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
+            "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
         _time = currentTime;
       });
 
@@ -1157,21 +1225,21 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? pickedFile =
-      await picker.pickImage(source: ImageSource.camera);
+          await picker.pickImage(source: ImageSource.camera);
 
       if (pickedFile == null) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("No image captured!")),
         );
-        return;
+        throw Exception("No image captured!");
       }
 
       // await _getCurrentLocation();
 
       final File imageFile = File(pickedFile.path);
       final ui.Image capturedImage =
-      await decodeImageFromList(await imageFile.readAsBytes());
+          await decodeImageFromList(await imageFile.readAsBytes());
 
       ui.PictureRecorder recorder = ui.PictureRecorder();
       Canvas canvas = Canvas(recorder);
@@ -1214,7 +1282,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           .endRecording()
           .toImage(capturedImage.width, capturedImage.height);
       ByteData? byteData =
-      await finalImage.toByteData(format: ui.ImageByteFormat.png);
+          await finalImage.toByteData(format: ui.ImageByteFormat.png);
       Uint8List pngBytes = byteData!.buffer.asUint8List();
       // Save the processed image
       final directory = await getApplicationDocumentsDirectory();
@@ -1243,16 +1311,13 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       });
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        SnackBar(content: Text(e.toString())),
       );
     }
   }
 
   Widget punchInOutDialog(BuildContext context) {
     String currentTime = DateFormat('HH:mm').format(DateTime.now());
-    Future<Position> futurePosition = Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -1292,7 +1357,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                 // Map view
                 Expanded(
                   child: FutureBuilder<Position>(
-                    future: futurePosition,
+                    future: _getInitialPosition(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return ClipRRect(
@@ -1316,6 +1381,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                             },
                             onMapCreated: (GoogleMapController controller) {
                               _mapController = controller;
+                              // Fetch the current location in the background
+                              _updateCurrentLocationOnMap();
                             },
                             myLocationEnabled: true,
                             myLocationButtonEnabled: false,
@@ -1333,6 +1400,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                       }
                     },
                   ),
+                  // findChildWidget(),
 
                   /* _currentPosition == null
                       ? const Center(child: CircularProgressIndicator())
@@ -1420,6 +1488,43 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         ],
       ),
     );
+  }
+
+  Future<Position> _getInitialPosition() async {
+    // Try to get the last known position for instant display
+    Position? lastKnownPosition = await Geolocator.getLastKnownPosition();
+
+    if (lastKnownPosition != null) {
+      return lastKnownPosition;
+    }
+
+    // If no last known position is available, fetch the current position
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+  }
+
+  Future<void> _updateCurrentLocationOnMap() async {
+    try {
+      Position currentPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      if (_mapController != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(currentPosition.latitude, currentPosition.longitude),
+          ),
+        );
+
+        setState(() {
+          // Update the marker with the current location
+          _currentPosition = currentPosition;
+        });
+      }
+    } catch (e) {
+      print('Error fetching current location: $e');
+    }
   }
 
   Widget headerSection(BuildContext context) {
@@ -1582,7 +1687,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       Map<String, dynamic> data = json.decode(response.body);
       setState(() {
         photoData =
-        data['ImageData']; // Initialize with an empty string if null
+            data['ImageData']; // Initialize with an empty string if null
         print('photoData==== $photoData');
       });
     } else {
@@ -1643,7 +1748,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                 radius: 25,
                 backgroundColor: Colors.grey[300],
                 child:
-                const Center(child: CircularProgressIndicator.adaptive()),
+                    const Center(child: CircularProgressIndicator.adaptive()),
               ),
             );
           } else if (snapshot.hasError) {
@@ -1670,7 +1775,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                 radius: 25,
                 backgroundColor: Colors.grey[300],
                 backgroundImage:
-                snapshot.data != null ? MemoryImage(snapshot.data!) : null,
+                    snapshot.data != null ? MemoryImage(snapshot.data!) : null,
                 child: snapshot.data == null
                     ? const Icon(Icons.person, size: 40, color: Colors.white)
                     : null,
@@ -1756,45 +1861,45 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   Widget _getDefaultImage(String gender, BuildContext context) {
     return gender == "Male"
         ? Container(
-        width: MediaQuery.of(context).size.width / 3.8,
-        height: MediaQuery.of(context).size.height / 6.5,
-        padding: const EdgeInsets.all(3.0),
-        decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-            border: Border.all(color: Colors.white, width: 2.0)),
-        child: Image.asset(
-          'assets/men_emp.jpg',
-          // width: MediaQuery.of(context).size.width / 4.5,
-          // height: MediaQuery.of(context).size.height / 6.5,
-        ))
+            width: MediaQuery.of(context).size.width / 3.8,
+            height: MediaQuery.of(context).size.height / 6.5,
+            padding: const EdgeInsets.all(3.0),
+            decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+                border: Border.all(color: Colors.white, width: 2.0)),
+            child: Image.asset(
+              'assets/men_emp.jpg',
+              // width: MediaQuery.of(context).size.width / 4.5,
+              // height: MediaQuery.of(context).size.height / 6.5,
+            ))
         : gender == "Female"
-        ? Container(
-      width: MediaQuery.of(context).size.width / 3.8,
-      height: MediaQuery.of(context).size.height / 6.5,
-      padding: const EdgeInsets.all(3.0),
-      decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-          border: Border.all(color: Colors.white, width: 2.0)),
-      child: Image.asset(
-        'assets/women-emp.jpg',
-        // width: MediaQuery.of(context).size.width / 3.8,
-        // height: MediaQuery.of(context).size.height / 6.5,
-      ),
-    )
-        : Container(
-      width: MediaQuery.of(context).size.width / 3.8,
-      height: MediaQuery.of(context).size.height / 6.5,
-      padding: const EdgeInsets.all(3.0),
-      decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-          border: Border.all(color: Colors.white, width: 2.0)),
-      child: Image.asset(
-        'assets/app_logo.png',
-        // width: MediaQuery.of(context).size.width / 3.8,
-        // height: MediaQuery.of(context).size.height / 6.5,
-        // height: 90,
-      ),
-    ); // You can replace Container() with another default image or widget
+            ? Container(
+                width: MediaQuery.of(context).size.width / 3.8,
+                height: MediaQuery.of(context).size.height / 6.5,
+                padding: const EdgeInsets.all(3.0),
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+                    border: Border.all(color: Colors.white, width: 2.0)),
+                child: Image.asset(
+                  'assets/women-emp.jpg',
+                  // width: MediaQuery.of(context).size.width / 3.8,
+                  // height: MediaQuery.of(context).size.height / 6.5,
+                ),
+              )
+            : Container(
+                width: MediaQuery.of(context).size.width / 3.8,
+                height: MediaQuery.of(context).size.height / 6.5,
+                padding: const EdgeInsets.all(3.0),
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+                    border: Border.all(color: Colors.white, width: 2.0)),
+                child: Image.asset(
+                  'assets/app_logo.png',
+                  // width: MediaQuery.of(context).size.width / 3.8,
+                  // height: MediaQuery.of(context).size.height / 6.5,
+                  // height: 90,
+                ),
+              ); // You can replace Container() with another default image or widget
   }
 
   String formatPunchTime(String? dateTimeString) {
@@ -1802,7 +1907,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       print('xxx5: $dateTimeString');
       if (dateTimeString == null) return "Invalid Date";
       DateTime dateTime =
-      DateFormat("yyyy-MM-dd HH:mm:ss").parse(dateTimeString);
+          DateFormat("yyyy-MM-dd HH:mm:ss").parse(dateTimeString);
       return DateFormat("hh:mm a").format(dateTime);
     } catch (e) {
       return "Invalid Date";
@@ -1828,10 +1933,10 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       String? filePath) async {
     try {
       final dataAccessHandler =
-      Provider.of<DataAccessHandler>(context, listen: false);
+          Provider.of<DataAccessHandler>(context, listen: false);
       final db = await dbHelper.database;
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String  userId = prefs.getString(SharedKeys.userId) ?? "";
+      String userId = prefs.getString(SharedKeys.userId) ?? "";
       // Ensure UserId is set correctly
       // String userId =
       //     "e939b672-84ed-45ed-ba3a-b7a372403ad3"; // Replace with actual User ID
@@ -1908,14 +2013,13 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               'UpdatedByUserId': userId,
               'UpdatedDate': punchTime,
               'ServerUpdatedStatus': 0, // Ensure it's marked for sync
-              'LookupType': isPunchedIn ? 376 : 377, // 23 for Punch In, 24 for Punch Out
+              'LookupType':
+                  isPunchedIn ? 376 : 377, // 23 for Punch In, 24 for Punch Out
             };
 
             // **Insert Image (Only One at a Time)**
             int fileResult = await db.insert('fileRepository', fileData);
             print("✅ File stored in FileRepository: $fileResult");
-
-
           } else {
             print("⚠️ Duplicate image detected, skipping insert: $fileName");
           }
@@ -1927,7 +2031,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           final syncService = SyncService(dataAccessHandler);
 
           // **Sync FileRepositorys**
-          int? unsyncedFileCount =  await dataAccessHandler.getOnlyOneIntValueFromDb(
+          int? unsyncedFileCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
               "SELECT COUNT(*) FROM fileRepository WHERE ServerUpdatedStatus = 0")!;
 
           if (unsyncedFileCount! > 0) {
@@ -1973,7 +2077,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       final allotedprivilegeleaves = loadedData['allottedPrivilegeLeaves'];
       final usedcausalleavesinmonth = loadedData['usedCasualLeavesInMonth'];
       final usedPrivilegeLeavesInMonth =
-      loadedData['usedPrivilegeLeavesInMonth'];
+          loadedData['usedPrivilegeLeavesInMonth'];
       final usedcasualleavesinyear = loadedData['usedCasualLeavesInYear'];
       final usdl = loadedData['allottedCasualLeaves'];
       // final mobilenum = loadedData['mobileNumber'];
@@ -2004,8 +2108,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
         print("Available Privilege Leaves: $availablepls");
 
-        availablecls = allotcausalleaves.toDouble() - usedCasualLeavesInYear.toDouble();
-
+        availablecls =
+            allotcausalleaves.toDouble() - usedCasualLeavesInYear.toDouble();
 
         //  print('availablecls: $availablecls');
       });
@@ -2014,9 +2118,41 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     // availablecls = allotcausalleaves - usedCasualLeavesInYear;
   }
 
-
-
-
+  Widget findChildWidget() {
+    if (_currentPosition != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(6.0),
+        child: GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: LatLng(
+              _currentPosition!.latitude,
+              _currentPosition!.longitude,
+            ),
+            zoom: 15,
+          ),
+          markers: {
+            Marker(
+              markerId: const MarkerId('current_location'),
+              position: LatLng(
+                _currentPosition!.latitude,
+                _currentPosition!.longitude,
+              ),
+            ),
+          },
+          onMapCreated: (GoogleMapController controller) {
+            _mapController = controller;
+          },
+          myLocationEnabled: true,
+          myLocationButtonEnabled: false,
+          zoomControlsEnabled: false,
+        ),
+      );
+    } else {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+  }
 }
 // Future<void> _loadUserActivityRights() async {
 //   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -2065,11 +2201,11 @@ class DataCountModel {
 }
 
 class BackgroundService {
-  String ? userId;
+  String? userId;
   final DataAccessHandler dataAccessHandler; // Declare DataAccessHandler
   late SyncServiceB syncService; // Declare SyncService
   final FlutterBackgroundService flutterBackgroundService =
-  FlutterBackgroundService();
+      FlutterBackgroundService();
 
   static const double MAX_ACCURACY_THRESHOLD = 10.0;
   static const double MIN_DISTANCE_THRESHOLD = 50.0;
@@ -2178,7 +2314,8 @@ void onStart(ServiceInstance service) async {
       }
     }
 
-    appendLog('Location permission granted. Starting Geolocator stream for location updates.');
+    appendLog(
+        'Location permission granted. Starting Geolocator stream for location updates.');
 
     // Start Geolocator stream for location updates
     Geolocator.getPositionStream(
@@ -2187,16 +2324,17 @@ void onStart(ServiceInstance service) async {
         distanceFilter: 20,
       ),
     ).listen((Position position) async {
-      appendLog('Received new position: Lat ${position.latitude}, Lon ${position.longitude}.');
+      appendLog(
+          'Received new position: Lat ${position.latitude}, Lon ${position.longitude}.');
 
       if (permission == LocationPermission.always) {
         DateTime now = DateTime.now();
 
         // Fetch shift timings and weekoffs from the database
         final shiftFromTime =
-        await dataAccessHandler.getShiftFromTime(); // Example user ID 13
+            await dataAccessHandler.getShiftFromTime(); // Example user ID 13
         final shiftToTime =
-        await dataAccessHandler.getShiftToTime(); // Example user ID 13
+            await dataAccessHandler.getShiftToTime(); // Example user ID 13
         //  final weekoffs = await dataAccessHandler.getweekoffs();            // List of week-off days (e.g., [DateTime.monday, DateTime.friday])
 
         // Parse the shift times into DateTime objects for comparison
@@ -2237,7 +2375,7 @@ void onStart(ServiceInstance service) async {
             .where((day) => day.isNotEmpty)
             .map((day) => dayToIntMap[day]) // Map day names to integers
             .where((day) =>
-        day != null && day >= 1 && day <= 7) // Only valid weekdays
+                day != null && day >= 1 && day <= 7) // Only valid weekdays
             .cast<int>()
             .toList();
         print('weekoffs==========>${weekoffs}');
@@ -2268,19 +2406,18 @@ void onStart(ServiceInstance service) async {
         //
         //   if (!hasleaveToday) {
         if (!hasPointToday) {
-         if (_isPositionAccurate(position)
-         ) {
-          if (!isFirstLocationLogged) {
-            lastLatitude = position.latitude;
-            lastLongitude = position.longitude;
-            isFirstLocationLogged = true;
+          if (_isPositionAccurate(position)) {
+            if (!isFirstLocationLogged) {
+              lastLatitude = position.latitude;
+              lastLongitude = position.longitude;
+              isFirstLocationLogged = true;
 
-            // Insert the first location
-            await insertLocationToDatabase(
-                hrmsDatabase, position, userID, syncService);
+              // Insert the first location
+              await insertLocationToDatabase(
+                  hrmsDatabase, position, userID, syncService);
+            }
           }
         }
-       }
 
         if (_isPositionAccurate(position)) {
           final distance = Geolocator.distanceBetween(
@@ -2303,8 +2440,7 @@ void onStart(ServiceInstance service) async {
         } else {
           appendLog("Skipping insert: Position inaccurate or speed is 0");
         }
-      }
-      else {
+      } else {
         appendLog("Tracking not allowed: User has leave today");
         print("Tracking not allowed: User has leave today");
       }
@@ -2362,14 +2498,14 @@ void onStart(ServiceInstance service) async {
 
 Future<void> _showNotification(String title, String content) async {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
   const AndroidNotificationDetails androidPlatformChannelSpecifics =
-  AndroidNotificationDetails('location_channel', 'Location Channel',
-      importance: Importance.high,
-      priority: Priority.high,
-      showWhen: false);
+      AndroidNotificationDetails('location_channel', 'Location Channel',
+          importance: Importance.high,
+          priority: Priority.high,
+          showWhen: false);
   const NotificationDetails platformChannelSpecifics =
-  NotificationDetails(android: androidPlatformChannelSpecifics);
+      NotificationDetails(android: androidPlatformChannelSpecifics);
 
   await flutterLocalNotificationsPlugin.show(
     0,
@@ -2422,7 +2558,7 @@ Future<void> insertLocationToDatabase(HRMSDatabaseHelper? database,
         longitude: position.longitude,
         createdByUserId: userID!,
         serverUpdatedStatus:
-        false, // Initially false, will be updated after successful sync
+            false, // Initially false, will be updated after successful sync
         from: '997', // Replace with appropriate source if needed
       );
 
@@ -2452,7 +2588,7 @@ Future<void> insertLocationToDatabase(HRMSDatabaseHelper? database,
           initialDelay: const Duration(minutes: 10), // Retry after 10 minutes
           constraints: Constraints(
               networkType:
-              NetworkType.connected), // Only run if network is available
+                  NetworkType.connected), // Only run if network is available
         );
 
         Fluttertoast.showToast(
@@ -2489,7 +2625,8 @@ Future<bool> checkIfLocationExists(
   return queryResult.isNotEmpty;
 }
 
-const double POSITION_ACCURACY_THRESHOLD = 20.0; // Threshold for position accuracy
+const double POSITION_ACCURACY_THRESHOLD =
+    20.0; // Threshold for position accuracy
 const double SPEED_ACCURACY_THRESHOLD = 10.0; // Threshold for speed accuracy
 const double MINIMUM_MOVEMENT_SPEED = 1.0; // Minimum speed to consider movement
 
@@ -2509,15 +2646,13 @@ bool _isPositionAccurate(Position position) {
 
   // Return true only if accuracy and movement speed conditions are met
   return position.accuracy <= POSITION_ACCURACY_THRESHOLD &&
-      position.speed >= MINIMUM_MOVEMENT_SPEED ;
+      position.speed >= MINIMUM_MOVEMENT_SPEED;
 }
 
 void appendLog(String text) async {
-
   const String fileName = 'hrmstracking.file';
   // final appFolderPath = await getApplicationDocumentsDirectory();
-  Directory appFolderPath =
-  Directory('/storage/emulated/0/Download/HRMS');
+  Directory appFolderPath = Directory('/storage/emulated/0/Download/HRMS');
   if (!appFolderPath.existsSync()) {
     appFolderPath.createSync(recursive: true);
   }
@@ -2558,7 +2693,7 @@ class StatCard extends StatelessWidget {
         children: [
           Text(value,
               style:
-              const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+                  const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Text(label, style: const TextStyle(fontSize: 18)),
         ],
