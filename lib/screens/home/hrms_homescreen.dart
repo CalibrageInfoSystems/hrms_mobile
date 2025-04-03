@@ -262,39 +262,44 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           body: Column(
             children: [
               header(),
-              SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 14.0, right: 14.0, top: 10, bottom: 10),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          color: Colors.white,
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 14.0, right: 14.0, top: 10, bottom: 10),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: Colors.white,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              shiftTimingAndStatus(),
+                              const SizedBox(height: 10),
+                              checkInNOut(),
+                            ],
+                          ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            shiftTimingAndStatus(),
-                            const SizedBox(height: 10),
-                            checkInNOut(),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      hrmsSection(),
-                      const SizedBox(height: 10),
-                      sgtSection(),
-                      const SizedBox(height: 10),
-                      bannersCarosuel(context),
-                      const SizedBox(height: 10),
-                    ],
+                        const SizedBox(height: 10),
+                        hrmsSection(),
+                        const SizedBox(height: 10),
+                        sgtSection(),
+                        const SizedBox(height: 10),
+                      ],
+                    ),
                   ),
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                child: bannersCarosuel(context),
+              ),
+              const SizedBox(height: 10),
             ],
           ),
           floatingActionButton: FloatingActionButton(

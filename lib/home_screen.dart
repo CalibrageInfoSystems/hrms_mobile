@@ -124,650 +124,361 @@ class _home_screenState extends State<home_screen>
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: _onWillPop
-        //   async {
-        // if (currentTab != 0) {
-        //   setState(() {
-        //     currentTab = 0;
-        //   });
-        //   return Future.value(false);
-        //
-        // }
-        //
-        //     else {
-        //       bool confirmClose = await showDialog(
-        //         context: context,
-        //         builder: (BuildContext context) {
-        //           return AlertDialog(
-        //             title: const Text('Confirm Exit'),
-        //             content: const Text('Are you sure you want to close the app?'),
-        //             actions: <Widget>[
-        //               TextButton(
-        //                 onPressed: () => Navigator.of(context).pop(false),
-        //                 child: const Text('No'),
-        //               ),
-        //               TextButton(
-        //                 onPressed: () => Navigator.of(context).pop(true),
-        //                 child: const Text('Yes'),
-        //               ),
-        //             ],
-        //           );
-        //         },
-        //       );
-        //
-        //       if (confirmClose == true) {
-        //         SystemNavigator.pop();
-        //       }
-        //
-        //       return false;
-        //     }
-        //     // return false; // Prevent default back navigation behavior
-        //   }
-        ,
-        child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: Scaffold(
-              appBar: AppBar(
-                elevation: 0,
-                backgroundColor: const Color(0xFFf15f22),
-                title: const Text(
-                  'HRMS',
-                  style: TextStyle(color: Colors.white),
+      onWillPop: _onWillPop,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          appBar: appBar(context),
+          drawer: drawer(context),
+          body: _buildScreens(_currentIndex),
+          bottomNavigationBar: bottomNavigationBar(),
+        ),
+      ),
+    );
+  }
+
+  BottomNavigationBar bottomNavigationBar() {
+    return BottomNavigationBar(
+      currentIndex: _currentIndex,
+      onTap: (index) => setState(() {
+        _currentIndex = index;
+      }),
+      selectedItemColor: const Color(0xFFf15f22),
+      items: [
+        _buildNavItem('assets/home.svg', 'Home'),
+        _buildNavItem('assets/overview.svg', 'Projects'),
+        _buildNavItem('assets/calendar-day.svg', ' Leaves'),
+        _buildNavItem('assets/circleuser.svg', 'Profile'),
+        if (showAddClient!)
+          _buildNavItem('assets/addlead.svg', 'Add Client Visits'),
+      ],
+    );
+  }
+
+  Drawer drawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(
+                // Remove the DecorationImage with AssetImage
                 ),
-                centerTitle: true,
-                // leading: IconButton(
-                //   icon: const Icon(Icons.menu, color: Colors.white),
-                //   onPressed: () {
-                //     // Add your menu action here
-                //   },
-                // ),
-                actions: [
-                  InkWell(
+            child: SvgPicture.asset(
+              'assets/cislogo-new.svg', // Replace with the path to your SVG icon
+              width: 80, // Adjust the width as needed
+              height: 100, // Adjust the height as needed
+            ),
+          ),
+          // ListTile(
+          //   leading: SvgPicture.asset(
+          //     'assets/atten.svg',
+          //     width: 20,
+          //     height: 20,
+          //     fit: BoxFit.contain,
+          //     color: Colors.black,
+          //   ),
+          //   title: const Text(
+          //     'My Profile',
+          //     style: TextStyle(
+          //       color: Colors.black,
+          //       fontFamily: 'hind_semibold',
+          //     ),
+          //   ),
+          //   onTap: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //           builder: (context) => personal_details()),
+          //     );
+          //   },
+          // ),
+          ListTile(
+            leading: SvgPicture.asset(
+              'assets/atten.svg',
+              width: 20,
+              height: 20,
+              fit: BoxFit.contain,
+              color: Colors.black,
+            ),
+            title: const Text(
+              'My Leaves',
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'hind_semibold',
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Myleaveslist()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.star,
+              color: Colors.black,
+            ), // Change the icon as needed
+            title: const Text(
+              'Feedback',
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'hind_semibold',
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => feedback_Screen()),
+              );
+              // Handle the onTap action for Logout
+            },
+          ),
+          ListTile(
+            leading: Image.asset(
+              'assets/holiday.png',
+              width: 22,
+              height: 22,
+              color: Colors.black,
+            ),
+            title: const Text(
+              'Holidays',
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'hind_semibold',
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HolidaysScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.notification_important,
+              color: Colors.black,
+              weight: 20,
+            ),
+            // SvgPicture.asset(
+            //   'assets/atten.svg',
+            //   width: 20,
+            //   height: 20,
+            //   fit: BoxFit.contain,
+            //   color: Colors.black,
+            // ),
+            title: const Text(
+              'Notifications',
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'hind_semibold',
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Notifications()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.copy,
+              color: Colors.black,
+              weight: 20,
+            ),
+            // SvgPicture.asset(
+            //   'assets/atten.svg',
+            //   width: 20,
+            //   height: 20,
+            //   fit: BoxFit.contain,
+            //   color: Colors.black,
+            // ),
+            title: const Text(
+              'Resignation Request',
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'hind_semibold',
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const Resgination_req()),
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(
+              Icons.logout,
+              color: Colors.black,
+            ), // Change the icon as needed
+            title: const Text(
+              'Logout',
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'hind_semibold',
+              ),
+            ),
+            onTap: () {
+              logOutDialog();
+              // Handle the onTap action for Logout
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.logout,
+              color: Colors.black,
+            ),
+            title: const Text(
+              'Test',
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'hind_semibold',
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TestHrms()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.logout,
+              color: Colors.black,
+            ),
+            title: const Text(
+              'Hrms Home Sreen',
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'hind_semibold',
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HrmsHomeSreen()),
+              );
+            },
+          ),
+
+          //MARK: Test Apply Leave
+          /* ListTile(
+                    leading: SvgPicture.asset(
+                      'assets/atten.svg',
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.contain,
+                      color: Colors.black,
+                    ),
+                    title: Text(
+                      'Test Apply Leave',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'hind_semibold',
+                      ),
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const Notifications(),
-                        ),
+                            builder: (context) => TestApplyLeave()),
                       );
                     },
-                    child: const Icon(
-                      Icons.notification_important,
-                      color: Colors.white,
-                    ),
                   ),
-                  const SizedBox(width: 15.0),
-
-                  InkWell(
+                  ListTile(
+                    leading: SvgPicture.asset(
+                      'assets/atten.svg',
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.contain,
+                      color: Colors.black,
+                    ),
+                    title: Text(
+                      'Test Projects',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'hind_semibold',
+                      ),
+                    ),
                     onTap: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                          builder: (context) =>
-                          SyncScreen(),
-                      ),);
-                      // Add action for the new icon
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TestProjectsScreen()),
+                      );
                     },
-                    child: SvgPicture.asset(
-                      'assets/backup.svg',
-                      width: 24,
-                      height: 24,
-                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                    ),
                   ),
-
-                  const SizedBox(width: 15.0),
-                ],
-              ),
-
-              drawer: Drawer(
-                child: ListView(
-                  children: [
-                    DrawerHeader(
-                      decoration: const BoxDecoration(
-                          // Remove the DecorationImage with AssetImage
-                          ),
-                      child: SvgPicture.asset(
-                        'assets/cislogo-new.svg', // Replace with the path to your SVG icon
-                        width: 80, // Adjust the width as needed
-                        height: 100, // Adjust the height as needed
-                      ),
-                    ),
-                    // ListTile(
-                    //   leading: SvgPicture.asset(
-                    //     'assets/atten.svg',
-                    //     width: 20,
-                    //     height: 20,
-                    //     fit: BoxFit.contain,
-                    //     color: Colors.black,
-                    //   ),
-                    //   title: const Text(
-                    //     'My Profile',
-                    //     style: TextStyle(
-                    //       color: Colors.black,
-                    //       fontFamily: 'hind_semibold',
-                    //     ),
-                    //   ),
-                    //   onTap: () {
-                    //     Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //           builder: (context) => personal_details()),
-                    //     );
-                    //   },
-                    // ),
-                    ListTile(
-                      leading: SvgPicture.asset(
-                        'assets/atten.svg',
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.contain,
-                        color: Colors.black,
-                      ),
-                      title: const Text(
-                        'My Leaves',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'hind_semibold',
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Myleaveslist()),
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(
-                        Icons.star,
-                        color: Colors.black,
-                      ), // Change the icon as needed
-                      title: const Text(
-                        'Feedback',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'hind_semibold',
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => feedback_Screen()),
-                        );
-                        // Handle the onTap action for Logout
-                      },
-                    ),
-                    ListTile(
-                      leading: Image.asset(
-                        'assets/holiday.png',
-                        width: 22,
-                        height: 22,
-                        color: Colors.black,
-                      ),
-                      title: const Text(
-                        'Holidays',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'hind_semibold',
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => HolidaysScreen()),
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(
-                        Icons.notification_important,
-                        color: Colors.black,
-                        weight: 20,
-                      ),
-                      // SvgPicture.asset(
-                      //   'assets/atten.svg',
-                      //   width: 20,
-                      //   height: 20,
-                      //   fit: BoxFit.contain,
-                      //   color: Colors.black,
-                      // ),
-                      title: const Text(
-                        'Notifications',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'hind_semibold',
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Notifications()),
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(
-                        Icons.copy,
-                        color: Colors.black,
-                        weight: 20,
-                      ),
-                      // SvgPicture.asset(
-                      //   'assets/atten.svg',
-                      //   width: 20,
-                      //   height: 20,
-                      //   fit: BoxFit.contain,
-                      //   color: Colors.black,
-                      // ),
-                      title: const Text(
-                        'Resignation Request',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'hind_semibold',
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Resgination_req()),
-                        );
-                      },
-                    ),
-
-                    ListTile(
-                      leading: const Icon(
-                        Icons.logout,
-                        color: Colors.black,
-                      ), // Change the icon as needed
-                      title: const Text(
-                        'Logout',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'hind_semibold',
-                        ),
-                      ),
-                      onTap: () {
-                        logOutDialog();
-                        // Handle the onTap action for Logout
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(
-                        Icons.logout,
-                        color: Colors.black,
-                      ),
-                      title: const Text(
-                        'Test',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'hind_semibold',
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const TestHrms()),
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(
-                        Icons.logout,
-                        color: Colors.black,
-                      ),
-                      title: const Text(
-                        'Hrms Home Sreen',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'hind_semibold',
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const HrmsHomeSreen()),
-                        );
-                      },
-                    ),
-
-                    //MARK: Test Apply Leave
-                    /* ListTile(
-                      leading: SvgPicture.asset(
-                        'assets/atten.svg',
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.contain,
-                        color: Colors.black,
-                      ),
-                      title: Text(
-                        'Test Apply Leave',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'hind_semibold',
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TestApplyLeave()),
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading: SvgPicture.asset(
-                        'assets/atten.svg',
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.contain,
-                        color: Colors.black,
-                      ),
-                      title: Text(
-                        'Test Projects',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'hind_semibold',
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TestProjectsScreen()),
-                        );
-                      },
-                    ),
-                 */
-                  ],
-                ),
-              ),
-              body: _buildScreens(_currentIndex),
-              bottomNavigationBar: BottomNavigationBar(
-                currentIndex: _currentIndex,
-                onTap: (index) => setState(() {
-                  _currentIndex = index;
-                }),
-                selectedItemColor: const Color(0xFFf15f22),
-                items: [
-                  _buildNavItem('assets/home.svg', 'Home'),
-                  _buildNavItem('assets/overview.svg', 'Projects'),
-                  _buildNavItem('assets/calendar-day.svg', ' Leaves'),
-                  _buildNavItem('assets/circleuser.svg', 'Profile'),
-                  if (showAddClient!)
-                    _buildNavItem('assets/addlead.svg', 'Add Client Visits'),
-                ],
-              ),
-              // body: _buildBody(),
-              // floatingActionButton: FloatingActionButton(
-              //   elevation: 0,
-              //   //   mini: true,
-              //   child: Image.asset(
-              //     'assets/app_logo.png',
-              //     // 'assets/user_1.png',
-              //     width: 18,
-              //     height: 23,
-              //     color: Colors.white,
-              //   ),
-              //   onPressed: () {
-              //     setState(() {
-              //       currentTab = 0;
-              //       //_selectTab(0);
-              //     });
-              //   },
-              //   backgroundColor: const Color(0xFFf15f22),
-              //   // Set the background color to orange
-              //   shape: RoundedRectangleBorder(
-              //     side: const BorderSide(
-              //         color: Colors.white,
-              //         width: 3.0), // Set border color and width
-              //     borderRadius:
-              //         BorderRadius.circular(60), // Adjust the radius as needed
-              //   ),
-              // ),
-              // floatingActionButtonLocation:
-              //     FloatingActionButtonLocation.centerDocked,
-              // bottomNavigationBar: BottomAppBar(
-              //   height: 58,
-              //   shape: const CircularNotchedRectangle(),
-              //   padding: const EdgeInsets.only(bottom: 10.0),
-              //   notchMargin: currentTab == 0 ? 8 : 0,
-              //   child: Column(
-              //     children: [
-              //       Row(
-              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //         children: [
-              //           InkWell(
-              //               onTap: () {
-              //                 setState(() {
-              //                   currentTab = 1;
-              //                   //    _selectTab(1  );
-              //                 });
-              //                 _projectsFocusNode.requestFocus();
-              //               },
-              //               child: Container(
-              //                 width: MediaQuery.of(context).size.width / 3 / 1,
-              //                 //    padding: EdgeInsets.only(left: 25.0),
-              //                 margin: const EdgeInsets.only(left: 25.0),
-              //                 child: GestureDetector(
-              //                   onTap: () {
-              //                     setState(() {
-              //                       currentTab = 1;
-              //                       //  _selectTab(1);
-              //                     });
-              //                     _projectsFocusNode.requestFocus();
-              //                   },
-              //                   // child: Container(
-              //                   // width: MediaQuery.of(context).size.width,
-              //
-              //                   child: Focus(
-              //                       focusNode: _projectsFocusNode,
-              //                       child: Stack(
-              //                         children: [
-              //                           GestureDetector(
-              //                             onTap: () {
-              //                               setState(() {
-              //                                 currentTab = 1;
-              //                                 //  _selectTab(1);
-              //                               });
-              //                             },
-              //                             child: Row(
-              //                               mainAxisAlignment:
-              //                                   MainAxisAlignment.start,
-              //                               children: [
-              //                                 Container(
-              //                                   padding:
-              //                                       const EdgeInsets.all(14.0),
-              //                                   child: SvgPicture.asset(
-              //                                     'assets/2560114.svg', // Replace with the actual path to your SVG icon
-              //                                     height:
-              //                                         20, // Adjust the height as needed
-              //                                     width:
-              //                                         20, // Adjust the width as needed
-              //                                     color:
-              //                                         const Color(0xFFf15f22),
-              //                                   ),
-              //                                 ),
-              //                                 const Text(
-              //                                   "Projects",
-              //                                   style: TextStyle(
-              //                                       color: Color(0xFFf15f22),
-              //                                       fontWeight: FontWeight.bold,
-              //                                       fontFamily: 'Calibri'),
-              //                                 ),
-              //                               ],
-              //                             ),
-              //                           ),
-              //                           Positioned(
-              //                             top: 0,
-              //                             left: 0,
-              //                             width: MediaQuery.of(context)
-              //                                     .size
-              //                                     .width /
-              //                                 3 /
-              //                                 1,
-              //                             height: 4,
-              //                             child: Container(
-              //                               color: currentTab == 1
-              //                                   ? const Color(0xFFf15f22)
-              //                                   : Colors.transparent,
-              //                             ),
-              //                           ),
-              //                         ],
-              //                       )),
-              //                   // ),
-              //                 ),
-              //               )),
-              //
-              //           // SizedBox(width: 10.0),
-              //           InkWell(
-              //             onTap: () {
-              //               setState(() {
-              //                 currentTab = 2;
-              //                 //  _selectTab(2);
-              //               });
-              //               _leavesFocusNode.requestFocus();
-              //             },
-              //             child: Container(
-              //               width: MediaQuery.of(context).size.width / 2.7 / 1,
-              //               padding: const EdgeInsets.only(right: 15.0),
-              //               child: GestureDetector(
-              //                 onTap: () {
-              //                   setState(() {
-              //                     currentTab = 2;
-              //                     // _selectTab(2);
-              //                   });
-              //                   _leavesFocusNode.requestFocus();
-              //                 },
-              //                 child: Container(
-              //                   // padding: EdgeInsets.only(right: 20.0),
-              //                   child: Focus(
-              //                       focusNode: _leavesFocusNode,
-              //                       child: Stack(
-              //                         children: [
-              //                           Row(
-              //                             mainAxisAlignment:
-              //                                 MainAxisAlignment.start,
-              //                             children: [
-              //                               Container(
-              //                                 padding:
-              //                                     const EdgeInsets.all(13.0),
-              //                                 child: SvgPicture.asset(
-              //                                   'assets/leave_8.svg', // Replace with the actual path to your SVG icon
-              //                                   height:
-              //                                       22, // Adjust the height as needed
-              //                                   width:
-              //                                       20, // Adjust the width as needed
-              //                                   color: const Color(0xFFf15f22),
-              //                                 ),
-              //                               ),
-              //                               const Text(
-              //                                 "Leaves",
-              //                                 style: TextStyle(
-              //                                     color: Color(0xFFf15f22),
-              //                                     fontWeight: FontWeight.bold,
-              //                                     fontFamily: 'Calibri'),
-              //                               ),
-              //                             ],
-              //                           ),
-              //                           Positioned(
-              //                             top: 0,
-              //                             left: 0,
-              //                             width: MediaQuery.of(context)
-              //                                     .size
-              //                                     .width /
-              //                                 2.5 /
-              //                                 1,
-              //                             height: 4,
-              //                             child: Container(
-              //                               color: currentTab == 2
-              //                                   ? const Color(0xFFf15f22)
-              //                                   : Colors.transparent,
-              //                             ),
-              //                           ),
-              //                         ],
-              //                       )),
-              //                 ),
-              //               ),
-              //             ),
-              //           )
-              //         ],
-              //       ),
-              //     ],
-              //   ),
-              //   // BottomNavigationBar(
-              //   //   currentIndex: currentTab,
-              //   //   items: [
-              //   //     BottomNavigationBarItem(
-              //   //       icon: Icon(Icons.home),
-              //   //       label: 'Home',
-              //   //     ),
-              //   //     BottomNavigationBarItem(
-              //   //       icon: Icon(Icons.search),
-              //   //       label: 'Search',
-              //   //     ),
-              //   //   ],
-              //   //   onTap: _onNavItemTapped,
-              //   // ),
-              // ),
-            )));
+               */
+        ],
+      ),
+    );
   }
 
-  // void _onNavItemTapped(int index) {
-  //   setState(() {
-  //     currentTab = index;
-  //   });
-  // }
-
-  // Widget _buildBody() {
-  //   switch (currentTab) {
-  //     case 0:
-  //       return personal_details();
-  //     case 1:
-  //       return projects_screen();
-  //     case 2:
-  //       return leaves_screen();
-  //
-  //     default:
-  //       return home_screen();
-  //     //return Container();
-  //   }
-  // }
-  // Widget _buildBody() {
-  //   Widget bodyContent;
-  //   switch (currentTab) {
-  //     case 0:
-  //       bodyContent = const HomeScreen();
-  //       break;
-  //     case 1:
-  //       bodyContent = const TestProjectsScreen();
-  //       // bodyContent = projects_screen();
-  //       break;
-  //     case 2:
-  //       bodyContent = leaves_screen();
-  //       break;
-  //     default:
-  //       bodyContent = home_screen();
-  //   }
-  //
-  //   return GestureDetector(
-  //     onHorizontalDragEnd: (details) {
-  //       if (currentTab != 0 && details.primaryVelocity! > 0) {
-  //         // Swipe right detected
-  //         setState(() {
-  //           currentTab = 0;
-  //         });
-  //       }
-  //     },
-  //     child: bodyContent,
-  //   );
-  // }
+  AppBar appBar(BuildContext context) {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: const Color(0xFFf15f22),
+      title: const Text(
+        'HRMS',
+        style: TextStyle(color: Colors.white),
+      ),
+      centerTitle: true,
+      leading: Builder(
+        builder: (BuildContext context) {
+          return IconButton(
+            icon: const Icon(
+              Icons.menu,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          );
+        },
+      ),
+      actions: [
+        InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Notifications(),
+              ),
+            );
+          },
+          child: const Icon(
+            Icons.notification_important,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(width: 15.0),
+        InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SyncScreen(),
+              ),
+            );
+            // Add action for the new icon
+          },
+          child: SvgPicture.asset(
+            'assets/backup.svg',
+            width: 24,
+            height: 24,
+            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          ),
+        ),
+        const SizedBox(width: 15.0),
+      ],
+    );
+  }
 
   void logOutDialog() {
     showDialog(
