@@ -198,7 +198,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     int currentYear = DateTime.now().year;
     // final apiUrl = Uri.parse(
     // 'http://182.18.157.215/HRMS/API/hrmsapi/Admin/GetHolidays/2025/1');
-    final apiUrl = Uri.parse('$baseUrl$GetHolidayList$currentYear/1');
+    final apiUrl = Uri.parse('$baseUrl$GetHolidayList$currentYear');
     Map<String, String> headers = {
       'Content-Type': 'application/json',
       'Authorization': accessToken,
