@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:flutter_svg/svg.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hrms/Constants.dart';
 import 'package:hrms/Database/HRMSDatabaseHelper.dart';
@@ -26,6 +27,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import 'package:workmanager/workmanager.dart';
 
@@ -131,12 +133,13 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   double availablepls = 0.0;
   double availablecls = 0.0;
   double usedCasualLeavesInMonth = 0.0;
+  late Future<void> futureCheckInOutStatus;
 
   @override
   void initState() {
     super.initState();
-    print('www: initState called');
-    loadPunchInfo();
+    futureCheckInOutStatus = fetchCheckInOutStatus();
+    // loadPunchInfo();
     loadCurrentLocation();
     getuserdata();
     _loademployeleaves();
@@ -208,6 +211,43 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     }
   }
 
+  Future<void> fetchCheckInOutStatus() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      isPunchedIn = prefs.getBool(Constants.isPunchIn) ?? false;
+      _time = prefs.getString(Constants.punchTime) ?? 'Invalid Time';
+      final now = DateTime.now();
+      final int currentHour = now.hour;
+      if (currentHour >= 9 && currentHour < 12) {
+        if (!isPunchedIn) {
+          setState(() {
+            isRequestProcessing = true;
+          });
+
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => punchInOutDialog(context),
+          );
+        }
+      } else if (currentHour >= 18) {
+        if (isPunchedIn) {
+          setState(() {
+            isRequestProcessing = true;
+          });
+
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => punchInOutDialog(context),
+          );
+        }
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> loadPunchInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -271,6 +311,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                       children: [
                         Container(
                           width: double.infinity,
+                          height: size.height * 0.13,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
@@ -286,10 +327,9 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        hrmsSection(),
+                        hrmsSection(size),
                         const SizedBox(height: 10),
-                        sgtSection(),
-                        const SizedBox(height: 10),
+                        sgtSection(size),
                       ],
                     ),
                   ),
@@ -297,7 +337,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14.0),
-                child: bannersCarosuel(context),
+                child: bannersCarosuel(context, size),
               ),
               const SizedBox(height: 10),
             ],
@@ -321,11 +361,12 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-  Row hrmsSection() {
+  Row hrmsSection(Size size) {
     return Row(
       children: [
         customLeaveTypeBox(
           leaveType: 'PL\'s',
+          size: size,
           data: "$usedPrivilegeLeavesInYear/$allottedPrivilegeLeaves",
           icon: Icons.edit_calendar_outlined,
           themeColor: const Color(0xffDC2626),
@@ -341,6 +382,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         const SizedBox(width: 12),
         customLeaveTypeBox(
           leaveType: 'CL\'s',
+          size: size,
           data: "$usedCasualLeavesInYear/$allotcausalleaves",
           icon: Icons.calendar_month,
           themeColor: const Color(0xff2563EB),
@@ -357,6 +399,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         customLeaveTypeBox(
           leaveType: 'Comp Off',
           data: '1/0',
+          size: size,
           icon: Icons.calendar_today_rounded,
           themeColor: const Color(0xff9333EA),
           // themeColor: CommonStyles.blueColor,background: #9333EA;
@@ -365,11 +408,12 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-  Row sgtSection() {
+  Row sgtSection(Size size) {
     return Row(
       children: [
         customLeaveTypeBox(
           leaveType: 'Travelled',
+          size: size,
           data: totalDistance.toStringAsFixed(2) + ' KM',
           icon: Icons.mode_of_travel_outlined,
           themeColor: const Color(0xffFBBF24),
@@ -378,6 +422,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         const SizedBox(width: 12),
         customLeaveTypeBox(
           leaveType: 'Today Visits',
+          size: size,
           data: '$totalLeadsCount',
           icon: Icons.calendar_month,
           themeColor: const Color(0xff16A34A),
@@ -386,6 +431,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         const SizedBox(width: 12),
         customLeaveTypeBox(
           leaveType: 'Total Visits',
+          size: size,
           data: '$totalLeadsCount',
           icon: Icons.calendar_today_rounded,
           themeColor: const Color(0xff4F46E5),
@@ -401,11 +447,13 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     required Color themeColor,
     IconData? icon,
     void Function()? onTap,
+    required Size size,
   }) {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
+          height: size.height * 0.194,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
@@ -423,10 +471,11 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                 child: Icon(
                   icon ?? Icons.check_circle_outline,
                   color: themeColor,
-                  size: 20,
+                  size: (size.height * 0.197) * 0.15,
+                  // size: 20,
                 ),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 12),
               Text(
                 leaveType,
               ),
@@ -445,7 +494,26 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-  Row checkInNOut() {
+  Widget checkInNOut() {
+    return FutureBuilder(
+      future: futureCheckInOutStatus,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Skeletonizer(
+            enabled: true,
+            child: checkInNOutTemplate(true),
+          );
+        } else if (snapshot.hasError) {
+          return const Center(
+            child: Text('Failed fetching data'),
+          );
+        }
+        return checkInNOutTemplate(isPunchedIn);
+      },
+    );
+  }
+
+  Row checkInNOutTemplate(bool isPunchedIn) {
     return Row(
       children: [
         Expanded(
@@ -475,16 +543,16 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                 btnTextColor: CommonStyles.primaryColor,
                 onTap: checkInOut,
                 /* onTap: () async {
-                  setState(() {
-                    isRequestProcessing = true;
-                  });
-
-                  await showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => punchInOutDialog(context),
-                  );
-                }, */
+                    setState(() {
+                      isRequestProcessing = true;
+                    });
+      
+                    await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => punchInOutDialog(context),
+                    );
+                  }, */
               )
             : CustomBtn(
                 btnText: 'Check In',
@@ -492,44 +560,44 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                 onTap: checkInOut,
               ),
         /* CustomBtn(
-          btnText: isRequestProcessing
-              ? "Checking..."
-              : (isPunchedIn ? "Check Out" : "Check In"),
-          isLoading: isRequestProcessing,
-          icon: isPunchedIn ? Icons.logout_outlined : Icons.camera_alt_outlined,
-          backgroundColor: isPunchedIn ? null : CommonStyles.whiteColor,
-          btnTextColor: isPunchedIn ? null : CommonStyles.primaryColor,
-          onTap: () async {
-            setState(() {
-              isRequestProcessing = true;
-            });
-
-            await showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => punchInOutDialog(context),
-            );
-
-            /* setState(() {
-              isRequestProcessing = false;
-            }); */
-          },
-        ), */ /* Column(
-                            children: [
-                              CustomBtn(
-                                btnText: 'Check In',
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              CustomBtn(
-                                icon: Icons.logout_outlined,
-                                btnText: 'Check Out',
-                                backgroundColor: CommonStyles.whiteColor,
-                                btnTextColor: CommonStyles.primaryColor,
-                              ),
-                            ],
-                          ), */
+            btnText: isRequestProcessing
+                ? "Checking..."
+                : (isPunchedIn ? "Check Out" : "Check In"),
+            isLoading: isRequestProcessing,
+            icon: isPunchedIn ? Icons.logout_outlined : Icons.camera_alt_outlined,
+            backgroundColor: isPunchedIn ? null : CommonStyles.whiteColor,
+            btnTextColor: isPunchedIn ? null : CommonStyles.primaryColor,
+            onTap: () async {
+              setState(() {
+                isRequestProcessing = true;
+              });
+      
+              await showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => punchInOutDialog(context),
+              );
+      
+              /* setState(() {
+                isRequestProcessing = false;
+              }); */
+            },
+          ), */ /* Column(
+                              children: [
+                                CustomBtn(
+                                  btnText: 'Check In',
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                CustomBtn(
+                                  icon: Icons.logout_outlined,
+                                  btnText: 'Check Out',
+                                  backgroundColor: CommonStyles.whiteColor,
+                                  btnTextColor: CommonStyles.primaryColor,
+                                ),
+                              ],
+                            ), */
       ],
     );
   }
@@ -630,14 +698,14 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     },
   ];
 
-  Widget bannersCarosuel(BuildContext context) {
+  Widget bannersCarosuel(BuildContext context, Size size) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
-      height: 150,
+      height: size.height * 0.18,
       child: FlutterCarousel(
         options: FlutterCarouselOptions(
           floatingIndicator: true,
-          height: 150,
+          height: size.height * 0.18,
           viewportFraction: 1.0,
           enlargeCenterPage: true,
           autoPlay: _items.length > 1,

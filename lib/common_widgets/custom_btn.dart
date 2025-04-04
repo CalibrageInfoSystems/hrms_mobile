@@ -26,7 +26,7 @@ class CustomBtn extends StatelessWidget {
     return ElevatedButton.icon(
       onPressed: isLoading ? null : onTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
+        backgroundColor: isLoading ? CommonStyles.whiteColor : backgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radius!),
           side: const BorderSide(color: CommonStyles.primaryColor),
@@ -49,7 +49,8 @@ class CustomBtn extends StatelessWidget {
             ),
       label: Text(
         isLoading ? 'Checking...' : btnText,
-        style: TextStyle(color: btnTextColor),
+        style: TextStyle(
+            color: isLoading ? CommonStyles.primaryColor : btnTextColor),
       ),
     );
   }
