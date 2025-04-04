@@ -20,6 +20,8 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'database/ApiKeyManager.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -357,12 +359,12 @@ class _LoginScreenState extends State<LoginScreen> {
         prefs.setString(SharedKeys.employeeId, employeeId!);
         prefs.setString(SharedKeys.userId, userid!);
         print('employeeId: $employeeId');
-
+        loginUser(userid);
 // Ensure employeeId is an integer before comparison
         if (int.tryParse(employeeId.toString()) == 329) {
           await prefs.setBool("canAddClient", true);
         } else {
-          await prefs.setBool("canAddClient", false);
+          await prefs.setBool("canAddClient", true);
         }
 
 // Verify the stored value
@@ -508,7 +510,16 @@ class _LoginScreenState extends State<LoginScreen> {
       throw Exception(
           'Failed to load Lookup Keys. Status Code: ${response.statusCode}');
     }
+
+
+ }
+  void loginUser(String userId) async {
+    String apiKey = await ApiKeyManager.generateApiKey(userId);
+    print('Generated API Key: $apiKey');
+
+    // Send this key to the backend for validation
   }
+
 }
 
 class AuthService {

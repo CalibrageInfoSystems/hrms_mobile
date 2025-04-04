@@ -21,6 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Constants.dart';
 
+import 'Database/DataAccessHandler.dart';
 import 'Holiday_screen.dart';
 import 'common_widgets/CommonUtils.dart';
 import 'screens/home/HomeScreen.dart';
@@ -57,10 +58,17 @@ class _home_screenState extends State<home_screen>
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   int _currentIndex = 0;
   bool? showAddClient; // Toggle visibility for Add Client
-
+  bool isLoading = true;
+  int? pendingleadscount;
+  int? pendingfilerepocount;
+  int? pendingboundarycount;
+  int? pendingweekoffcount;
+  bool isButtonEnabled = false;
+  final dataAccessHandler = DataAccessHandler();
   @override
   void initState() {
     checkLoginuserdata();
+    fetchpendingrecordscount();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
@@ -128,7 +136,7 @@ class _home_screenState extends State<home_screen>
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          appBar: appBar(context),
+          appBar: appBar(context,isButtonEnabled),
           drawer: drawer(context),
           body: _buildScreens(_currentIndex),
           bottomNavigationBar: bottomNavigationBar(),
@@ -419,8 +427,7 @@ class _home_screenState extends State<home_screen>
       ),
     );
   }
-
-  AppBar appBar(BuildContext context) {
+  AppBar appBar(BuildContext context, bool isButtonEnabled) {
     return AppBar(
       elevation: 0,
       backgroundColor: const Color(0xFFf15f22),
@@ -458,24 +465,24 @@ class _home_screenState extends State<home_screen>
           ),
         ),
         const SizedBox(width: 15.0),
-        InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SyncScreen(),
-              ),
-            );
-            // Add action for the new icon
-          },
-          child: SvgPicture.asset(
-            'assets/backup.svg',
-            width: 24,
-            height: 24,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+        if (isButtonEnabled) // Show only if isButtonEnabled is true
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SyncScreen(),
+                ),
+              );
+            },
+            child: SvgPicture.asset(
+              'assets/backup.svg',
+              width: 24,
+              height: 24,
+              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            ),
           ),
-        ),
-        const SizedBox(width: 15.0),
+        if (isButtonEnabled) const SizedBox(width: 15.0),
       ],
     );
   }
@@ -525,6 +532,35 @@ class _home_screenState extends State<home_screen>
     setState(() {
       showAddClient = prefs.getBool('canAddClient');
       print('showAddClient: $showAddClient');
+    });
+  }
+
+  void fetchpendingrecordscount() async {
+    setState(() {
+      isLoading = true; // Start loading
+    });
+
+    // Fetch pending counts
+    pendingleadscount = await dataAccessHandler.getOnlyOneIntValueFromDb(
+        'SELECT Count(*) AS pendingLeadsCount FROM Leads WHERE ServerUpdatedStatus = 0');
+    pendingfilerepocount = await dataAccessHandler.getOnlyOneIntValueFromDb(
+        'SELECT Count(*) AS pendingrepoCount FROM FileRepository WHERE ServerUpdatedStatus = 0');
+    pendingboundarycount = await dataAccessHandler.getOnlyOneIntValueFromDb(
+        'SELECT Count(*) AS pendingboundaryCount FROM GeoBoundaries WHERE ServerUpdatedStatus = 0');
+    pendingweekoffcount = await dataAccessHandler.getOnlyOneIntValueFromDb(
+        'SELECT Count(*) AS pendingweekoffcount FROM UserWeekOffXref WHERE ServerUpdatedStatus = 0');
+    print('pendingleadscount: $pendingleadscount ');
+    print('pendingfilerepocount: $pendingfilerepocount');
+    print('pendingboundarycount: $pendingboundarycount ');
+
+    // Enable button if any of the counts are greater than 0
+    isButtonEnabled = pendingleadscount! > 0 ||
+        pendingfilerepocount! > 0 ||
+        pendingboundarycount! > 0 ||
+        pendingweekoffcount! > 0;
+
+    setState(() {
+      isLoading = false; // Stop loading
     });
   }
 

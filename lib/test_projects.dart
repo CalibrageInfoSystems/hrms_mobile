@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Commonutils.dart';
 import 'Constants.dart';
 import 'SharedPreferencesHelper.dart';
+import 'database/ApiKeyManager.dart';
 
 class TestProjectsScreen extends StatefulWidget {
   const TestProjectsScreen({super.key});
@@ -62,6 +63,8 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
     } */
 
       final apiUrl = Uri.parse('$baseUrl$getselfempolyee$employeid');
+      String? apiKey = await ApiKeyManager.getApiKey();
+      print('Stored API Key: $apiKey');
 //  final apiUrl = Uri.parse(baseUrl + getselfempolyee + empolyeid);
       final jsonResponse = await http.get(
         apiUrl,

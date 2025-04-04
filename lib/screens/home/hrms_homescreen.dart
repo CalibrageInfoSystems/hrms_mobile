@@ -145,8 +145,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     _loademployeleaves();
     fetchLeadCounts();
     fetchpendingrecordscount();
-    backgroundService =
-        BackgroundService(userId: userID, dataAccessHandler: dataAccessHandler);
+    backgroundService = BackgroundService(userId: userID, dataAccessHandler: dataAccessHandler);
     backgroundService.initializeService();
     checkLocationEnabled();
     startService();
@@ -423,7 +422,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         customLeaveTypeBox(
           leaveType: 'Today Visits',
           size: size,
-          data: '$totalLeadsCount',
+          data: '$todayLeadsCount',
           icon: Icons.calendar_month,
           themeColor: const Color(0xff16A34A),
           // themeColor: CommonStyles.greenColor,background: #16A34A;background: #;

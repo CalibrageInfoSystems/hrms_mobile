@@ -42,7 +42,7 @@ class _AddLeadScreenState extends State<AddLeads>
   final TextEditingController _commentsController = TextEditingController();
   // TextEditingController _usernameController = TextEditingController();
   bool _isCompany = false;
-
+  bool isRequestProcessing = false;
   Position? _currentPosition;
   final List<Uint8List> _images = [];
   final List<XFile> _imagepath = [];
@@ -568,16 +568,27 @@ class _AddLeadScreenState extends State<AddLeads>
                       width: double.infinity,
                       height: 45,
                       child: ElevatedButton(
-                        onPressed: _submit,
+                        onPressed: isRequestProcessing ? null : _submit,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 10),
-                          backgroundColor: CommonStyles
-                              .buttonbg, // You can customize the color here
+                          backgroundColor: isRequestProcessing
+                              ? Colors.grey.shade400
+                              : CommonStyles.primaryColor,
+                          elevation: isRequestProcessing ? 0 : 2,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text(
+                        child: isRequestProcessing
+                            ? const SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                            : const Text(
                           "Add Client Visit",
                           style: TextStyle(
                             fontSize: 18,
@@ -586,6 +597,29 @@ class _AddLeadScreenState extends State<AddLeads>
                         ),
                       ),
                     ),
+
+                    // SizedBox(
+                    //   width: double.infinity,
+                    //   height: 45,
+                    //   child: ElevatedButton(
+                    //     onPressed: _submit,
+                    //     style: ElevatedButton.styleFrom(
+                    //       padding: const EdgeInsets.symmetric(vertical: 10),
+                    //       backgroundColor: CommonStyles
+                    //           .primaryColor, // You can customize the color here
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(10),
+                    //       ),
+                    //     ),
+                    //     child: const Text(
+                    //       "Add Client Visit",
+                    //       style: TextStyle(
+                    //         fontSize: 18,
+                    //         color: Colors.white,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -603,17 +637,21 @@ class _AddLeadScreenState extends State<AddLeads>
       builder: (BuildContext context) {
         return const Dialog(
           backgroundColor: Colors.transparent,
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(child: CircularProgressIndicator(   color: Styles.primaryColor,)),
         );
       },
     );
   }
-
+  void hideLoadingDialog(BuildContext context) {
+    Navigator.of(context).pop();
+  }
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       FocusScope.of(context).unfocus();
       //  await _getCurrentLocation(); // Fetch location
-      showLoadingDialog(context);
+      setState(() {
+        isRequestProcessing = true;
+      });
       _validateTotalItems();
 
       final dataAccessHandler =
@@ -720,6 +758,11 @@ class _AddLeadScreenState extends State<AddLeads>
 
           await dataAccessHandler.insertFileRepository(fileData);
         }
+        await Future.delayed(const Duration(seconds: 2));
+
+        setState(() {
+          isRequestProcessing = false;
+        });
 
         bool isConnected = await CommonStyles.checkInternetConnectivity();
         if (isConnected) {
@@ -733,6 +776,9 @@ class _AddLeadScreenState extends State<AddLeads>
             );
           });
         } else {
+          // Hide loading dialog
+          hideLoadingDialog(context);
+
           CommonStyles.showCustomToastMessageLong(
               'Client Visit added successfully.', context, 0, 2);
           Navigator.push(
