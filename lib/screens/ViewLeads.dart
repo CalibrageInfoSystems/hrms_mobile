@@ -18,6 +18,7 @@ import '../Model Class/LeadsModel.dart';
 import '../common_widgets/common_styles.dart';
 import '../common_widgets/custom_lead_template.dart';
 import '../common_widgets/custom_textfield.dart';
+import '../shared_keys.dart';
 
 class ViewLeads extends StatefulWidget {
   const ViewLeads({super.key});
@@ -190,7 +191,8 @@ class _ViewLeadsState extends State<ViewLeads> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
      // final createdByUserId = prefs.getInt('userID'); //todo
-      final createdByUserId = 101;
+     //  final createdByUserId = 101;
+      String createdByUserId = prefs.getString(SharedKeys.userId) ?? "";
       print('createdByUserId: $createdByUserId');
       final dataAccessHandler =
           Provider.of<DataAccessHandler>(context, listen: false);

@@ -326,7 +326,7 @@ class DataAccessHandler with ChangeNotifier {
   }
 
   Future<List<Map<String, dynamic>>> getleads(
-      {required int createdByUserId}) async {
+      {required String createdByUserId}) async {
     final db = await dbHelper.database;
     String query = 'SELECT * FROM Leads WHERE CreatedByUserId = ?';
     List<Map<String, dynamic>> results =
@@ -409,7 +409,7 @@ class DataAccessHandler with ChangeNotifier {
     try {
       final db = await dbHelper.database;
       String query =
-          'SELECT * FROM FileRepositorys WHERE leadsCode = ? AND FileExtension = ?';
+          'SELECT * FROM FileRepository WHERE leadsCode = ? AND FileExtension = ?';
       List<Map<String, dynamic>> results = await db.rawQuery(
         query,
         [leadsCode, fileExtension],
@@ -421,22 +421,7 @@ class DataAccessHandler with ChangeNotifier {
     }
   }
 
-// SELECT * FROM FileRepositorys WHERE FileExtension in ('.xlsx', '.pdf')
-/*   Future<List<Map<String, dynamic>>> getLeadDocsByCode(String code, String fileExtension) async {
-    try {
-      final db = await database;
-      String query =
-          'SELECT * FROM FileRepositorys WHERE leadsCode = ? AND FileExtension = ?'; // Define the query
-      List<Map<String, dynamic>> results = await db.rawQuery(
-        query,
-        [code, fileExtension],
-      );
-      print('Data fetched: ${jsonEncode(results)}');
-      return results; // Return the results
-    } catch (e) {
-      throw Exception('Error fetching data: $e');
-    }
-  } */
+
 
   Future<List<Map<String, dynamic>>> getLeadDocsByCode(
       String leadsCode, List<String> fileExtensions) async {
@@ -445,7 +430,7 @@ class DataAccessHandler with ChangeNotifier {
 
       String placeholders = fileExtensions.map((_) => '?').join(', ');
       String query =
-          'SELECT * FROM FileRepositorys WHERE leadsCode = ? AND FileExtension IN ($placeholders)';
+          'SELECT * FROM FileRepository WHERE leadsCode = ? AND FileExtension IN ($placeholders)';
       print('query: $query');
       List<dynamic> parameters = [leadsCode] + fileExtensions;
 

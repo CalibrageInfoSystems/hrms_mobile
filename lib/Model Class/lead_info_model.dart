@@ -17,9 +17,9 @@ class LeadInfoModel {
   final double? latitude;
   final double? longitude;
   String? Address;
-  final int? createdByUserId;
+  final String? createdByUserId;
   final String? createdDate;
-  final int? updatedByUserId;
+  final String? updatedByUserId;
   final String? updatedDate;
   final int? serverUpdatedStatus;
 
