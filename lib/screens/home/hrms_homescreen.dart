@@ -145,7 +145,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     _loademployeleaves();
     fetchLeadCounts();
     fetchpendingrecordscount();
-    backgroundService = BackgroundService(userId: userID, dataAccessHandler: dataAccessHandler);
+    backgroundService =
+        BackgroundService(userId: userID, dataAccessHandler: dataAccessHandler);
     backgroundService.initializeService();
     checkLocationEnabled();
     startService();
@@ -420,22 +421,38 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         ),
         const SizedBox(width: 12),
         customLeaveTypeBox(
-          leaveType: 'Today Visits',
-          size: size,
-          data: '$todayLeadsCount',
-          icon: Icons.calendar_month,
-          themeColor: const Color(0xff16A34A),
-          // themeColor: CommonStyles.greenColor,background: #16A34A;background: #;
-        ),
+            leaveType: 'Today Visits',
+            size: size,
+            data: '$todayLeadsCount',
+            icon: Icons.calendar_month,
+            themeColor: const Color(0xff16A34A),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ViewLeads(),
+                ),
+              );
+            }
+            // themeColor: CommonStyles.greenColor,background: #16A34A;background: #;
+            ),
         const SizedBox(width: 12),
         customLeaveTypeBox(
-          leaveType: 'Total Visits',
-          size: size,
-          data: '$totalLeadsCount',
-          icon: Icons.calendar_today_rounded,
-          themeColor: const Color(0xff4F46E5),
-          // themeColor: CommonStyles.blueColor,background: #9333EA;
-        ),
+            leaveType: 'Total Visits',
+            size: size,
+            data: '$totalLeadsCount',
+            icon: Icons.calendar_today_rounded,
+            themeColor: const Color(0xff4F46E5),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ViewLeads(),
+                ),
+              );
+            }
+            // themeColor: CommonStyles.blueColor,background: #9333EA;
+            ),
       ],
     );
   }
