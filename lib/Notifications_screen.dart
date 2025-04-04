@@ -291,8 +291,7 @@ class _Notifications_screenState extends State<Notifications> {
                           Center(child: CircularProgressIndicator.adaptive()),
                     );
                   } else if (snapshot.hasError) {
-                    return Center(
-                        child: Text('snapshot.hasError ${snapshot.error}'));
+                    return Center(child: Text('${snapshot.error}'));
                   } else {
                     List<List<Notification_model>> snapShot = snapshot.data!;
                     List<Notification_model> notifyData = snapShot[0];

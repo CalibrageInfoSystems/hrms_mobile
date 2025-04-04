@@ -38,7 +38,7 @@ class CustomBtn extends StatelessWidget {
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
-                color: Colors.white,
+                color: CommonStyles.primaryColor,
                 strokeWidth: 2,
               ),
             )

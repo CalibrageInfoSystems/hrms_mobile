@@ -1234,9 +1234,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
       if (pickedFile == null) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No image captured!")),
-        );
         throw Exception("No image captured!");
       }
 
@@ -1314,9 +1311,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       setState(() {
         isRequestProcessing = false;
       });
-      Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
       );
     }
   }
@@ -1405,40 +1401,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                       }
                     },
                   ),
-                  // findChildWidget(),
-
-                  /* _currentPosition == null
-                      ? const Center(child: CircularProgressIndicator())
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(6.0),
-                          child: GoogleMap(
-                            initialCameraPosition: CameraPosition(
-                              target: LatLng(
-                                _currentPosition!.latitude,
-                                _currentPosition!.longitude,
-                              ),
-                              zoom: 15,
-                            ),
-                            markers: {
-                              Marker(
-                                markerId: const MarkerId('current_location'),
-                                position: LatLng(
-                                  _currentPosition!.latitude,
-                                  _currentPosition!.longitude,
-                                ),
-                              ),
-                            },
-                            onMapCreated: (GoogleMapController controller) {
-                              _mapController = controller;
-                            },
-                            myLocationEnabled: true,
-                            myLocationButtonEnabled: false,
-                            zoomControlsEnabled: false,
-                          ),
-                        ), */
                 ),
                 const SizedBox(height: 10),
-                // Sample text
                 Text(
                   isPunchedIn
                       ? 'Time to go home!'
@@ -1446,7 +1410,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 5),
-                // Current time with pencil icon
                 Text(
                   currentTime,
                   style: const TextStyle(
@@ -1456,19 +1419,12 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Submit button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () async {
                       Navigator.of(context).pop();
                       await _captureAndProcessImage();
-
-                      /* await _captureAndProcessImage().whenComplete(() {
-                        if (mounted) {
-                          Navigator.of(context).pop();
-                        }
-                      }); */
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: CommonStyles.primaryColor,
