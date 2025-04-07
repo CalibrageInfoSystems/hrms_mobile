@@ -2,13 +2,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Database/HRMSDatabaseHelper.dart';
+import 'package:hrms/common_widgets/custom_btn.dart';
 import 'package:hrms/screens/view_leads_info.dart';
-import 'package:http/http.dart' as http;
+import 'package:hrms/shared_keys.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,10 +16,10 @@ import '../Model Class/LeadsModel.dart';
 import '../common_widgets/common_styles.dart';
 import '../common_widgets/custom_lead_template.dart';
 import '../common_widgets/custom_textfield.dart';
-import '../shared_keys.dart';
 
 class ViewLeads extends StatefulWidget {
-  const ViewLeads({super.key});
+  final bool? isToday;
+  const ViewLeads({super.key, this.isToday = false});
 
   @override
   State<ViewLeads> createState() => _ViewLeadsState();
@@ -63,16 +61,20 @@ class _ViewLeadsState extends State<ViewLeads> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: CommonStyles.appBgColor,
         appBar: AppBar(
-          backgroundColor: CommonStyles.listOddColor,
+          backgroundColor: CommonStyles.primaryColor,
           leading: IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
           ),
           scrolledUnderElevation: 0,
           title: const Text(
             'View Client Visits',
-            //  style: CommonStyles.txStyF14CbFF5,
+            style: TextStyle(color: Colors.white),
           ),
           // actions: [
           //   IconButton(
@@ -83,6 +85,7 @@ class _ViewLeadsState extends State<ViewLeads> {
         ),
         body: Column(
           children: [
+            const SizedBox(height: 10),
             filterAndSearch(),
             Expanded(
               child: FutureBuilder(
@@ -190,14 +193,12 @@ class _ViewLeadsState extends State<ViewLeads> {
   Future<List<LeadsModel>> loadLeads() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-     // final createdByUserId = prefs.getInt('userID'); //todo
-     //  final createdByUserId = 101;
       String createdByUserId = prefs.getString(SharedKeys.userId) ?? "";
-      print('createdByUserId: $createdByUserId');
+      print('loadLeads createdByUserId: $createdByUserId');
       final dataAccessHandler =
           Provider.of<DataAccessHandler>(context, listen: false);
-      List<dynamic> leads =
-          await dataAccessHandler.getleads(createdByUserId: createdByUserId!);
+      List<dynamic> leads = await dataAccessHandler.getleads(
+          createdByUserId: createdByUserId, isToday: widget.isToday!);
       return leads.map((item) => LeadsModel.fromMap(item)).toList();
     } catch (e) {
       throw Exception('catch: ${e.toString()}');
@@ -229,7 +230,6 @@ class _ViewLeadsState extends State<ViewLeads> {
 
   Container filterAndSearch() {
     return Container(
-      color: CommonStyles.listOddColor,
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -269,8 +269,7 @@ class _ViewLeadsState extends State<ViewLeads> {
                     decoration: BoxDecoration(
                       color: CommonStyles.whiteColor,
                       borderRadius: BorderRadius.circular(12),
-                      // Optional: Add a shadow for elevation effect
-                      boxShadow: [
+                      /* boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.2),
                           spreadRadius: 2,
@@ -278,7 +277,7 @@ class _ViewLeadsState extends State<ViewLeads> {
                           offset:
                               const Offset(0, 3), // changes position of shadow
                         ),
-                      ],
+                      ], */
                     ),
                     child: TextField(
                       controller: searchController,
@@ -731,187 +730,6 @@ class Filter extends StatefulWidget {
   State<Filter> createState() => _FilterState();
 }
 
-/* 
-class _FilterState extends State<Filter> {
-  int? selectedDateIndex;
-  int? selectedTypeIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    selectedDateIndex = widget.dateChipValue;
-    selectedTypeIndex = widget.typeChipValue;
-    print('selectedDateIndex: $selectedDateIndex');
-    print('selectedTypeIndex: $selectedTypeIndex');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(12),
-          topRight: Radius.circular(12),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const SizedBox(width: 40),
-              const Text('Filter', style: CommonStyles.txStyF20CbFF5),
-              IconButton(
-                  icon: const Icon(
-                    Icons.close,
-                  ),
-                  iconSize: 20,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  })
-            ],
-          ),
-          const SizedBox(height: 5),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      spacing: 12.0,
-                      children: List<Widget>.generate(
-                        widget.dates.length,
-                        (int index) {
-                          return ChoiceChip(
-                            label: Text(
-                              widget.dates[index],
-                            ),
-                            selectedColor: CommonStyles.btnBlueBgColor,
-                            backgroundColor: CommonStyles.whiteColor,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: const BorderSide(
-                                    color: CommonStyles.btnBlueBgColor)),
-                            selected: widget.dateChipValue == index,
-                            onSelected: (bool selected) {
-                              if (widget.onSelectedDateChip != null) {
-                                widget
-                                    .onSelectedDateChip!(selected ? index : -1);
-                                selectedDateIndex = index;
-                              }
-                            },
-                          );
-                        },
-                      ).toList(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      spacing: 12.0,
-                      children: List<Widget>.generate(
-                        widget.types.length,
-                        (int index) {
-                          return ChoiceChip(
-                            label: Text(
-                              widget.types[index],
-                            ),
-                            selectedColor: CommonStyles.btnBlueBgColor,
-                            backgroundColor: CommonStyles.whiteColor,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: const BorderSide(
-                                    color: CommonStyles.btnBlueBgColor)),
-                            // No chip selected initially if widget.typeChipValue == -1
-                            selected: widget.typeChipValue == index,
-                            onSelected: (bool selected) {
-                              if (widget.onSelectedTypeChip != null) {
-                                widget
-                                    .onSelectedTypeChip!(selected ? index : -1);
-                                selectedTypeIndex = index;
-                              }
-                            },
-                          );
-                        },
-                      ).toList(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20.0),
-                CustomTextField(
-                  label: 'From Date',
-                  readOnly: true,
-                  suffixIcon: const Icon(Icons.calendar_month_outlined),
-                  onTap: widget.onFromDate,
-                  controller: widget.fromDateController,
-                ),
-                const SizedBox(height: 15.0),
-                CustomTextField(
-                  label: 'To Date',
-                  readOnly: true,
-                  suffixIcon: const Icon(Icons.calendar_month_outlined),
-                  onTap: widget.onToDate,
-                  controller: widget.toDateController,
-                ),
-                const SizedBox(height: 20.0),
-                Row(
-                  children: [
-                    Expanded(
-                      child: customBtn(
-                        onPressed: () {
-                          widget.onSubmit(selectedDateIndex, selectedTypeIndex);
-                        },
-                        child: const Text(
-                          'Submit',
-                          style: CommonStyles.txStyF14CwFF5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: customBtn(
-                          onPressed: widget.onClear,
-                          child: const Text(
-                            'Clear',
-                            style: CommonStyles.txStyF14CwFF5,
-                          ),
-                          backgroundColor: CommonStyles.btnBlueBgColor),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  ElevatedButton customBtn(
-      {Color? backgroundColor = CommonStyles.btnRedBgColor,
-      required Widget child,
-      void Function()? onPressed}) {
-    return ElevatedButton(
-      onPressed: () {
-        onPressed?.call();
-      },
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        backgroundColor: backgroundColor,
-      ),
-      child: child,
-    );
-  }
-}
- */
 class _FilterState extends State<Filter> {
   int? selectedDateIndex;
   int? selectedTypeIndex;
@@ -952,7 +770,7 @@ class _FilterState extends State<Filter> {
                   })
             ],
           ),
-          const SizedBox(height: 5),
+          const Divider(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -969,12 +787,12 @@ class _FilterState extends State<Filter> {
                             label: Text(
                               widget.dates[index],
                             ),
-                            selectedColor: CommonStyles.btnBlueBgColor,
+                            selectedColor: CommonStyles.primaryColor,
                             backgroundColor: CommonStyles.whiteColor,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 side: const BorderSide(
-                                    color: CommonStyles.btnBlueBgColor)),
+                                    color: CommonStyles.primaryColor)),
                             selected: selectedDateIndex == index,
                             onSelected: (bool selected) {
                               if (widget.onSelectedDateChip != null) {
@@ -1004,12 +822,12 @@ class _FilterState extends State<Filter> {
                             label: Text(
                               widget.types[index],
                             ),
-                            selectedColor: CommonStyles.btnBlueBgColor,
+                            selectedColor: CommonStyles.primaryColor,
                             backgroundColor: CommonStyles.whiteColor,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 side: const BorderSide(
-                                    color: CommonStyles.btnBlueBgColor)),
+                                    color: CommonStyles.primaryColor)),
                             selected: selectedTypeIndex == index,
                             onSelected: (bool selected) {
                               if (widget.onSelectedTypeChip != null) {
@@ -1032,7 +850,7 @@ class _FilterState extends State<Filter> {
                   suffixIcon: const Icon(Icons.calendar_month_outlined),
                   onTap: widget.onFromDate,
                   controller: widget.fromDateController!,
-                  hintText: '',
+                  hintText: 'From Date',
                 ),
                 const SizedBox(height: 15.0),
                 CustomTextField(
@@ -1040,25 +858,30 @@ class _FilterState extends State<Filter> {
                   readOnly: true,
                   suffixIcon: const Icon(Icons.calendar_month_outlined),
                   onTap: widget.onToDate,
-                  controller: widget.toDateController!, hintText: '',
+                  controller: widget.toDateController!, hintText: 'To Date',
                 ),
                 const SizedBox(height: 20.0),
                 Row(
                   children: [
                     Expanded(
-                      child: customBtn(
-                        onPressed: () {
-                          widget.onSubmit(selectedDateIndex, selectedTypeIndex);
+                      child: CustomBtn(
+                        btnText: 'Clear',
+                        backgroundColor: CommonStyles.whiteColor,
+                        btnTextColor: CommonStyles.primaryColor,
+                        isIconVisible: false,
+                        onTap: () {
+                          // Clear the chip selection
+                          setState(() {
+                            selectedDateIndex = null;
+                            selectedTypeIndex = null;
+                          });
+                          // Call the onClear function to reset the parent state
+                          if (widget.onClear != null) {
+                            widget.onClear!();
+                          }
                         },
-                        child: const Text(
-                          'Submit',
-                          style: CommonStyles.txStyF14CwFF5,
-                        ),
                       ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: customBtn(
+                      /* customBtn(
                         onPressed: () {
                           // Clear the chip selection
                           setState(() {
@@ -1075,7 +898,26 @@ class _FilterState extends State<Filter> {
                           style: CommonStyles.txStyF14CwFF5,
                         ),
                         backgroundColor: CommonStyles.btnBlueBgColor,
+                      ), */
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: CustomBtn(
+                        btnText: 'Submit',
+                        isIconVisible: false,
+                        onTap: () {
+                          widget.onSubmit(selectedDateIndex, selectedTypeIndex);
+                        },
                       ),
+                      /* customBtn(
+                        onPressed: () {
+                          widget.onSubmit(selectedDateIndex, selectedTypeIndex);
+                        },
+                        child: const Text(
+                          'Submit',
+                          style: CommonStyles.txStyF14CwFF5,
+                        ),
+                      ), */
                     ),
                   ],
                 ),

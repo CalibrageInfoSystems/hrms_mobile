@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-
 import '../Database/DataAccessHandler.dart';
 import '../Model Class/LeadsModel.dart';
 import 'common_styles.dart';
@@ -17,10 +16,10 @@ class CustomLeadTemplate extends StatelessWidget {
 
   const CustomLeadTemplate(
       {super.key,
-        required this.index,
-        required this.lead,
-        this.onTap,
-        this.padding});
+      required this.index,
+      required this.lead,
+      this.onTap,
+      this.padding});
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +29,11 @@ class CustomLeadTemplate extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         decoration: BoxDecoration(
-          color: index.isEven
+          color: CommonStyles.whiteColor,
+
+          /* color: index.isEven
               ? CommonStyles.listEvenColor
-              : CommonStyles.listOddColor,
+              : CommonStyles.listOddColor, */
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -56,7 +57,7 @@ class CustomLeadTemplate extends StatelessWidget {
                     userItem(
                         data: lead.name,
                         dataStyle:
-                        const TextStyle(fontSize: 16, color: Colors.black)),
+                            const TextStyle(fontSize: 16, color: Colors.black)),
                     userItem(
                       data: lead.companyName,
                     ),
@@ -147,7 +148,6 @@ class CustomLeadTemplate extends StatelessWidget {
       //           CommonStyles.txStyF16CbFF5
       //               .copyWith(color: CommonStyles.dataTextColor)),
       // ),
-
     );
   }
 }

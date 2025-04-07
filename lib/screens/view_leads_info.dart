@@ -42,10 +42,10 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
   Future<List<LeadInfoModel>> getLeadInfoByCode(String code) async {
     try {
       final dataAccessHandler =
-      Provider.of<DataAccessHandler>(context, listen: false);
+          Provider.of<DataAccessHandler>(context, listen: false);
       List<dynamic> result = await dataAccessHandler.getLeadInfoByCode(code);
       List<LeadInfoModel> leads =
-      result.map((item) => LeadInfoModel.fromJson(item)).toList();
+          result.map((item) => LeadInfoModel.fromJson(item)).toList();
       print('xxx Info: ${jsonEncode(leads)}');
       return leads;
     } catch (e) {
@@ -56,11 +56,11 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
   Future<List<Map<String, dynamic>>> getLeadImagesByCode(String code) async {
     try {
       final dataAccessHandler =
-      Provider.of<DataAccessHandler>(context, listen: false);
+          Provider.of<DataAccessHandler>(context, listen: false);
       List<dynamic> result =
-      await dataAccessHandler.getLeadImagesByCode(code, '.jpg');
+          await dataAccessHandler.getLeadImagesByCode(code, '.jpg');
       List<Map<String, dynamic>> leads =
-      result.map((item) => Map<String, dynamic>.from(item)).toList();
+          result.map((item) => Map<String, dynamic>.from(item)).toList();
       print('xxx Images: ${jsonEncode(leads)}');
       return leads;
     } catch (e) {
@@ -71,13 +71,13 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
   Future<List<Map<String, dynamic>>> getLeadDocsByCode(String code) async {
     try {
       final dataAccessHandler =
-      Provider.of<DataAccessHandler>(context, listen: false);
+          Provider.of<DataAccessHandler>(context, listen: false);
       List<dynamic> result = await dataAccessHandler.getLeadDocsByCode(
         code,
         ['.xlsx', '.pdf'],
       );
       List<Map<String, dynamic>> leads =
-      result.map((item) => Map<String, dynamic>.from(item)).toList();
+          result.map((item) => Map<String, dynamic>.from(item)).toList();
       print('xxx Docs: ${jsonEncode(leads)}');
       return leads;
     } catch (e) {
@@ -122,6 +122,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: CommonStyles.appBgColor,
       appBar: appBar(context),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -135,7 +136,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
                     return Column(
                       children: [
                         const SizedBox(height: 12),
-                      //  CommonStyles.customShimmer(child: leadInfoShimmer()),
+                        //  CommonStyles.customShimmer(child: leadInfoShimmer()),
                       ],
                     );
                   } else if (snapshot.hasError) {
@@ -304,7 +305,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: CommonStyles.listOddColor,
+        color: CommonStyles.whiteColor,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -320,7 +321,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
               spacing: 20,
               children: [
                 ...leads.map(
-                      (lead) => customDoc(lead, leads.indexOf(lead)),
+                  (lead) => customDoc(lead, leads.indexOf(lead)),
                 ),
               ],
             )
@@ -391,7 +392,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: CommonStyles.listEvenColor,
+        color: CommonStyles.whiteColor,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -407,7 +408,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
             spacing: 20,
             children: [
               ...lead.map(
-                    (lead) {
+                (lead) {
                   return Column(
                     children: [
                       GestureDetector(
@@ -419,11 +420,11 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               SvgPicture.asset(
-                                'assets/fileuploadicon.svg',
-                                width: 70,
-                                height: 70,
-                                color: CommonStyles.btnBlueBgColor,
-                              ),
+                            'assets/fileuploadicon.svg',
+                            width: 70,
+                            height: 70,
+                            color: CommonStyles.btnBlueBgColor,
+                          ),
                         ),
                       ),
                       // Text(
@@ -462,7 +463,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
                     builder: (context, index) {
                       return PhotoViewGalleryPageOptions(
                         imageProvider:
-                        FileImage(File(imagePath)), // Use FileImage
+                            FileImage(File(imagePath)), // Use FileImage
                         minScale: PhotoViewComputedScale.contained,
                         maxScale: PhotoViewComputedScale.covered,
                       );
@@ -506,7 +507,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: CommonStyles.listOddColor,
+        color: CommonStyles.whiteColor,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -607,14 +608,18 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
 
   AppBar appBar(BuildContext context) {
     return AppBar(
-      backgroundColor: CommonStyles.appBarBgColor,
+      backgroundColor: CommonStyles.primaryColor,
       leading: IconButton(
         onPressed: () => Navigator.of(context).pop(),
-        icon: const Icon(Icons.arrow_back),
+        icon: const Icon(
+          Icons.arrow_back,
+          color: Colors.white,
+        ),
       ),
       scrolledUnderElevation: 0,
       title: const Text(
         'View Client Visit',
+        style: TextStyle(color: Colors.white),
       ),
     );
   }
@@ -652,7 +657,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
       //   MaterialPageRoute(
       //     builder: (context) => PDFViewScreen(path: filePath),
       //   ),
-   //   );
+      //   );
     } else if (fileExtension == 'xls' || fileExtension == 'xlsx') {
       // Open Excel file externally
       // Navigator.push(

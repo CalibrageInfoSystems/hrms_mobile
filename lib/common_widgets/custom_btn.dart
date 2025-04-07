@@ -9,6 +9,7 @@ class CustomBtn extends StatelessWidget {
   final String btnText;
   final bool isLoading;
   final VoidCallback onTap;
+  final bool? isIconVisible;
 
   const CustomBtn({
     super.key,
@@ -19,6 +20,7 @@ class CustomBtn extends StatelessWidget {
     this.btnTextColor = CommonStyles.whiteColor,
     required this.onTap,
     this.isLoading = false,
+    this.isIconVisible = true,
   });
 
   @override
@@ -42,11 +44,13 @@ class CustomBtn extends StatelessWidget {
                 strokeWidth: 2,
               ),
             )
-          : Icon(
-              icon ?? Icons.camera_alt_outlined,
-              size: 20,
-              color: btnTextColor,
-            ),
+          : isIconVisible!
+              ? Icon(
+                  icon ?? Icons.camera_alt_outlined,
+                  size: 20,
+                  color: btnTextColor,
+                )
+              : null,
       label: Text(
         isLoading ? 'Checking...' : btnText,
         style: TextStyle(

@@ -298,7 +298,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           exit(0);
         },
         child: Scaffold(
-          backgroundColor: const Color(0xFFf2f2f2),
+          backgroundColor: CommonStyles.appBgColor,
           body: Column(
             children: [
               header(),
@@ -430,7 +430,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ViewLeads(),
+                  builder: (context) => const ViewLeads(isToday: true),
                 ),
               );
             }
