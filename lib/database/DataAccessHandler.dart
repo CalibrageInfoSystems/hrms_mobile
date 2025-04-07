@@ -1,20 +1,13 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hrms/Database/HRMSDatabaseHelper.dart';
-import 'package:hrms/screens/home/HomeScreen.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../screens/home/hrms_homescreen.dart';
 import '../shared_keys.dart';
-import 'DatabaseHelper.dart';
 
 class DataAccessHandler with ChangeNotifier {
   static final Lock _lock = Lock();
@@ -326,9 +319,13 @@ class DataAccessHandler with ChangeNotifier {
   }
 
   Future<List<Map<String, dynamic>>> getleads(
-      {required String createdByUserId}) async {
+      {required String createdByUserId, required bool isToday}) async {
     final db = await dbHelper.database;
-    String query = 'SELECT * FROM Leads WHERE CreatedByUserId = ?';
+    String query = isToday
+        ? '''SELECT * FROM Leads 
+       WHERE CreatedByUserId = ? 
+       AND DATE(CreatedDate) = DATE('now')'''
+        : 'SELECT * FROM Leads WHERE CreatedByUserId = ?';
     List<Map<String, dynamic>> results =
         await db.rawQuery(query, [createdByUserId]);
     return results;
@@ -421,8 +418,6 @@ class DataAccessHandler with ChangeNotifier {
     }
   }
 
-
-
   Future<List<Map<String, dynamic>>> getLeadDocsByCode(
       String leadsCode, List<String> fileExtensions) async {
     try {
@@ -508,7 +503,7 @@ class DataAccessHandler with ChangeNotifier {
 
     // Retrieve userID from SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String  userID = prefs.getString(SharedKeys.userId) ?? "";
+    String userID = prefs.getString(SharedKeys.userId) ?? "";
     print('Retrieved userID: $userID');
 
     if (userID == null) {
