@@ -136,7 +136,7 @@ class _home_screenState extends State<home_screen>
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          appBar: appBar(context,isButtonEnabled),
+          appBar: appBar(context, isButtonEnabled),
           drawer: drawer(context),
           body: _buildScreens(_currentIndex),
           bottomNavigationBar: bottomNavigationBar(),
@@ -336,97 +336,11 @@ class _home_screenState extends State<home_screen>
               // Handle the onTap action for Logout
             },
           ),
-          ListTile(
-            leading: const Icon(
-              Icons.logout,
-              color: Colors.black,
-            ),
-            title: const Text(
-              'Test',
-              style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'hind_semibold',
-              ),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const TestHrms()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.logout,
-              color: Colors.black,
-            ),
-            title: const Text(
-              'Hrms Home Sreen',
-              style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'hind_semibold',
-              ),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HrmsHomeSreen()),
-              );
-            },
-          ),
-
-          //MARK: Test Apply Leave
-          /* ListTile(
-                    leading: SvgPicture.asset(
-                      'assets/atten.svg',
-                      width: 20,
-                      height: 20,
-                      fit: BoxFit.contain,
-                      color: Colors.black,
-                    ),
-                    title: Text(
-                      'Test Apply Leave',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'hind_semibold',
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => TestApplyLeave()),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: SvgPicture.asset(
-                      'assets/atten.svg',
-                      width: 20,
-                      height: 20,
-                      fit: BoxFit.contain,
-                      color: Colors.black,
-                    ),
-                    title: Text(
-                      'Test Projects',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'hind_semibold',
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => TestProjectsScreen()),
-                      );
-                    },
-                  ),
-               */
         ],
       ),
     );
   }
+
   AppBar appBar(BuildContext context, bool isButtonEnabled) {
     return AppBar(
       elevation: 0,
@@ -479,7 +393,8 @@ class _home_screenState extends State<home_screen>
               'assets/backup.svg',
               width: 24,
               height: 24,
-              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
             ),
           ),
         if (isButtonEnabled) const SizedBox(width: 15.0),

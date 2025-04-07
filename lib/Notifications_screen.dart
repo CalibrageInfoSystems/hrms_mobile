@@ -1794,74 +1794,77 @@ class _Notifications_screenState extends State<Notifications> {
   Future<List<List<Notification_model>>> fetchNotifications() async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
     if (isConnected) {
-      print('Connected to the internet');
+      try {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        accessToken = prefs.getString("accessToken") ?? "";
+        sharedEmpId = prefs.getString("employeeId") ?? "";
+        loggedInEmployeeId = int.tryParse(sharedEmpId);
+        userid = prefs.getString("UserId") ?? "";
+        loademployeid();
+        final url = Uri.parse(
+            'http://182.18.157.215/HRMS/API/hrmsapi/Notification/GetNotifications/1');
+        // final url = Uri.parse(baseUrl + getnotification);
+        print(
+            'fetchNotifications url: $url'); // http://182.18.157.215/HRMS/API/hrmsapi/Notification/GetNotifications/1
+        print('fetchNotifications accessToken: $accessToken');
+
+        final response = await http.get(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': accessToken!,
+          },
+        );
+        print('fetchNotifications res: ${response.body}');
+
+        if (response.statusCode == 200) {
+          final List<dynamic> jsonData = json.decode(response.body);
+          print('fetchNotifications jsonData: $jsonData');
+          List<Notification_model> data = jsonData
+              .map((json) => Notification_model.fromJson(json))
+              .toList();
+
+          // setState(() { });
+          //MARK: HR Notifications(164)
+          //  List<Notification_model> notifyData = data.where((notification) => notification.messageType != 'Birthday').toList();
+          //    List<Notification_model> notifyData = data.where((notification) => notification.messageType != 'Birthday').toList();
+          List<Notification_model> notifyData = data
+              .where((notification) => notification.messageType != 'Birthday')
+              // notification.messageType == 'Company Anniversary Day')
+              .toList();
+          // List<Notification_model> notifyData = data.where((notification) => notification.messageTypeId == 147).toList();
+
+          //MARK: Today Notifications(168)
+          // List<Notification_model> birthdayNotifyData = data.where((notification) => notification.messageTypeId == 168).toList();
+          List<Notification_model> birthdayNotifyData = data
+              .where((notification) => notification.messageType == 'Birthday')
+              .toList();
+
+          checkNotificationsAndOpenExpandedView(notifyData, birthdayNotifyData);
+
+          setState(() {
+            for (var notification in birthdayNotifyData) {
+              getNotificationsReplies(accessToken!, notification.employeeId);
+            }
+          });
+          return [notifyData, birthdayNotifyData];
+        } else {
+          Commonutils.showCustomToastMessageLong(
+              'Error: ${response.body}', context, 1, 4);
+          print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+          throw Exception(
+              'Failed to load data. Status Code: ${response.statusCode}');
+        }
+      } catch (error) {
+        print('catch: $error');
+        rethrow;
+      }
     } else {
       Commonutils.showCustomToastMessageLong(
           'No Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
-      print('Not connected to the internet');
-    }
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      accessToken = prefs.getString("accessToken") ?? "";
-      sharedEmpId = prefs.getString("employeeId") ?? "";
-      loggedInEmployeeId = int.tryParse(sharedEmpId);
-      userid = prefs.getString("UserId") ?? "";
-      loademployeid();
-      final url = Uri.parse(baseUrl + getnotification);
-      print(
-          'fetchNotifications url: $url'); // http://182.18.157.215/HRMS/API/hrmsapi/Notification/GetNotifications
-      print('fetchNotifications accessToken: $accessToken');
 
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': accessToken!,
-        },
-      );
-      print('fetchNotifications res: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.body);
-        print('fetchNotifications jsonData: $jsonData');
-        List<Notification_model> data =
-            jsonData.map((json) => Notification_model.fromJson(json)).toList();
-
-        // setState(() { });
-        //MARK: HR Notifications(164)
-        //  List<Notification_model> notifyData = data.where((notification) => notification.messageType != 'Birthday').toList();
-        //    List<Notification_model> notifyData = data.where((notification) => notification.messageType != 'Birthday').toList();
-        List<Notification_model> notifyData = data
-            .where((notification) => notification.messageType != 'Birthday')
-            // notification.messageType == 'Company Anniversary Day')
-            .toList();
-        // List<Notification_model> notifyData = data.where((notification) => notification.messageTypeId == 147).toList();
-
-        //MARK: Today Notifications(168)
-        // List<Notification_model> birthdayNotifyData = data.where((notification) => notification.messageTypeId == 168).toList();
-        List<Notification_model> birthdayNotifyData = data
-            .where((notification) => notification.messageType == 'Birthday')
-            .toList();
-
-        checkNotificationsAndOpenExpandedView(notifyData, birthdayNotifyData);
-
-        setState(() {
-          for (var notification in birthdayNotifyData) {
-            getNotificationsReplies(accessToken!, notification.employeeId);
-          }
-        });
-        return [notifyData, birthdayNotifyData];
-      } else {
-        Commonutils.showCustomToastMessageLong(
-            'Error: ${response.body}', context, 1, 4);
-        print('Error: ${response.statusCode} - ${response.reasonPhrase}');
-        throw Exception(
-            'Failed to load data. Status Code: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('catch: $error');
-      rethrow;
+      throw Exception('No Internet Connection');
     }
   }
 
@@ -1961,7 +1964,9 @@ class _Notifications_screenState extends State<Notifications> {
       FocusScope.of(context).unfocus();
       return;
     }
-    final url = Uri.parse(baseUrl + getupcomingbirthdays);
+    final url = Uri.parse(
+        'http://182.18.157.215/HRMS/API/hrmsapi/Notification/GetUpcomingBirthdaysNotifications/1');
+    // final url = Uri.parse(baseUrl + getupcomingbirthdays);
     print('getupcomingbirthdays: $url');
     try {
       // Map<String, String> headers = {

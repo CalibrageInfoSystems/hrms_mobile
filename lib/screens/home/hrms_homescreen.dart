@@ -8,7 +8,9 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hrms/Constants.dart';
 import 'package:hrms/Database/HRMSDatabaseHelper.dart';
+import 'package:hrms/Model%20Class/birthday_banner_model.dart';
 import 'package:hrms/Myleaveslist.dart';
+import 'package:hrms/login_screen.dart';
 
 import 'package:hrms/screens/AddLeads.dart';
 import 'package:hrms/screens/BatteryOptimization.dart';
@@ -134,14 +136,19 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   double availablecls = 0.0;
   double usedCasualLeavesInMonth = 0.0;
   late Future<void> futureCheckInOutStatus;
+  bool ismatchedlogin = false;
+
+  late Future<List<BirthdayBanner>> futureBirthdayBanners;
 
   @override
   void initState() {
     super.initState();
     futureCheckInOutStatus = fetchCheckInOutStatus();
     // loadPunchInfo();
+    getLoginTime();
     loadCurrentLocation();
     getuserdata();
+    futureBirthdayBanners = fetchBirthBanners();
     _loademployeleaves();
     fetchLeadCounts();
     fetchpendingrecordscount();
@@ -183,6 +190,25 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     }); */
 
     //  dateController.text = DateFormat('dd-MM-yyyy').format(selectedDatemark);
+  }
+
+  Future<void> getLoginTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final logintime = prefs.getString('loginTime') ?? 'Unknown';
+    DateTime currentTime = DateTime.now();
+    DateTime formattedlogintime = DateTime.parse(logintime);
+    DateTime loginTime = formattedlogintime;
+
+    // Calculate the time difference
+    Duration timeDifference = currentTime.difference(loginTime);
+
+    // Check if the time difference is less than or equal to 1 hour (3600 seconds)
+    if (timeDifference.inSeconds > 3600) {
+      print("Login is more than 1 hour from current time.");
+      setState(() {
+        ismatchedlogin = true;
+      });
+    }
   }
 
   Future<void> loadCurrentLocation() async {
@@ -286,6 +312,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    if (ismatchedlogin) Future.microtask(() => _showtimeoutdialog(context));
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -311,7 +338,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                       children: [
                         Container(
                           width: double.infinity,
-                          height: size.height * 0.13,
+                          height: size.height * 0.12,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
@@ -319,9 +346,9 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               shiftTimingAndStatus(),
-                              const SizedBox(height: 10),
                               checkInNOut(),
                             ],
                           ),
@@ -539,7 +566,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               Text(
                 isPunchedIn ? "Punch In" : "Shift Timings",
                 style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               Text(
                 isPunchedIn
@@ -714,56 +741,179 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     },
   ];
 
+  Future<List<BirthdayBanner>> fetchBirthBanners() async {
+    try {
+      bool isConnected = await Commonutils.checkInternetConnectivity();
+      if (!isConnected) {
+        Commonutils.showCustomToastMessageLong(
+            'Please Check the Internet Connection', context, 1, 4);
+        FocusScope.of(context).unfocus();
+        throw Exception('No Internet Connection');
+      } else {
+        await getLoginTime();
+        final apiUrl = Uri.parse('$baseUrl$getSlideShowData');
+        Map<String, String> headers = {
+          'Content-Type': 'application/json',
+          'Authorization': accessToken,
+        };
+        final jsonString = await http.get(apiUrl, headers: headers);
+        if (jsonString.statusCode == 200) {
+          Map<String, dynamic> response = jsonDecode(jsonString.body);
+          if (response['birthdayWishes'] != null &&
+              response['birthdayWishes'].isNotEmpty) {
+            final List<dynamic> birthdayWishesData = response['birthdayWishes'];
+            return birthdayWishesData
+                .map((data) => BirthdayBanner.fromJson(data))
+                .toList();
+            //  return birthdayBannerFromJson(jsonString.body);
+          } else {
+            throw Exception('No Birthday Wishes Found');
+          }
+        } else {
+          throw Exception('Failed to fetch birthday wishes');
+        }
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Widget bannersCarosuel(BuildContext context, Size size) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: size.height * 0.18,
-      child: FlutterCarousel(
-        options: FlutterCarouselOptions(
-          floatingIndicator: true,
-          height: size.height * 0.18,
-          viewportFraction: 1.0,
-          enlargeCenterPage: true,
-          autoPlay: _items.length > 1,
-          enableInfiniteScroll: _items.length > 1,
-          aspectRatio: 16 / 9,
-          autoPlayCurve: Curves.fastOutSlowIn,
-          slideIndicator: CircularSlideIndicator(
-            slideIndicatorOptions: const SlideIndicatorOptions(
-              alignment: Alignment.bottomLeft,
-              padding: EdgeInsets.only(left: 20.0, bottom: 10.0),
-              itemSpacing: 12,
-              indicatorRadius: 4,
-            ),
-          ),
-          autoPlayAnimationDuration: const Duration(milliseconds: 800),
-        ),
-        items: _items.map((item) {
-          return Builder(
-            builder: (BuildContext context) {
-              return SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.network(
-                    item['img'],
-                    height: 200,
-                    fit: BoxFit
-                        .cover, // Use cover instead of fill for better aspect ratio handling
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return const Center(
-                        child: CircularProgressIndicator.adaptive(),
-                      );
-                    },
+      child: FutureBuilder(
+          future: futureBirthdayBanners,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Skeletonizer(
+                enabled: true,
+                child: Container(
+                  height: size.height * 0.18,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white,
                   ),
                 ),
               );
-            },
-          );
-        }).toList(),
-      ),
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text(snapshot.error.toString()),
+                // child: Text('Failed to fetch data'),
+              );
+            } else {
+              final List<BirthdayBanner> birthdayBanners = snapshot.data!;
+              if (birthdayBanners.isEmpty) {
+                return const Center(
+                  child: Text('No Birthday Wishes Found'),
+                );
+              } else {
+                return _buildCarousel(birthdayBanners, size);
+              }
+            }
+          }),
     );
+  }
+
+  FlutterCarousel _buildCarousel(
+      List<BirthdayBanner> birthdayBanners, Size size) {
+    return FlutterCarousel(
+      options: FlutterCarouselOptions(
+        floatingIndicator: true,
+        height: size.height * 0.18,
+        viewportFraction: 1.0,
+        enlargeCenterPage: true,
+        autoPlay: birthdayBanners.length > 1,
+        enableInfiniteScroll: birthdayBanners.length > 1,
+        aspectRatio: 16 / 9,
+        autoPlayCurve: Curves.fastOutSlowIn,
+        slideIndicator: CircularSlideIndicator(
+          slideIndicatorOptions: const SlideIndicatorOptions(
+            alignment: Alignment.bottomLeft,
+            padding: EdgeInsets.only(left: 20.0, bottom: 10.0),
+            itemSpacing: 12,
+            indicatorRadius: 4,
+          ),
+        ),
+        autoPlayAnimationDuration: const Duration(milliseconds: 800),
+      ),
+      items: birthdayBanners.map((item) {
+        return Builder(
+          builder: (BuildContext context) {
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.white,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: SizedBox(
+                      height: double.infinity,
+                      child: Text(
+                        '${item.wish}',
+                        maxLines: 6,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: item.photo != null
+                          ? Image.memory(
+                              formatBase64Image(item.photo!),
+                              fit: BoxFit.cover,
+                            )
+                          : Image.asset(
+                              'assets/birthday_cake2.jpg',
+                              height: 200,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+            /*  return SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: item.photo != null
+                    ? Image.memory(
+                        formatBase64Image(item.photo!),
+                        fit: BoxFit.cover,
+                      )
+                    : Image.network(
+                        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+                        height: 200,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          );
+                        },
+                      ),
+              ),
+            ); */
+          },
+        );
+      }).toList(),
+    );
+  }
+
+  Uint8List formatBase64Image(String base64String) {
+    // String formattedString = base64String.replaceAll('\n', '');
+    String cleanedBase64 = base64String.split('base64,').last.trim();
+    Uint8List bytes = base64Decode(cleanedBase64);
+    return bytes;
   }
 
   Future<void> startService() async {
@@ -2197,6 +2347,93 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         child: CircularProgressIndicator(),
       );
     }
+  }
+
+  void _showtimeoutdialog(BuildContext context) {
+    showDialog(
+      // barrierDismissible: false,
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              title: Column(
+                //mainAxisAlignment: MainAxisAlignment.,
+                children: [
+                  SizedBox(
+                    height: 50.0,
+                    width: 60.0,
+                    child: SvgPicture.asset(
+                      'assets/cislogo-new.svg',
+                      height: 120.0,
+                      width: 55.0,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 7.0,
+                  ),
+                  const Text(
+                    "Session Time Out",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Calibri',
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 3.0,
+                  ),
+                  const Text(
+                    "Please Login Again",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Calibri',
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    onConfirmLogout(context);
+                  },
+                  child: const Text(
+                    'Ok',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(
+                        0xFFf15f22), // Change to your desired background color
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> onConfirmLogout(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('loginTime');
+    SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
+    Commonutils.showCustomToastMessageLong(
+        "Logout Successfully", context, 0, 3);
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (route) => false,
+    );
   }
 }
 // Future<void> _loadUserActivityRights() async {

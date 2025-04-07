@@ -33,6 +33,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
   int? _selectedLeave;
   DateTime? selectedDate;
   String showYear = 'Select Year';
+  String tempShowYear = 'Select Year';
   DateTime _selectedYear = DateTime.now();
   static const List<String> leavesList = [
     'Pending',
@@ -54,8 +55,28 @@ class _MyleaveslistState extends State<Myleaveslist> {
   void initState() {
     super.initState();
 
+    getLoginTime();
     employeeLeaves =
-        _loadleaveslist(empolyeid, leaveTypeValue: widget.leaveType);
+        fetchLeavesInYear(empolyeid, leaveTypeValue: widget.leaveType);
+  }
+
+  Future<void> getLoginTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    logintime = prefs.getString('loginTime') ?? 'Unknown';
+    DateTime currentTime = DateTime.now();
+    DateTime formattedlogintime = DateTime.parse(logintime!);
+    DateTime loginTime = formattedlogintime /* Replace with your login time */;
+
+    // Calculate the time difference
+    Duration timeDifference = currentTime.difference(loginTime);
+
+    // Check if the time difference is less than or equal to 1 hour (3600 seconds)
+    if (timeDifference.inSeconds > 3600) {
+      print("Login is more than 1 hour from current time.");
+      setState(() {
+        ismatchedlogin = true;
+      });
+    }
   }
 
 /*   Future<String?> getLoginTime() async {
@@ -197,408 +218,457 @@ class _MyleaveslistState extends State<Myleaveslist> {
     });
     print("empolyeidinapplyleave:$empolyeid");
   } */
-
-  Future<List<EmployeeLeave>> _loadleaveslist(String empolyeid,
-      {String? leaveTypeValue}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      accessToken = prefs.getString("accessToken") ?? "";
-      logintime = prefs.getString('loginTime') ?? 'Unknown';
-      empolyeid = prefs.getString("employeeId") ?? "";
-    });
+/* 
+  Future<List<EmployeeLeave>> fetchLeavesInYear2(String empolyeid,
+      {String? leaveTypeValue, String? selectedYear}) async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
-    if (isConnected) {
-      print('Connected to the internet');
-    } else {
+    if (!isConnected) {
       Commonutils.showCustomToastMessageLong(
-          'No Internet Connection', context, 1, 4);
+          'Please Check the Internet Connection', context, 1, 4);
       FocusScope.of(context).unfocus();
-      print('Not connected to the internet');
-    }
-    DateTime now = DateTime.now();
-    int currentYear = now.year;
-    print('Current Year: $currentYear');
-
-    if (accessToken != null) {
+      throw Exception('No Internet Connection');
+    } else {
       try {
-        final url =
-            Uri.parse(baseUrl + getleavesapi + empolyeid + '/$currentYear');
-        print('myleavesapi$url');
-        Map<String, String> headers = {
-          'Content-Type': 'application/json',
-          'Authorization': '$accessToken',
-        };
-        print('API headers: $accessToken');
-
-        final response = await http.get(url, headers: headers);
-        print('response body : ${response.body}');
-        //  final response = await http.get(Uri.parse(url), headers: headers);
-        print("responsecode ${response.statusCode}");
-        // Check if the request was successful (status code 200)
-        if (response.statusCode == 200) {
-          // Parse the JSON response
-          final List<dynamic> data = json.decode(response.body);
-          setState(() {
-            //leaveData = data.map((json) => EmployeeLeave.fromJson(json)).toList();
-            //leaveDataexcludingdeleted.clear();
-            isLoading = false;
-            List<EmployeeLeave> validLeaves = [];
-            data.forEach((leave) {
-              if (leave['isDeleted'] == false || leave['isDeleted'] == null) {
-                validLeaves.add(EmployeeLeave.fromJson(leave));
+        await getLoginTime();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        setState(() {
+          accessToken = prefs.getString("accessToken") ?? "";
+          logintime = prefs.getString('loginTime') ?? 'Unknown';
+          empolyeid = prefs.getString("employeeId") ?? "";
+        });
+        if (accessToken.isNotEmpty) {
+          DateTime now = DateTime.now();
+          String currentYear = selectedYear ?? now.year.toString();
+          final url = Uri.parse('$baseUrl$getleavesapi$empolyeid/$currentYear');
+          Map<String, String> headers = {
+            'Content-Type': 'application/json',
+            'Authorization': accessToken,
+          };
+          final response = await http.get(url, headers: headers);
+          if (response.statusCode == 200) {
+            final List<dynamic> data = json.decode(response.body);
+            setState(() {
+              List<EmployeeLeave> validLeaves = [];
+              data.forEach((leave) {
+                if (leave['isDeleted'] == false || leave['isDeleted'] == null) {
+                  validLeaves.add(EmployeeLeave.fromJson(leave));
+                }
+              });
+              if (leaveTypeValue != null) {
+                validLeaves = validLeaves
+                    .where((leave) => leave.leaveType == leaveTypeValue)
+                    .toList();
+              }
+              leaveData = validLeaves;
+              allLeaves = leaveData;
+              filteredLeaves = leaveData;
+            });
+            return leaveData;
+          } else {
+            Commonutils.showCustomToastMessageLong(
+                response.body, context, 1, 4);
+            throw Exception(response.body);
+          }
+        } else {
+          throw Exception('Invalid access token');
+        }
+      } catch (e) {
+        rethrow;
+      }
+    }
+  }
+ */
+  Future<List<EmployeeLeave>> fetchLeavesInYear(String empolyeid,
+      {String? leaveTypeValue,
+      String? selectedYear,
+      String? selectedStatus}) async {
+    bool isConnected = await Commonutils.checkInternetConnectivity();
+    if (!isConnected) {
+      Commonutils.showCustomToastMessageLong(
+          'Please Check the Internet Connection', context, 1, 4);
+      FocusScope.of(context).unfocus();
+      throw Exception('No Internet Connection');
+    } else {
+      try {
+        await getLoginTime();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        setState(() {
+          accessToken = prefs.getString("accessToken") ?? "";
+          logintime = prefs.getString('loginTime') ?? 'Unknown';
+          empolyeid = prefs.getString("employeeId") ?? "";
+        });
+        if (accessToken.isNotEmpty) {
+          DateTime now = DateTime.now();
+          String currentYear = selectedYear ?? now.year.toString();
+          final url = Uri.parse('$baseUrl$getleavesapi$empolyeid/$currentYear');
+          Map<String, String> headers = {
+            'Content-Type': 'application/json',
+            'Authorization': accessToken,
+          };
+          final response = await http.get(url, headers: headers);
+          if (response.statusCode == 200) {
+            final List<dynamic> data = json.decode(response.body);
+            setState(() {
+              List<EmployeeLeave> validLeaves = [];
+              data.forEach((leave) {
+                if (leave['isDeleted'] == false || leave['isDeleted'] == null) {
+                  validLeaves.add(EmployeeLeave.fromJson(leave));
+                }
+              });
+              if (leaveTypeValue != null) {
+                validLeaves = validLeaves
+                    .where((leave) => leave.leaveType == leaveTypeValue)
+                    .toList();
+              }
+              leaveData = validLeaves;
+              allLeaves = leaveData;
+              if (selectedStatus != null) {
+                filteredLeaves = leaveData
+                    .where((leave) => leave.status == selectedStatus)
+                    .toList();
+              } else {
+                filteredLeaves = leaveData;
               }
             });
-            if (leaveTypeValue != null) {
-              validLeaves = validLeaves
-                  .where((leave) => leave.leaveType == leaveTypeValue)
-                  .toList();
-            }
-            leaveData = validLeaves;
-          });
-          print('leaveData${leaveData.length}');
-          // Process the data as needed
-          print('API Response jsonList : $data');
-          print('API Response leaveData: $leaveData');
-          print('API Response leaveData: ${leaveData.length}');
-          allLeaves = leaveData;
-          filteredLeaves = leaveData;
-          return leaveData;
+            return leaveData;
+          } else {
+            Commonutils.showCustomToastMessageLong(
+                response.body, context, 1, 4);
+            throw Exception(response.body);
+          }
         } else {
-          Commonutils.showCustomToastMessageLong(
-              'Error: ${response.body}', context, 1, 4);
-          print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+          throw Exception('Invalid access token');
         }
-      } catch (error) {
-        print('Error: $error');
+      } catch (e) {
+        rethrow;
       }
-    } else {
-      print('Error: accessToken is null');
     }
-    return [];
   }
 
   @override
   Widget build(BuildContext context) {
     final textscale = MediaQuery.of(context).textScaleFactor;
-    if (ismatchedlogin) {
-      Future.microtask(() => _showtimeoutdialog(context));
-    }
+    if (ismatchedlogin) Future.microtask(() => _showtimeoutdialog(context));
     return WillPopScope(
-        onWillPop: () async {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => home_screen()),
-          ); // Navigate to the previous screen
-          return true; // Prevent default back navigation behavior
-        },
-        child: Scaffold(
-            appBar: AppBar(
-                elevation: 0,
-                backgroundColor: const Color(0xFFf15f22),
-                leading: IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => home_screen()),
-                    );
-                  },
+      onWillPop: () async {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => home_screen()),
+        ); // Navigate to the previous screen
+        return true; // Prevent default back navigation behavior
+      },
+      child: Scaffold(
+        appBar: AppBar(
+            elevation: 0,
+            backgroundColor: const Color(0xFFf15f22),
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => home_screen()),
+                );
+              },
+            ),
+            title: const Text(
+              'HRMS',
+              style: TextStyle(color: Colors.white),
+            ),
+            centerTitle: true,
+            actions: [
+              //MARK: Filter
+              IconButton(
+                icon: const Icon(
+                  Icons.filter,
+                  color: Colors.white,
                 ),
-                title: const Text(
-                  'HRMS',
-                  style: TextStyle(color: Colors.white),
-                ),
-                centerTitle: true,
-                actions: [
-                  //MARK: Filter
-                  IconButton(
-                    icon: const Icon(
-                      Icons.menu,
-                      color: Colors.white,
+                onPressed: () {
+                  showModalBottomSheet(
+                    isScrollControlled: true,
+                    context: context,
+                    builder: (context) => Padding(
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom,
+                      ),
+                      child: filterMyLeaves(),
                     ),
-                    onPressed: () {
-                      showModalBottomSheet(
-                        isScrollControlled: true,
-                        context: context,
-                        builder: (context) => Padding(
-                          padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom,
-                          ),
-                          child: filterMyLeaves(),
+                  );
+                },
+              ),
+            ]),
+        body: FutureBuilder(
+          future: employeeLeaves,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CustomCircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                    snapshot.error.toString().replaceFirst('Exception: ', '')),
+              );
+            } else {
+              // EmployeeLeave employeeLeave = EmployeeLeaveData
+              // List<EmployeeLeave> data = snapshot.data ?? [];
+
+              List<EmployeeLeave> data = filteredLeaves;
+              if (data.isEmpty) {
+                return Center(
+                    child: Container(
+                  padding: const EdgeInsets.only(top: 5.0),
+                  child: const Text('No Leaves Found'),
+                ));
+              } else {
+                return ListView.builder(
+                  itemCount: data.length,
+                  itemBuilder: (context, index) {
+                    final leave = data[index];
+                    final borderColor = _getStatusBorderColor(leave.status);
+                    String? leavetodate;
+                    DateTime from_date = DateTime.parse(leave.fromDate);
+                    String leavefromdate =
+                        DateFormat('dd MMM yyyy').format(from_date);
+                    if (leave.toDate != null) {
+                      todate = leave.toDate!;
+                      DateTime to_date = DateTime.parse(todate);
+                      leavetodate = DateFormat('dd MMM yyyy').format(to_date);
+                    } else {
+                      leavetodate = leavefromdate;
+                    }
+                    // Color backgroundColor = leave.isDeleted == null || leave.isDeleted == false
+                    //     ? Color(0xFFfbf2ed) // Default color
+                    //     : Colors.grey.shade300;
+                    Color backgroundColor = leave.isMarkedForDeletion
+                        ? Colors.grey
+                            .shade300 // Grey background if marked for deletion
+                        : leave.isDeleted == null || leave.isDeleted == false
+                            ? const Color(0xFFfbf2ed) // Default color
+                            : Colors.grey.shade300;
+
+                    DateTime from_datefordelete =
+                        DateFormat('yyyy-MM-dd').parse(leave.fromDate);
+
+                    bool hideDeleteIcon =
+                        from_datefordelete.isBefore(DateTime.now());
+
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: backgroundColor,
+                          borderRadius: BorderRadius.circular(16.0),
+                          border: Border.all(color: borderColor, width: 1.5),
                         ),
-                      );
-                    },
-                  ),
-                ]),
-            body: FutureBuilder(
-              future: employeeLeaves,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CustomCircularProgressIndicator();
-                } else if (snapshot.connectionState == ConnectionState.done) {
-                  // EmployeeLeave employeeLeave = EmployeeLeaveData
-                  List<EmployeeLeave> data = filteredLeaves;
-                  if (data.isEmpty) {
-                    return Center(
-                        child: Container(
-                      padding: const EdgeInsets.only(top: 5.0),
-                      child: const Text('No Leaves Found'),
-                    ));
-                  } else {
-                    return ListView.builder(
-                      itemCount: data.length,
-                      itemBuilder: (context, index) {
-                        final leave = data[index];
-                        final borderColor = _getStatusBorderColor(leave.status);
-                        String? leavetodate;
-                        DateTime from_date = DateTime.parse(leave.fromDate);
-                        String leavefromdate =
-                            DateFormat('dd MMM yyyy').format(from_date);
-                        if (leave.toDate != null) {
-                          todate = leave.toDate!;
-                          DateTime to_date = DateTime.parse(todate);
-                          leavetodate =
-                              DateFormat('dd MMM yyyy').format(to_date);
-                        } else {
-                          leavetodate = leavefromdate;
-                        }
-                        // Color backgroundColor = leave.isDeleted == null || leave.isDeleted == false
-                        //     ? Color(0xFFfbf2ed) // Default color
-                        //     : Colors.grey.shade300;
-                        Color backgroundColor = leave.isMarkedForDeletion
-                            ? Colors.grey
-                                .shade300 // Grey background if marked for deletion
-                            : leave.isDeleted == null ||
-                                    leave.isDeleted == false
-                                ? const Color(0xFFfbf2ed) // Default color
-                                : Colors.grey.shade300;
-
-                        DateTime from_datefordelete =
-                            DateFormat('yyyy-MM-dd').parse(leave.fromDate);
-
-                        bool hideDeleteIcon =
-                            from_datefordelete.isBefore(DateTime.now());
-
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: backgroundColor,
-                              borderRadius: BorderRadius.circular(16.0),
-                              border:
-                                  Border.all(color: borderColor, width: 1.5),
-                            ),
-                            child: ListTile(
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: 5.0, bottom: 0.0),
-                                    child: Row(
-                                      children: [
-                                        const Text(
-                                          'Leave Type: ',
-                                          style: TextStyle(
-                                            color: Color(0xFFf37345),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'Calibri',
-                                          ),
-                                        ),
-                                        Text(
-                                          '${leave.leaveType}',
-                                          style: const TextStyle(
-                                            color: Color(0xFF000000),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Calibri',
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                        const SizedBox(width: 16.0),
-                                        GestureDetector(
-                                          onTap: () {
-                                            _showConfirmationDialog(leave);
-                                          },
-                                          // child: leave.isLeaveUsed == true // Check if isLeaveUsed is true
-                                          //     ? Container() // Hide the delete icon if isLeaveUsed is true
-                                          //     : Icon(
-                                          //   CupertinoIcons.delete,
-                                          //   color: leave.isDeleted == null || leave.isDeleted == false ? Colors.red : Colors.transparent,
-                                          // ),
-                                          child: hideDeleteIcon
-                                              ? Container()
-                                              : const Icon(
-                                                  CupertinoIcons.delete,
-                                                  color: Colors.red,
-                                                ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    child: Row(
-                                      children: [
-                                        const Text(
-                                          'Half Day Leave :',
-                                          style: TextStyle(
-                                            color: Color(0xFFf37345),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'Calibri',
-                                          ),
-                                        ),
-                                        leave.isHalfDayLeave == null ||
-                                                leave.isHalfDayLeave == false
-                                            ? const Text(
-                                                ' No',
-                                                style: TextStyle(
-                                                  color: Color(0xFF000000),
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily: 'Calibri',
-                                                ),
-                                              )
-                                            : const Text(
-                                                ' Yes',
-                                                style: TextStyle(
-                                                  color: Color(0xFF000000),
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily: 'Calibri',
-                                                ),
-                                              )
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 4.0),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          const TextSpan(
-                                            text: 'Leave Status :',
-                                            style: TextStyle(
-                                                color: Color(0xFFf37345),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                fontFamily: 'Calibri'),
-                                          ),
-                                          TextSpan(
-                                            text: ' ${leave.status}',
-                                            style: TextStyle(
-                                                color: _getStatusColor(
-                                                    leave.status),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700,
-                                                fontFamily: 'Calibri'),
-                                          ),
-                                        ],
+                        child: ListTile(
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 5.0, bottom: 0.0),
+                                child: Row(
+                                  children: [
+                                    const Text(
+                                      'Leave Type: ',
+                                      style: TextStyle(
+                                        color: Color(0xFFf37345),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Calibri',
                                       ),
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 4.0),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          const TextSpan(
-                                            text: 'From Date: ',
-                                            style: TextStyle(
-                                              color: Color(0xFFf37345),
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'Calibri',
+                                    Text(
+                                      '${leave.leaveType}',
+                                      style: const TextStyle(
+                                        color: Color(0xFF000000),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Calibri',
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    const SizedBox(width: 16.0),
+                                    GestureDetector(
+                                      onTap: () {
+                                        _showConfirmationDialog(leave);
+                                      },
+                                      // child: leave.isLeaveUsed == true // Check if isLeaveUsed is true
+                                      //     ? Container() // Hide the delete icon if isLeaveUsed is true
+                                      //     : Icon(
+                                      //   CupertinoIcons.delete,
+                                      //   color: leave.isDeleted == null || leave.isDeleted == false ? Colors.red : Colors.transparent,
+                                      // ),
+                                      child: hideDeleteIcon
+                                          ? Container()
+                                          : const Icon(
+                                              CupertinoIcons.delete,
+                                              color: Colors.red,
                                             ),
-                                          ),
-                                          TextSpan(
-                                            text: '${leavefromdate}',
-                                            style: const TextStyle(
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                child: Row(
+                                  children: [
+                                    const Text(
+                                      'Half Day Leave :',
+                                      style: TextStyle(
+                                        color: Color(0xFFf37345),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Calibri',
+                                      ),
+                                    ),
+                                    leave.isHalfDayLeave == null ||
+                                            leave.isHalfDayLeave == false
+                                        ? const Text(
+                                            ' No',
+                                            style: TextStyle(
                                               color: Color(0xFF000000),
                                               fontSize: 16,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: 'Calibri',
-                                            ),
-                                          ),
-                                          const TextSpan(
-                                            text: '   To Date:  ',
-                                            style: TextStyle(
-                                              color: Color(0xFFf37345),
-                                              fontSize: 16,
                                               fontWeight: FontWeight.bold,
-                                              fontFamily: 'Calibri',
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: {leavetodate} != null
-                                                ? leavetodate
-                                                : '${leavefromdate}',
-                                            style: const TextStyle(
-                                              color: Color(0xFF000000),
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 16,
                                               fontFamily: 'Calibri',
                                             ),
                                           )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 4.0),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          const TextSpan(
-                                            text: 'Leave Description : ',
+                                        : const Text(
+                                            ' Yes',
                                             style: TextStyle(
-                                                color: Color(0xFFF44614),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                fontFamily: 'Calibri'),
-                                          ),
-                                          TextSpan(
-                                            text: '${leave.note}',
-                                            style: const TextStyle(
-                                                color: Color(0xFF000000),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                                fontFamily: 'Calibri'),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  // Padding(
-                                  //   padding: EdgeInsets.only(bottom: 4.0),
-                                  //   child: Row(
-                                  //     children: [
-                                  //       Text('Leave Description :',
-                                  //           style: TextStyle(
-                                  //               color: Color(0xFFF44614), fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Calibri')),
-                                  //       Text(
-                                  //         '${leave.note}',
-                                  //         style:
-                                  //             TextStyle(color: Color(0xFFF44614), fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
-                                  //       )
-                                  //     ],
-                                  //   ),
-                                  // )
-                                ],
+                                              color: Color(0xFF000000),
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'Calibri',
+                                            ),
+                                          )
+                                  ],
+                                ),
                               ),
-                            ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 4.0),
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      const TextSpan(
+                                        text: 'Leave Status :',
+                                        style: TextStyle(
+                                            color: Color(0xFFf37345),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Calibri'),
+                                      ),
+                                      TextSpan(
+                                        text: ' ${leave.status}',
+                                        style: TextStyle(
+                                            color:
+                                                _getStatusColor(leave.status),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Calibri'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 4.0),
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      const TextSpan(
+                                        text: 'From Date: ',
+                                        style: TextStyle(
+                                          color: Color(0xFFf37345),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Calibri',
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: '${leavefromdate}',
+                                        style: const TextStyle(
+                                          color: Color(0xFF000000),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          fontFamily: 'Calibri',
+                                        ),
+                                      ),
+                                      const TextSpan(
+                                        text: '   To Date:  ',
+                                        style: TextStyle(
+                                          color: Color(0xFFf37345),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Calibri',
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: {leavetodate} != null
+                                            ? leavetodate
+                                            : '${leavefromdate}',
+                                        style: const TextStyle(
+                                          color: Color(0xFF000000),
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16,
+                                          fontFamily: 'Calibri',
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 4.0),
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      const TextSpan(
+                                        text: 'Leave Description : ',
+                                        style: TextStyle(
+                                            color: Color(0xFFF44614),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Calibri'),
+                                      ),
+                                      TextSpan(
+                                        text: '${leave.note}',
+                                        style: const TextStyle(
+                                            color: Color(0xFF000000),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: 'Calibri'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              // Padding(
+                              //   padding: EdgeInsets.only(bottom: 4.0),
+                              //   child: Row(
+                              //     children: [
+                              //       Text('Leave Description :',
+                              //           style: TextStyle(
+                              //               color: Color(0xFFF44614), fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Calibri')),
+                              //       Text(
+                              //         '${leave.note}',
+                              //         style:
+                              //             TextStyle(color: Color(0xFFF44614), fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
+                              //       )
+                              //     ],
+                              //   ),
+                              // )
+                            ],
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     );
-                  }
-                } else {
-                  return const Text('Error: Unable to fetch data');
-                }
-              },
-            )));
+                  },
+                );
+              }
+            }
+          },
+        ),
+      ),
+    );
   }
 
   Color _getStatusBorderColor(String status) {
@@ -939,7 +1009,6 @@ class _MyleaveslistState extends State<Myleaveslist> {
                           onSelected: (bool selected) {
                             setState(() {
                               print('Selected Leave22: ${leavesList[index]}');
-                              ;
                               _selectedLeave = selected ? index : null;
                             });
                           },
@@ -988,16 +1057,38 @@ class _MyleaveslistState extends State<Myleaveslist> {
                               child: GestureDetector(
                                 onTap: () {
                                   Navigator.of(context).pop();
-
-                                  print('Selected Year: $showYear');
-                                  print('Selected Leave Type: $_selectedLeave');
-                                  // Call the filter method with the selected values
-                                  filterLeaves(
-                                    showYear == 'Select Year' ? null : showYear,
-                                    _selectedLeave == null
+                                  if (showYear != 'Select Year') {
+                                    // api call with status filter
+                                    setState(() {
+                                      employeeLeaves = fetchLeavesInYear(
+                                          empolyeid,
+                                          leaveTypeValue: widget.leaveType,
+                                          selectedYear: showYear,
+                                          selectedStatus: _selectedLeave == null
+                                              ? null
+                                              : leavesList[_selectedLeave!]);
+                                    });
+                                  }
+                                  if (_selectedLeave != null) {
+                                    // filter status
+                                    setState(() {
+                                      filteredLeaves
+                                          .where((leave) =>
+                                              leave.status ==
+                                              leavesList[_selectedLeave!])
+                                          .toList();
+                                    });
+                                  }
+                                  /*  filterLeaves(
+                                    empolyeid,
+                                    leaveTypeValue: widget.leaveType,
+                                    selectedYear: showYear == 'Select Year'
+                                        ? null
+                                        : showYear,
+                                    selectedStatus: _selectedLeave == null
                                         ? null
                                         : leavesList[_selectedLeave!],
-                                  );
+                                  ); */
                                 },
                                 //MARK: Apply Filter
                                 child: Container(
@@ -1037,8 +1128,14 @@ class _MyleaveslistState extends State<Myleaveslist> {
     });
   }
 
-  void filterLeaves(String? selectedYear, String? selectedStatus) {
+/*   void filterLeaves(String? selectedYear, String? selectedStatus) {
     setState(() {
+      if (showYear != tempShowYear) {
+        tempShowYear = showYear;
+        employeeLeaves = fetchLeavesInYear(empolyeid,
+            leaveTypeValue: widget.leaveType, selectedYear: selectedYear);
+      }
+
       // If both are null, close the filter and display all data
       if ((selectedYear == null || selectedYear == 'Select Year') &&
           selectedStatus == null) {
@@ -1073,7 +1170,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
     });
 
     print('Filtered Leaves: ${filteredLeaves.length}');
-  }
+  } */
 
   Future<void> showYearPicker(context) async {
     showDialog(
@@ -1113,7 +1210,9 @@ class _MyleaveslistState extends State<Myleaveslist> {
       _selectedLeave = null;
       _fromToDatesController.clear();
 
-      filteredLeaves = allLeaves;
+      // filteredLeaves = allLeaves;
+      employeeLeaves =
+          fetchLeavesInYear(empolyeid, leaveTypeValue: widget.leaveType);
     });
   }
 }
