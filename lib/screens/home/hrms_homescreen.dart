@@ -336,20 +336,20 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               const SizedBox(height: 10),
             ],
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-              String to_day = DateFormat('dd/MM/yyyy').format(DateTime.now());
-              setState(() {
-                //  selectedOption = 'Today'; // Reset the dropdown to "Today"
-                calenderDate = to_day; // Set calendar to today's date
-                fetchdatewiseleads(today, today); // Fetch date-wise leads
-                fetchpendingrecordscount(); // Fetch other counts
-              });
-            },
-            child: const Icon(Icons.refresh), // Refresh icon
-            tooltip: 'Refresh',
-          ),
+          // floatingActionButton: FloatingActionButton(
+          //   onPressed: () {
+          //     String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+          //     String to_day = DateFormat('dd/MM/yyyy').format(DateTime.now());
+          //     setState(() {
+          //       //  selectedOption = 'Today'; // Reset the dropdown to "Today"
+          //       calenderDate = to_day; // Set calendar to today's date
+          //       fetchdatewiseleads(today, today); // Fetch date-wise leads
+          //       fetchpendingrecordscount(); // Fetch other counts
+          //     });
+          //   },
+          //   child: const Icon(Icons.refresh), // Refresh icon
+          //   tooltip: 'Refresh',
+          // ),
         ),
       ),
     );
@@ -463,7 +463,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          height: size.height * 0.194,
+          height: size.height * 0.19,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
@@ -481,7 +481,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                 child: Icon(
                   icon ?? Icons.check_circle_outline,
                   color: themeColor,
-                  size: (size.height * 0.197) * 0.15,
+                  size: (size.height * 0.19) * 0.15,
                   // size: 20,
                 ),
               ),
@@ -871,15 +871,15 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                 children: [
                   Expanded(
                     flex: 3,
-                    child: SizedBox(
+                    child: Container(
+                      alignment: Alignment.center,
                       height: double.infinity,
                       child: Text(
                         '${item.wish}',
                         maxLines: 6,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
+
+                        style: CommonStyles.txStyF20CbFcF5.copyWith(fontSize: 14)
                       ),
                     ),
                   ),

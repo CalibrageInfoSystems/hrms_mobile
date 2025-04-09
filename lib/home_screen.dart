@@ -158,7 +158,7 @@ class _home_screenState extends State<home_screen>
         _buildNavItem('assets/overview.svg', 'Projects'),
         _buildNavItem('assets/calendar-day.svg', ' Leaves'),
         _buildNavItem('assets/circleuser.svg', 'Profile'),
-       if (showAddClient!)
+      // if (showAddClient!)
           _buildNavItem('assets/addlead.svg', 'Add Client Visits'),
       ],
     );
