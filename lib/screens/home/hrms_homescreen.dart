@@ -146,7 +146,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   void initState() {
     super.initState();
     futureCheckInOutStatus = fetchCheckInOutStatus();
-    // loadPunchInfo();
     getLoginTime();
     loadCurrentLocation();
     getuserdata();
@@ -273,41 +272,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       }
     } catch (e) {
       rethrow;
-    }
-  }
-
-  Future<void> loadPunchInfo() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isPunchedIn = prefs.getBool(Constants.isPunchIn) ?? false;
-      _time = prefs.getString(Constants.punchTime) ?? 'Invalid Time';
-    });
-    final now = DateTime.now();
-    final int currentHour = now.hour;
-    if (currentHour >= 9 && currentHour < 12) {
-      if (!isPunchedIn) {
-        setState(() {
-          isRequestProcessing = true;
-        });
-
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => punchInOutDialog(context),
-        );
-      }
-    } else if (currentHour >= 18) {
-      if (isPunchedIn) {
-        setState(() {
-          isRequestProcessing = true;
-        });
-
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => punchInOutDialog(context),
-        );
-      }
     }
   }
 
@@ -565,7 +529,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isPunchedIn ? "Punch In" : "Shift Timings",
+                isPunchedIn ? "Check In" : "Shift Timings",
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
@@ -1471,7 +1435,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   }
 
   Widget punchInOutDialog(BuildContext context) {
-    String currentTime = DateFormat('HH:mm').format(DateTime.now());
+    String currentTime = DateFormat('hh:mm a').format(DateTime.now());
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -1545,7 +1509,9 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                         );
                       } else if (snapshot.hasError) {
                         return Center(
-                          child: Text('Error: ${snapshot.error}'),
+                          child: Text(snapshot.error
+                              .toString()
+                              .replaceFirst('Exception: ', '')),
                         );
                       } else {
                         return const Center(
@@ -2032,8 +1998,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
   Future<void> updatePunchStatus(bool status) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(Constants.isPunchIn, status);
-    await prefs.setString(Constants.punchTime, _time);
+    prefs.setBool(Constants.isPunchIn, status);
+    await prefs.setString(Constants.punchTime, DateTime.now().toString());
     setState(() {
       isPunchedIn = status;
       isRequestProcessing = false;
@@ -2080,7 +2046,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         };
 
         punchResult = await db.insert('DailyPunchInAndOut', punchInData);
-        print("✅ Punch In inserted successfully: $punchResult");
       } else {
         // **Punch Out: Update last Punch In record**
         punchResult = await db.rawUpdate(
