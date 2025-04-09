@@ -365,20 +365,11 @@ class _LoginScreenState extends State<LoginScreen> {
         prefs.setString(SharedKeys.userId, userid!);
         prefs.setString(SharedKeys.brnchId, branchId!);
         print('branchId: $branchId');
-        loginUser(accessToken);
+        loginUser(prefs, employeeId!, isFirstTimeLogin, userid,accessToken);
 // Ensure employeeId is an integer before comparison
-        if (int.tryParse(employeeId.toString()) == 329) {
-          await prefs.setBool("canAddClient", true);
-        } else {
-          await prefs.setBool("canAddClient", true);
-        }
-
-// Verify the stored value
-        bool? canAddClient = prefs.getBool("canAddClient");
-        print('canAddClient: $canAddClient');
 
         //  showAddClient = prefs.getBool('canAddClient') ?? true;
-        empolyelogin(prefs, employeeId!, isFirstTimeLogin, userid, accessToken);
+   //   empolyelogin(prefs, employeeId!, isFirstTimeLogin, userid, accessToken);
       } else {
         setState(() {
           // progressDialog.dismiss();
@@ -519,7 +510,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
  }
-  void loginUser(String accessToken) async {
+  void loginUser(SharedPreferences prefs, String empolyeid,
+      String isfirstTime, String userid, String? accessToken) async {
 
     final url = Uri.parse(baseUrl + GenerateApiKey);
     final response = await http.get(
@@ -530,23 +522,39 @@ class _LoginScreenState extends State<LoginScreen> {
       },
     );
     if (response.statusCode == 200) {
-      Map<String, dynamic> jsonData = json.decode(response.body);
+      try {
+        final decoded = json.decode(response.body);
 
-      if (jsonData.containsKey('apikey')) {
-        String apiKey = jsonData['apikey'];
+        if (decoded is Map<String, dynamic>) {
+          if (decoded.containsKey('apikey')) {
+            String apiKey = decoded['apikey'];
 
-        // Save API key in SharedPreferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString(SharedKeys.APIKey, apiKey);
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            prefs.setString(SharedKeys.APIKey, apiKey);
 
-        print('API Key saved: $apiKey');
-      } else {
-        print('API key not found in response');
+            print('API Key saved: $apiKey');
+            empolyelogin(prefs, empolyeid!, isfirstTime, userid, accessToken);
+          } else {
+            Commonutils.showCustomToastMessageLong(
+                'Permission denied. Please contact admin to enable access', context, 1, 4);
+            print('API key not found in response');
+          }
+        } else if (decoded is String) {
+          print('Server says: $decoded');
+          Commonutils.showCustomToastMessageLong(
+              'Permission denied. Please contact admin to enable access', context, 1, 4);
+          // Show a proper message to the user if it's a permission issue
+        }
+      } catch (e) {
+        print('Failed to parse response: $e');
+        print('Raw response: ${response.body}');
       }
     } else {
-      throw Exception(
-          'Failed to load API key. Status Code: ${response.statusCode}');
+      print('Failed to load API key. Status Code: ${response.statusCode}');
+      print('Response body: ${response.body}');
     }
+
+
 
 
   }

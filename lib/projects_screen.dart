@@ -519,7 +519,7 @@ class _ProjectsScreenState extends State<projects_screen> {
                                                     "Login is within 1 hour of current time.");
                                               } else {
                                                 // Login is outside the allowed window
-                                                _showtimeoutdialog(context);
+                                              //  _showtimeoutdialog(context);
                                                 print(
                                                     "Login is more than 1 hour from current time.");
                                               }
@@ -658,94 +658,6 @@ class _ProjectsScreenState extends State<projects_screen> {
         ));
   }
 
-  void _showtimeoutdialog(BuildContext context) {
-    showDialog(
-      // barrierDismissible: false,
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              surfaceTintColor: Colors.transparent,
-              title: Column(
-                //mainAxisAlignment: MainAxisAlignment.,
-                children: [
-                  Container(
-                    height: 50.0,
-                    width: 60.0,
-                    child: SvgPicture.asset(
-                      'assets/cislogo-new.svg',
-                      height: 120.0,
-                      width: 55.0,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 7.0,
-                  ),
-                  Text(
-                    "Session Time Out",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Calibri',
-                      color: Colors.black,
-                    ),
-                  ),
-                  // SizedBox(
-                  //   height: 3.0,
-                  // ),
-                  // Text(
-                  //   "Invalid Token",
-                  //   style: TextStyle(
-                  //     fontSize: 16,
-                  //     fontFamily: 'Calibri',
-                  //     color: Colors.black,
-                  //   ),
-                  // ),
-
-                  SizedBox(
-                    height: 3.0,
-                  ),
-                  Text(
-                    "Please Login Again",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Calibri',
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    deleteLoginTime();
-                    onConfirmLogout();
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    'Ok',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Calibri'), // Set text color to white
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(
-                        0xFFf15f22), // Change to your desired background color
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(5), // Set border radius
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
 
   Future<void> deleteLoginTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -156,81 +156,6 @@ class _Notifications_screenState extends State<Notifications> {
     prefs.remove('loginTime');
   }
 
-  void _showtimeoutdialog(BuildContext context) {
-    showDialog(
-      // barrierDismissible: false,
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              title: Column(
-                //mainAxisAlignment: MainAxisAlignment.,
-                children: [
-                  Container(
-                    height: 50.0,
-                    width: 60.0,
-                    child: SvgPicture.asset(
-                      'assets/cislogo-new.svg',
-                      height: 120.0,
-                      width: 55.0,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 7.0,
-                  ),
-                  Text(
-                    "Session Time Out",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Calibri',
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 3.0,
-                  ),
-                  Text(
-                    "Please Login Again",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Calibri',
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    deleteLoginTime();
-                    onConfirmLogout(context);
-                    // Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    'Ok',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Calibri'), // Set text color to white
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(
-                        0xFFf15f22), // Change to your desired background color
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(5), // Set border radius
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
 
   void onConfirmLogout(BuildContext context) {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
@@ -271,9 +196,9 @@ class _Notifications_screenState extends State<Notifications> {
 
   @override
   Widget build(BuildContext context) {
-    if (ismatchedlogin) {
-      Future.microtask(() => _showtimeoutdialog(context));
-    }
+    // if (ismatchedlogin) {
+    //   Future.microtask(() => _showtimeoutdialog(context));
+    // }
     return WillPopScope(
       onWillPop: () async {
         return true;

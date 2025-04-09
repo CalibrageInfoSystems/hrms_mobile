@@ -294,7 +294,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
 //MARK: Build Method
   @override
   Widget build(BuildContext context) {
-    if (ismatchedlogin) Future.microtask(() => showtimeoutdialog(context));
+  //  if (ismatchedlogin) Future.microtask(() => showtimeoutdialog(context));
     return Scaffold(
         appBar: appBar(),
         body: Stack(
@@ -1718,80 +1718,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     _leaveReasonController.clear();
   }
 
-  void showtimeoutdialog(BuildContext context) {
-    showDialog(
-      // barrierDismissible: false,
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              title: Column(
-                //mainAxisAlignment: MainAxisAlignment.,
-                children: [
-                  SizedBox(
-                    height: 50.0,
-                    width: 60.0,
-                    child: SvgPicture.asset(
-                      'assets/cislogo-new.svg',
-                      height: 120.0,
-                      width: 55.0,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 7.0,
-                  ),
-                  const Text(
-                    "Session Time Out",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Calibri',
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 3.0,
-                  ),
-                  const Text(
-                    "Please Login Again",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Calibri',
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    deleteLoginTime();
-                    onConfirmLogout(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(
-                        0xFFf15f22), // Change to your desired background color
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(5), // Set border radius
-                    ),
-                  ),
-                  child: const Text(
-                    'Ok',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Calibri'), // Set text color to white
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
 
   Future<void> deleteLoginTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

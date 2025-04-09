@@ -184,81 +184,81 @@ class Commonutils {
     return true;
   }
 
-  static void showtimeoutdialog(BuildContext context,
-      {required void Function()? onPressed}) {
-    showDialog(
-      // barrierDismissible: false,
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              surfaceTintColor: Colors.transparent,
-              title: Column(
-                //mainAxisAlignment: MainAxisAlignment.,
-                children: [
-                  SizedBox(
-                    height: 50.0,
-                    width: 60.0,
-                    child: SvgPicture.asset(
-                      'assets/cislogo-new.svg',
-                      height: 120.0,
-                      width: 55.0,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 7.0,
-                  ),
-                  const Text(
-                    "Session Time Out",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Calibri',
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 3.0,
-                  ),
-                  const Text(
-                    "Please Login Again",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Calibri',
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: onPressed,
-                  /*   onPressed: () {
-                    _deleteLoginTime();
-                    _onConfirmLogout(context);
-                    Navigator.of(context).pop();
-                  }, */
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFf15f22),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  child: const Text(
-                    'Ok',
-                    style:
-                        TextStyle(color: Colors.white, fontFamily: 'Calibri'),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
+  // static void showtimeoutdialog(BuildContext context,
+  //     {required void Function()? onPressed}) {
+  //   showDialog(
+  //     // barrierDismissible: false,
+  //     barrierDismissible: false,
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setState) {
+  //           return AlertDialog(
+  //             backgroundColor: Colors.white,
+  //             surfaceTintColor: Colors.transparent,
+  //             title: Column(
+  //               //mainAxisAlignment: MainAxisAlignment.,
+  //               children: [
+  //                 SizedBox(
+  //                   height: 50.0,
+  //                   width: 60.0,
+  //                   child: SvgPicture.asset(
+  //                     'assets/cislogo-new.svg',
+  //                     height: 120.0,
+  //                     width: 55.0,
+  //                   ),
+  //                 ),
+  //                 const SizedBox(
+  //                   height: 7.0,
+  //                 ),
+  //                 const Text(
+  //                   "Session Time Out",
+  //                   style: TextStyle(
+  //                     fontSize: 16,
+  //                     fontFamily: 'Calibri',
+  //                     color: Colors.black,
+  //                   ),
+  //                 ),
+  //                 const SizedBox(
+  //                   height: 3.0,
+  //                 ),
+  //                 const Text(
+  //                   "Please Login Again",
+  //                   style: TextStyle(
+  //                     fontSize: 16,
+  //                     fontFamily: 'Calibri',
+  //                     color: Colors.black,
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //             actions: [
+  //               ElevatedButton(
+  //                 onPressed: onPressed,
+  //                 /*   onPressed: () {
+  //                   _deleteLoginTime();
+  //                   _onConfirmLogout(context);
+  //                   Navigator.of(context).pop();
+  //                 }, */
+  //                 style: ElevatedButton.styleFrom(
+  //                   backgroundColor: const Color(0xFFf15f22),
+  //                   shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(5),
+  //                   ),
+  //                 ),
+  //                 child: const Text(
+  //                   'Ok',
+  //                   style:
+  //                       TextStyle(color: Colors.white, fontFamily: 'Calibri'),
+  //                 ),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
 
   static Future<void> _deleteLoginTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

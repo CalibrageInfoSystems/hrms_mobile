@@ -93,81 +93,6 @@ class _MyleaveslistState extends State<Myleaveslist> {
     prefs.remove('loginTime');
   }
 
-  void _showtimeoutdialog(BuildContext context) {
-    showDialog(
-      // barrierDismissible: false,
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              title: Column(
-                //mainAxisAlignment: MainAxisAlignment.,
-                children: [
-                  SizedBox(
-                    height: 50.0,
-                    width: 60.0,
-                    child: SvgPicture.asset(
-                      'assets/cislogo-new.svg',
-                      height: 120.0,
-                      width: 55.0,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 7.0,
-                  ),
-                  const Text(
-                    "Session Time Out",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Calibri',
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 3.0,
-                  ),
-                  const Text(
-                    "Please Login Again",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Calibri',
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    deleteLoginTime();
-                    onConfirmLogout(context);
-                    // Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    'Ok',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Calibri'), // Set text color to white
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(
-                        0xFFf15f22), // Change to your desired background color
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(5), // Set border radius
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
 
   void onConfirmLogout(BuildContext context) {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
@@ -352,7 +277,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
   @override
   Widget build(BuildContext context) {
     final textscale = MediaQuery.of(context).textScaleFactor;
-    if (ismatchedlogin) Future.microtask(() => _showtimeoutdialog(context));
+ //   if (ismatchedlogin) Future.microtask(() => _showtimeoutdialog(context));
     return WillPopScope(
       onWillPop: () async {
         Navigator.of(context).pushReplacement(

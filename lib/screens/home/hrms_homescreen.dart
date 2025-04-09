@@ -278,7 +278,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    if (ismatchedlogin) Future.microtask(() => _showtimeoutdialog(context));
+//    if (ismatchedlogin) Future.microtask(() => _showtimeoutdialog(context));
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -2499,7 +2499,7 @@ void onStart(ServiceInstance service) async {
         DateTime now = DateTime.now();
 
         // Fetch shift timings and weekoffs from the database
-        final shiftFromTime =
+/*        final shiftFromTime =
             await dataAccessHandler.getShiftFromTime(); // Example user ID 13
         final shiftToTime =
             await dataAccessHandler.getShiftToTime(); // Example user ID 13
@@ -2559,7 +2559,7 @@ void onStart(ServiceInstance service) async {
         appendLog(
             "track condition for data insert: $isWithinTrackingHours   ====== $weekoffsString");
         print(
-            "track condition for data insert: $isWithinTrackingHours   ====== $weekoffsString");
+            "track condition for data insert: $isWithinTrackingHours   ====== $weekoffsString");*/
 
         // Check if tracking is allowed
         // if (isWithinTrackingHours && !isExcludedDate && !isWeekOff) {

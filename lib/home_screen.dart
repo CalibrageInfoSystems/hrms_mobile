@@ -472,8 +472,8 @@ class _home_screenState extends State<home_screen>
     // Enable button if any of the counts are greater than 0
     isButtonEnabled = pendingleadscount! > 0 ||
         pendingfilerepocount! > 0 ||
-        pendingboundarycount! > 0 ||
-        pendingweekoffcount! > 0;
+        pendingboundarycount! > 0
+     ;
 
     setState(() {
       isLoading = false; // Stop loading
