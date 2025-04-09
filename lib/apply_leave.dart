@@ -7,6 +7,7 @@ import 'package:hrms/Commonutils.dart';
 import 'package:hrms/home_screen.dart';
 import 'package:hrms/leaves_screen.dart';
 import 'package:hrms/login_screen.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -825,12 +826,14 @@ class _apply_leaveeState extends State<apply_leave> {
       FocusScope.of(context).unfocus();
       return;
     }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     try {
       final url = Uri.parse(baseUrl + getadminsettings);
       print('AdminSettings: $url');
       Map<String, String> headers = {
         'Content-Type': 'application/json',
-        'Authorization': accessToken,
+        'APIKey': APIKey,
       };
 
       final response = await http.get(url, headers: headers);
@@ -3743,11 +3746,14 @@ class _apply_leaveeState extends State<apply_leave> {
     try {
       int currentYear = DateTime.now().year;
 
-      final url = Uri.parse(baseUrl + GetHolidayList + '$currentYear');
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String brnchId = prefs.getString(SharedKeys.brnchId) ?? "";
+      String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
+      final url = Uri.parse(baseUrl + GetHolidayList + '$currentYear' + '/' + brnchId);
       print('fetchHoliday: $url');
       Map<String, String> headers = {
         'Content-Type': 'application/json',
-        'Authorization': '$accessToken',
+        'APIKey': '$APIKey',
       };
       final response = await http.get(url, headers: headers);
 
@@ -4091,13 +4097,15 @@ class _apply_leaveeState extends State<apply_leave> {
       FocusScope.of(context).unfocus();
       return;
     }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     final url = Uri.parse(baseUrl + getdropdown + '$dayWorkStatus');
     print('fetchDataleavetype :${url}');
     final response = await http.get(
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': '$accessToken',
+        'APIKey': '$APIKey',
       },
     );
 
@@ -4205,13 +4213,14 @@ class _apply_leaveeState extends State<apply_leave> {
   Future<int> checkLeavesAllocation(String fromDate, int leaveTypeId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final empId = prefs.getString("employeeId") ?? "";
-
+    String brnchId = prefs.getString(SharedKeys.brnchId) ?? "";
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     final apiUrl =
-        '$baseUrl$getleaveStatistics${fromDate.split('-')[2]}/$empId';
+        '$baseUrl$getleaveStatistics${fromDate.split('-')[2]}/$empId/$brnchId';
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',
-      'Authorization': accessToken,
+      'APIKey': APIKey,
     };
 
     final jsonResponse = await http.get(

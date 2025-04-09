@@ -10,6 +10,7 @@ import 'package:hrms/api%20config.dart';
 import 'package:hrms/home_screen.dart';
 import 'package:hrms/login_screen.dart';
 import 'package:hrms/personal_details.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -215,12 +216,15 @@ class HolidaysScreen_screenState extends State<HolidaysScreen> {
     }
     try {
       int currentYear = DateTime.now().year;
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
+      String brnchId = prefs.getString(SharedKeys.brnchId) ?? "";
 
-      final url = Uri.parse(baseUrl + GetHolidayList + '$currentYear');
+      final url = Uri.parse(baseUrl + GetHolidayList + '$currentYear' + '/' + brnchId);
       print('fetchHoliday: $url');
       Map<String, String> headers = {
         'Content-Type': 'application/json',
-        'Authorization': '$accessToken',
+        'APIKey': '$APIKey',
       };
       final response = await http.get(url, headers: headers);
 

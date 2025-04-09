@@ -40,6 +40,7 @@ import '../../Database/SyncServiceB.dart';
 import '../../Model Class/LeadsModel.dart';
 import '../../SharedPreferencesHelper.dart';
 import '../../api config.dart';
+import '../../common_widgets/PermissionManager.dart';
 import '../../common_widgets/common_styles.dart';
 import '../../common_widgets/custom_lead_template.dart';
 import 'dart:ui' as ui;
@@ -126,6 +127,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   String? employee_designation;
   String empolyeid = '';
   String accessToken = '';
+  String APIKey = '';
   bool? isPunchIn = false;
   int employeid = 0;
   double allottedPriviegeLeaves = 0.0;
@@ -744,6 +746,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   Future<List<BirthdayBanner>> fetchBirthBanners() async {
     try {
       bool isConnected = await Commonutils.checkInternetConnectivity();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
       if (!isConnected) {
         Commonutils.showCustomToastMessageLong(
             'Please Check the Internet Connection', context, 1, 4);
@@ -754,7 +758,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         final apiUrl = Uri.parse('$baseUrl$getSlideShowData');
         Map<String, String> headers = {
           'Content-Type': 'application/json',
-          'Authorization': accessToken,
+          'APIKey': APIKey,
         };
         final jsonString = await http.get(apiUrl, headers: headers);
         if (jsonString.statusCode == 200) {
@@ -1039,6 +1043,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
   Future<void> getuserdata() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    await PermissionManager.loadPermissions();
     userID = prefs.getString(SharedKeys.userId) ?? "";
     //   userID = prefs.getInt('userID');
     RoleId = prefs.getInt('roleID');
@@ -1305,90 +1310,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     return storedList?.map(int.parse).toList() ?? [];
   }
 
-  void showShiftPopup(BuildContext context, String dateTime, String location) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "NEXT SHIFT",
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 5),
-              const Text(
-                "9am-5pm",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today,
-                      size: 16, color: Colors.blue),
-                  const SizedBox(width: 5),
-                  Expanded(
-                      child: Text(dateTime, overflow: TextOverflow.ellipsis)),
-                ],
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  const Icon(Icons.location_on, size: 16, color: Colors.blue),
-                  const SizedBox(width: 5),
-                  Expanded(
-                      child: Text(location, overflow: TextOverflow.ellipsis)),
-                ],
-              ),
-              const SizedBox(height: 5),
-              const Row(
-                children: [
-                  Icon(Icons.person, size: 16, color: Colors.blue),
-                  SizedBox(width: 5),
-                  Text("Client Care"),
-                ],
-              ),
-              const SizedBox(height: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text("Punch in"),
-                  ),
-                  OutlinedButton(
-                    onPressed: () {},
-                    child: const Text("Punch out"),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: () {},
-                child: const Text(
-                  "Unscheduled punch",
-                  style: TextStyle(color: Colors.blue),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   void _getCurrentDateTime() {
     final now = DateTime.now();
@@ -1441,7 +1362,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         _longitude = position.longitude.toString();
         _address =
             "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
-        _time = currentTime;
+     //   _time = currentTime;
       });
 
       // Move the map camera to the user's location
@@ -1713,6 +1634,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         );
 
         setState(() {
+          _time =    DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
           // Update the marker with the current location
           _currentPosition = currentPosition;
         });
@@ -1867,6 +1789,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     setState(() {
       empolyeid = prefs.getString("employeeId") ?? "";
       accessToken = prefs.getString("accessToken") ?? "";
+      APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     });
     print("empolyeidinapplyleave:$empolyeid");
     final url = Uri.parse(baseUrl + GetEmployeePhoto + '$empolyeid');
@@ -1875,7 +1798,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': '$accessToken',
+        'APIKey': '$APIKey',
       },
     );
     if (response.statusCode == 200) {

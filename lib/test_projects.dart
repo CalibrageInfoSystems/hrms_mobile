@@ -51,10 +51,10 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
 
       Duration timeDifference = currentTime.difference(formattedlogintime);
 
-      if (timeDifference.inSeconds > 3600) {
-        _showtimeoutdialog(context);
-        throw SessionTimeOut('Session Time Out');
-      }
+      // if (timeDifference.inSeconds > 3600) {
+      //   _showtimeoutdialog(context);
+      //   throw SessionTimeOut('Session Time Out');
+      // }
 
       /*  if (timeDifference.inSeconds <= 3600) {
     } else {
@@ -63,13 +63,15 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
     } */
 
       final apiUrl = Uri.parse('$baseUrl$getselfempolyee$employeid');
-      String? apiKey = await ApiKeyManager.getApiKey();
-      print('Stored API Key: $apiKey');
+
+      String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
+      // String? apiKey = await ApiKeyManager.getApiKey();
+      // print('Stored API Key: $apiKey');
 //  final apiUrl = Uri.parse(baseUrl + getselfempolyee + empolyeid);
       final jsonResponse = await http.get(
         apiUrl,
         headers: {
-          'Authorization': accessToken,
+          'APIKey': APIKey,
         },
       );
 
@@ -112,21 +114,21 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
     }
   }
 
-  Future<bool> checkSessionTimeOut(String? loginTime) async {
-    if (loginTime == null) {
-      return false;
-    }
-    DateTime currentTime = DateTime.now();
-    DateTime formattedlogintime = DateTime.parse(loginTime);
-
-    Duration timeDifference = currentTime.difference(formattedlogintime);
-
-    if (timeDifference.inSeconds > 3600) {
-      _showtimeoutdialog(context);
-      return false;
-    }
-    return true;
-  }
+  // Future<bool> checkSessionTimeOut(String? loginTime) async {
+  //   if (loginTime == null) {
+  //     return false;
+  //   }
+  //   DateTime currentTime = DateTime.now();
+  //   DateTime formattedlogintime = DateTime.parse(loginTime);
+  //
+  //   Duration timeDifference = currentTime.difference(formattedlogintime);
+  //
+  //   if (timeDifference.inSeconds > 3600) {
+  //     _showtimeoutdialog(context);
+  //     return false;
+  //   }
+  //   return true;
+  // }
 
   Uint8List convertBase64StringToUint8List(String? base64String) {
     if (base64String == null) {
@@ -273,9 +275,10 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
             onTap: () async {
               SharedPreferences prefs = await SharedPreferences.getInstance();
               String? loginTime = prefs.getString('loginTime') ?? 'Unknown';
-              if (await checkSessionTimeOut(loginTime)) {
-                fetchProjectList(project.projectid);
-              }
+              fetchProjectList(project.projectid);
+              // if (await checkSessionTimeOut(loginTime)) {
+              //   fetchProjectList(project.projectid);
+              // }
               /*  print(
                                                   'project_id${project.projectid}');
                                               DateTime currentTime =
@@ -361,6 +364,7 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
       String? accessToken = prefs.getString(SharedKeys.accessToken) ?? "";
+      String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
       final loadedData = await SharedPreferencesHelper.getCategories();
       if (loadedData != null) {
         int employeid = loadedData["employeeId"];
@@ -378,7 +382,7 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
           url,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': accessToken,
+            'APIKey': APIKey,
           },
         );
         print('Response Headers: ${response.headers}');
@@ -762,12 +766,12 @@ class NetworkException implements Exception {
   String toString() => message.toString();
 }
 
-class SessionTimeOut implements Exception {
-  final String message;
-  final int? code;
-
-  SessionTimeOut(this.message, {this.code});
-
-  @override
-  String toString() => message.toString();
-}
+// class SessionTimeOut implements Exception {
+//   final String message;
+//   final int? code;
+//
+//   SessionTimeOut(this.message, {this.code});
+//
+//   @override
+//   String toString() => message.toString();
+// }

@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hrms/holiday_model.dart';
 import 'package:hrms/leave_model.dart';
 import 'package:hrms/login_screen.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:hrms/test_apply_leave.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -1473,13 +1474,15 @@ class _leaves_screen_screenState extends State<leaves_screen> {
       FocusScope.of(context).unfocus();
       return;
     }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     final url = Uri.parse(baseUrl + getdropdown + '$dayWorkStatus');
     print('fetchDataleavetype :${url}');
     final response = await http.get(
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': '$accessToken',
+        'APIKey': '$APIKey',
       },
     );
 

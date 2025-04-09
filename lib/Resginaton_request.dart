@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:hrms/NotificationReply.dart';
 import 'package:hrms/Resignation.dart';
 import 'package:hrms/login_screen.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:hrms/styles.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
@@ -271,13 +272,14 @@ class _Resgination_req_screenState extends State<Resgination_req> {
     }
     final url = Uri.parse('$baseUrl$getdropdown$resignationReq');
     print('fetchResignationReq :$url');
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     try {
       final response = await http.get(
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': '$accessToken',
+          'APIKey': '$APIKey',
         },
       );
 
@@ -378,13 +380,16 @@ class _Resgination_req_screenState extends State<Resgination_req> {
       FocusScope.of(context).unfocus();
       return;
     }
-    final url = Uri.parse(baseUrl + getResignations);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String brnchId = prefs.getString(SharedKeys.brnchId) ?? "";
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
+    final url = Uri.parse(baseUrl + getResignations + '/' + brnchId);
     print('CheckResignation :$url');
     final response = await http.get(
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': accessToken,
+        'APIKey': APIKey,
       },
     );
 
@@ -1079,6 +1084,8 @@ class _Resgination_req_screenState extends State<Resgination_req> {
         FocusScope.of(context).unfocus();
         return;
       }
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
       final url = Uri.parse(baseUrl + applyResignation);
       print('CheckResignation :$url');
       String desc = _Desctext.text.trim().toString();
@@ -1103,7 +1110,7 @@ class _Resgination_req_screenState extends State<Resgination_req> {
         body: json.encode(request),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': '$accessToken',
+          'APIKey': '$APIKey',
         },
       );
 
@@ -1164,7 +1171,8 @@ class _Resgination_req_screenState extends State<Resgination_req> {
     DateTime currentTime = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd').format(currentTime);
     String message = _withdrawreasontext.text.trim().toString();
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     try {
       final url = Uri.parse(baseUrl + WithdrawResignation);
       final request = {
@@ -1185,7 +1193,7 @@ class _Resgination_req_screenState extends State<Resgination_req> {
         body: json.encode(request),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': '$accessToken',
+          'APIKey': '$APIKey',
         },
       );
 

@@ -44,3 +44,4 @@ var getleaveStatistics = '/hrmsapi/Attendance/GetLeaveStatistics/';
 const uatLeaveApplyURL = 'https://hrms.calibrage.in:/'; */
 var SyncTransactions = "/hrmsapi/Track/SyncTransactions";
 const getSlideShowData = "/hrmsapi/admin/GetSlideShowData";
+var GenerateApiKey = "/hrmsapi/ApiKey/GenerateApiKey/Roja";

@@ -14,6 +14,7 @@ import 'package:hrms/common_widgets/custom_textfield.dart';
 import 'package:hrms/holiday_model.dart';
 import 'package:hrms/home_screen.dart';
 import 'package:hrms/login_screen.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:hrms/styles.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -109,13 +110,14 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       throw Exception(''); // 'Please Check the Internet Connection'
     }
 
+    final APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     final url = Uri.parse('$baseUrl$getdropdown$dayWorkStatus');
     print('getLeaveTypes: $url');
     final jsonResponse = await http.get(
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': accessToken,
+        'APIKey': APIKey,
       },
     );
 
@@ -144,13 +146,14 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final accessToken = prefs.getString('accessToken') ?? '';
       final leaveReasons = prefs.getInt('leavereasons') ?? 0;
+      final APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
       final apiUrl =
           Uri.parse('$baseUrl$getdropdown$leaveReasons/$lookupDetailsId');
       final jsonResponse = await http.get(
         apiUrl,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': accessToken,
+          'APIKey': APIKey,
         },
       );
       print('dcsdc: $apiUrl');
@@ -195,13 +198,14 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   Future<List<Holiday_Model>> getLeaves() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken') ?? '';
+   final APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     int currentYear = DateTime.now().year;
     // final apiUrl = Uri.parse(
     // 'http://182.18.157.215/HRMS/API/hrmsapi/Admin/GetHolidays/2025/1');
     final apiUrl = Uri.parse('$baseUrl$GetHolidayList$currentYear/1');
     Map<String, String> headers = {
       'Content-Type': 'application/json',
-      'Authorization': accessToken,
+      'APIKey': APIKey,
     };
 
     final jsonResponse = await http.get(apiUrl, headers: headers);
@@ -1822,13 +1826,13 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final accessToken = prefs.getString("accessToken") ?? '';
       final empId = prefs.getString("employeeId") ?? "";
-
+      String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
       final apiUrl =
           '$baseUrl$getleaveStatistics${fromDate.split('-')[2]}/1/$empId';
 
       Map<String, String> headers = {
         'Content-Type': 'application/json',
-        'Authorization': accessToken,
+        'APIKey': APIKey,
       };
 
       final jsonResponse = await http.get(

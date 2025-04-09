@@ -24,6 +24,7 @@ import 'Constants.dart';
 import 'Database/DataAccessHandler.dart';
 import 'Holiday_screen.dart';
 import 'common_widgets/CommonUtils.dart';
+import 'common_widgets/PermissionManager.dart';
 import 'screens/home/HomeScreen.dart';
 import 'Myleaveslist.dart';
 import 'Resginaton_request.dart';
@@ -157,7 +158,7 @@ class _home_screenState extends State<home_screen>
         _buildNavItem('assets/overview.svg', 'Projects'),
         _buildNavItem('assets/calendar-day.svg', ' Leaves'),
         _buildNavItem('assets/circleuser.svg', 'Profile'),
-        if (showAddClient!)
+       if (showAddClient!)
           _buildNavItem('assets/addlead.svg', 'Add Client Visits'),
       ],
     );
@@ -445,7 +446,7 @@ class _home_screenState extends State<home_screen>
   void checkLoginuserdata() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      showAddClient = prefs.getBool('canAddClient');
+      showAddClient = PermissionManager.hasPermission("CanManageClientVisits");
       print('showAddClient: $showAddClient');
     });
   }

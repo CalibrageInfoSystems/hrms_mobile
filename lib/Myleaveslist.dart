@@ -8,6 +8,7 @@ import 'package:hrms/common_widgets/CommonUtils.dart';
 import 'package:hrms/common_widgets/common_styles.dart';
 import 'package:hrms/home_screen.dart';
 import 'package:hrms/login_screen.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -29,6 +30,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
   String empolyeid = '';
   String todate = "";
   String logintime = "";
+  String APIKey ="";
   final _fromToDatesController = TextEditingController();
   int? _selectedLeave;
   DateTime? selectedDate;
@@ -291,11 +293,13 @@ class _MyleaveslistState extends State<Myleaveslist> {
     } else {
       try {
         await getLoginTime();
+
         SharedPreferences prefs = await SharedPreferences.getInstance();
         setState(() {
           accessToken = prefs.getString("accessToken") ?? "";
           logintime = prefs.getString('loginTime') ?? 'Unknown';
           empolyeid = prefs.getString("employeeId") ?? "";
+           APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
         });
         if (accessToken.isNotEmpty) {
           DateTime now = DateTime.now();
@@ -303,7 +307,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
           final url = Uri.parse('$baseUrl$getleavesapi$empolyeid/$currentYear');
           Map<String, String> headers = {
             'Content-Type': 'application/json',
-            'Authorization': accessToken,
+            'APIKey': APIKey,
           };
           final response = await http.get(url, headers: headers);
           if (response.statusCode == 200) {
@@ -846,6 +850,8 @@ class _MyleaveslistState extends State<Myleaveslist> {
       FocusScope.of(context).unfocus();
       return;
     }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     setState(() {
       isLoading = true; // Show circular progress indicator
     });
@@ -855,7 +861,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
     try {
       Map<String, String> headers = {
         'Content-Type': 'application/json',
-        'Authorization': '$accessToken',
+        'APIKey': '$APIKey',
       };
 
       final response = await http.get(url, headers: headers);

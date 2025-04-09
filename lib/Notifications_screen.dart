@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/NotificationReply.dart';
 import 'package:hrms/login_screen.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -1734,7 +1735,8 @@ class _Notifications_screenState extends State<Notifications> {
     DateTime currentTime = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd').format(currentTime);
     String message = messagecontroller.text.trim().toString();
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     try {
       final url = Uri.parse(baseUrl + sendgreeting);
       print('sendgreetings url: $url');
@@ -1755,7 +1757,7 @@ class _Notifications_screenState extends State<Notifications> {
         body: json.encode(request),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': '$accessToken',
+          'APIKey': '$APIKey',
         },
       );
       print('sendgreetings requestobject ${json.encode(request)}');
@@ -1877,6 +1879,8 @@ class _Notifications_screenState extends State<Notifications> {
       FocusScope.of(context).unfocus();
       return;
     }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     final url = Uri.parse('$baseUrl$getnotificationreplies$employeeId');
     print('url:$url');
     try {
@@ -1884,7 +1888,7 @@ class _Notifications_screenState extends State<Notifications> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': accessToken,
+          'APIKey': APIKey,
         },
       );
 
@@ -1922,6 +1926,8 @@ class _Notifications_screenState extends State<Notifications> {
       FocusScope.of(context).unfocus();
       return;
     }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     final url = Uri.parse('$baseUrl$getnotificationreplies$employeeId');
     print('getNotificationsRepliesByEmployee: $url');
 
@@ -1930,7 +1936,7 @@ class _Notifications_screenState extends State<Notifications> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': accessToken,
+          'APIKey': APIKey,
         },
       );
 

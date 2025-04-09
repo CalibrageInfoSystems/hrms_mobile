@@ -7,6 +7,7 @@ import 'package:hrms/Model%20Class/projectmodel.dart';
 import 'package:hrms/home_screen.dart';
 import 'package:hrms/login_screen.dart';
 import 'package:hrms/personal_details.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -184,6 +185,9 @@ class _ProjectsScreenState extends State<projects_screen> {
       FocusScope.of(context).unfocus();
       return;
     }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
+
     try {
       final url = Uri.parse(baseUrl + getprojectemployeslist + '$employeid');
       print('API URL: $url');
@@ -191,7 +195,7 @@ class _ProjectsScreenState extends State<projects_screen> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': '$accesstoken',
+          'APIKey': '$APIKey',
         },
       );
       print('accestoekn:$accesstoken');

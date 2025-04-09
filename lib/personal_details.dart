@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/login_screen.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -1539,6 +1540,8 @@ class _personal_screen_screenState extends State<personal_details> {
   }
 
   Future<void> employedata(String accesstoken) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     // bool isConnected = await Commonutils.checkInternetConnectivity();
     // if (!isConnected) {
     //   Commonutils.showCustomToastMessageLong('Please Check the Internet Connection', context, 1, 4);
@@ -1560,7 +1563,7 @@ class _personal_screen_screenState extends State<personal_details> {
       final response = await http.get(
         url,
         headers: {
-          'Authorization': '$accessToken',
+          'APIKey': '$APIKey',
         },
       );
       print('login response: ${response.body}');
@@ -1898,7 +1901,8 @@ class _personal_screen_screenState extends State<personal_details> {
     }
     // ProgressDialog progressDialog = ProgressDialog(context);
     bool apiCallCompleted = false;
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     // Show the progress dialog
     //  progressDialog.show();
     try {
@@ -1931,7 +1935,7 @@ class _personal_screen_screenState extends State<personal_details> {
         body: json.encode(request),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': '$accessToken',
+          'APIKey': '$APIKey',
         },
       ).timeout(Duration(seconds: 15), onTimeout: () {
         apiCallCompleted = false;

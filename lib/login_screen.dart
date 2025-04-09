@@ -355,11 +355,17 @@ class _LoginScreenState extends State<LoginScreen> {
         final isFirstTimeLogin = decodedToken['IsFirstTimeLogin'];
         final userid = decodedToken['Id'];
         final employeeId = decodedToken['EmployeeId'];
+        final branchId = decodedToken['BranchId'];
+        final permissionsJson = decodedToken['Permissions'];
+        if (permissionsJson != null) {
+          prefs.setString('permissions', permissionsJson);
+        }
         prefs.setString("accessToken", accessToken!);
         prefs.setString(SharedKeys.employeeId, employeeId!);
         prefs.setString(SharedKeys.userId, userid!);
-        print('employeeId: $employeeId');
-        loginUser(userid);
+        prefs.setString(SharedKeys.brnchId, branchId!);
+        print('branchId: $branchId');
+        loginUser(accessToken);
 // Ensure employeeId is an integer before comparison
         if (int.tryParse(employeeId.toString()) == 329) {
           await prefs.setBool("canAddClient", true);
@@ -513,11 +519,36 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
  }
-  void loginUser(String userId) async {
-    String apiKey = await ApiKeyManager.generateApiKey(userId);
-    print('Generated API Key: $apiKey');
+  void loginUser(String accessToken) async {
 
-    // Send this key to the backend for validation
+    final url = Uri.parse(baseUrl + GenerateApiKey);
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': '$accessToken',
+      },
+    );
+    if (response.statusCode == 200) {
+      Map<String, dynamic> jsonData = json.decode(response.body);
+
+      if (jsonData.containsKey('apikey')) {
+        String apiKey = jsonData['apikey'];
+
+        // Save API key in SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString(SharedKeys.APIKey, apiKey);
+
+        print('API Key saved: $apiKey');
+      } else {
+        print('API key not found in response');
+      }
+    } else {
+      throw Exception(
+          'Failed to load API key. Status Code: ${response.statusCode}');
+    }
+
+
   }
 
 }

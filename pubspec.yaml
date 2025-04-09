@@ -79,6 +79,7 @@ dependencies:
   wakelock_plus: ^1.2.4
   workmanager: ^0.5.1
   crypto: ^3.0.3
+  encrypt: ^5.0.1
 
 
 
