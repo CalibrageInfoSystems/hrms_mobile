@@ -274,7 +274,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
       children: [
         Text('$label : ', style: CommonStyles.txStyF14CpFF),
         Text('$data',
-            style: CommonStyles.txStyF14CbFF5
+            style: CommonStyles.txStyF14CbFcF5
                 .copyWith(color: CommonStyles.dataTextColor)),
       ],
     );
@@ -293,7 +293,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
           Text('$label : ', style: CommonStyles.txStyF14CpFF),
           Flexible(
             child: Text(data,
-                style: CommonStyles.txStyF14CbFF5
+                style: CommonStyles.txStyF14CbFcF5
                     .copyWith(color: CommonStyles.dataTextColor)),
           ),
         ],
@@ -359,7 +359,7 @@ class _ViewLeadsInfoState extends State<ViewLeadsInfo> {
         const SizedBox(height: 5),
         Text(
           'Doc${lead['FileExtension']}',
-          style: CommonStyles.txStyF14CbFF5,
+          style: CommonStyles.txStyF14CbFcF5,
         ),
       ],
     );

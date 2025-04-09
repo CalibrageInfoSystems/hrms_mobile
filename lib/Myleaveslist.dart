@@ -30,7 +30,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
   String empolyeid = '';
   String todate = "";
   String logintime = "";
-  String APIKey ="";
+  String APIKey = "";
   final _fromToDatesController = TextEditingController();
   int? _selectedLeave;
   DateTime? selectedDate;
@@ -93,6 +93,81 @@ class _MyleaveslistState extends State<Myleaveslist> {
     prefs.remove('loginTime');
   }
 
+  void _showtimeoutdialog(BuildContext context) {
+    showDialog(
+      // barrierDismissible: false,
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              title: Column(
+                //mainAxisAlignment: MainAxisAlignment.,
+                children: [
+                  SizedBox(
+                    height: 50.0,
+                    width: 60.0,
+                    child: SvgPicture.asset(
+                      'assets/cislogo-new.svg',
+                      height: 120.0,
+                      width: 55.0,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 7.0,
+                  ),
+                  const Text(
+                    "Session Time Out",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Calibri',
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 3.0,
+                  ),
+                  const Text(
+                    "Please Login Again",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Calibri',
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    deleteLoginTime();
+                    onConfirmLogout(context);
+                    // Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Ok',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Calibri'), // Set text color to white
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(
+                        0xFFf15f22), // Change to your desired background color
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(5), // Set border radius
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   void onConfirmLogout(BuildContext context) {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
@@ -224,7 +299,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
           accessToken = prefs.getString("accessToken") ?? "";
           logintime = prefs.getString('loginTime') ?? 'Unknown';
           empolyeid = prefs.getString("employeeId") ?? "";
-           APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
+          APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
         });
         if (accessToken.isNotEmpty) {
           DateTime now = DateTime.now();
@@ -277,7 +352,6 @@ class _MyleaveslistState extends State<Myleaveslist> {
   @override
   Widget build(BuildContext context) {
     final textscale = MediaQuery.of(context).textScaleFactor;
- //   if (ismatchedlogin) Future.microtask(() => _showtimeoutdialog(context));
     return WillPopScope(
       onWillPop: () async {
         Navigator.of(context).pushReplacement(
@@ -309,7 +383,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
               //MARK: Filter
               IconButton(
                 icon: const Icon(
-                  Icons.filter,
+                  Icons.filter_list,
                   color: Colors.white,
                 ),
                 onPressed: () {
@@ -334,7 +408,9 @@ class _MyleaveslistState extends State<Myleaveslist> {
             } else if (snapshot.hasError) {
               return Center(
                 child: Text(
-                    snapshot.error.toString().replaceFirst('Exception: ', '')),
+                  snapshot.error.toString().replaceFirst('Exception: ', ''),
+                  style: CommonStyles.txStyF16CbFFb,
+                ),
               );
             } else {
               // EmployeeLeave employeeLeave = EmployeeLeaveData
@@ -345,7 +421,10 @@ class _MyleaveslistState extends State<Myleaveslist> {
                 return Center(
                     child: Container(
                   padding: const EdgeInsets.only(top: 5.0),
-                  child: const Text('No Leaves Found'),
+                  child: const Text(
+                    'No Leaves Found',
+                    style: CommonStyles.txStyF16CbFFb,
+                  ),
                 ));
               } else {
                 return ListView.builder(
@@ -399,21 +478,11 @@ class _MyleaveslistState extends State<Myleaveslist> {
                                   children: [
                                     const Text(
                                       'Leave Type: ',
-                                      style: TextStyle(
-                                        color: Color(0xFFf37345),
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        fontFamily: 'Calibri',
-                                      ),
+                                      style: CommonStyles.txStyF16CpFcF6,
                                     ),
                                     Text(
                                       '${leave.leaveType}',
-                                      style: const TextStyle(
-                                        color: Color(0xFF000000),
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Calibri',
-                                      ),
+                                      style: CommonStyles.txStyF16CbFFb,
                                     ),
                                     const Spacer(),
                                     const SizedBox(width: 16.0),
@@ -431,7 +500,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
                                           ? Container()
                                           : const Icon(
                                               CupertinoIcons.delete,
-                                              color: Colors.red,
+                                              color: CommonStyles.dotColor,
                                             ),
                                     ),
                                   ],
@@ -442,32 +511,17 @@ class _MyleaveslistState extends State<Myleaveslist> {
                                   children: [
                                     const Text(
                                       'Half Day Leave :',
-                                      style: TextStyle(
-                                        color: Color(0xFFf37345),
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        fontFamily: 'Calibri',
-                                      ),
+                                      style: CommonStyles.txStyF16CpFcF6,
                                     ),
                                     leave.isHalfDayLeave == null ||
                                             leave.isHalfDayLeave == false
                                         ? const Text(
                                             ' No',
-                                            style: TextStyle(
-                                              color: Color(0xFF000000),
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'Calibri',
-                                            ),
+                                            style: CommonStyles.txStyF16CbFFb,
                                           )
                                         : const Text(
                                             ' Yes',
-                                            style: TextStyle(
-                                              color: Color(0xFF000000),
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'Calibri',
-                                            ),
+                                            style: CommonStyles.txStyF16CbFFb,
                                           )
                                   ],
                                 ),
@@ -479,20 +533,16 @@ class _MyleaveslistState extends State<Myleaveslist> {
                                     children: [
                                       const TextSpan(
                                         text: 'Leave Status :',
-                                        style: TextStyle(
-                                            color: Color(0xFFf37345),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Calibri'),
+                                        style: CommonStyles.txStyF16CpFcF6,
                                       ),
                                       TextSpan(
                                         text: ' ${leave.status}',
                                         style: TextStyle(
-                                            color:
-                                                _getStatusColor(leave.status),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            fontFamily: 'Calibri'),
+                                          color: _getStatusColor(leave.status),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          fontFamily: 'Calibri',
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -505,41 +555,21 @@ class _MyleaveslistState extends State<Myleaveslist> {
                                     children: [
                                       const TextSpan(
                                         text: 'From Date: ',
-                                        style: TextStyle(
-                                          color: Color(0xFFf37345),
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Calibri',
-                                        ),
+                                        style: CommonStyles.txStyF16CpFcF6,
                                       ),
                                       TextSpan(
                                         text: '${leavefromdate}',
-                                        style: const TextStyle(
-                                          color: Color(0xFF000000),
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily: 'Calibri',
-                                        ),
+                                        style: CommonStyles.txStyF16CbFFb,
                                       ),
                                       const TextSpan(
                                         text: '   To Date:  ',
-                                        style: TextStyle(
-                                          color: Color(0xFFf37345),
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Calibri',
-                                        ),
+                                        style: CommonStyles.txStyF16CpFcF6,
                                       ),
                                       TextSpan(
                                         text: {leavetodate} != null
                                             ? leavetodate
                                             : '${leavefromdate}',
-                                        style: const TextStyle(
-                                          color: Color(0xFF000000),
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 16,
-                                          fontFamily: 'Calibri',
-                                        ),
+                                        style: CommonStyles.txStyF16CbFFb,
                                       )
                                     ],
                                   ),
@@ -552,39 +582,16 @@ class _MyleaveslistState extends State<Myleaveslist> {
                                     children: [
                                       const TextSpan(
                                         text: 'Leave Description : ',
-                                        style: TextStyle(
-                                            color: Color(0xFFF44614),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Calibri'),
+                                        style: CommonStyles.txStyF16CpFcF6,
                                       ),
                                       TextSpan(
                                         text: '${leave.note}',
-                                        style: const TextStyle(
-                                            color: Color(0xFF000000),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'Calibri'),
+                                        style: CommonStyles.txStyF16CbFFb,
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
-                              // Padding(
-                              //   padding: EdgeInsets.only(bottom: 4.0),
-                              //   child: Row(
-                              //     children: [
-                              //       Text('Leave Description :',
-                              //           style: TextStyle(
-                              //               color: Color(0xFFF44614), fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Calibri')),
-                              //       Text(
-                              //         '${leave.note}',
-                              //         style:
-                              //             TextStyle(color: Color(0xFFF44614), fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Calibri'),
-                              //       )
-                              //     ],
-                              //   ),
-                              // )
                             ],
                           ),
                         ),
@@ -647,11 +654,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
                 children: [
                   const Text(
                     "Confirmation",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Calibri',
-                      color: Color(0xFFf15f22),
-                    ),
+                    style: CommonStyles.txStyF16CpFcF6,
                   ),
                   InkWell(
                     onTap: () {
@@ -717,12 +720,6 @@ class _MyleaveslistState extends State<Myleaveslist> {
                     deleteapi(leave.employeeLeaveId);
                     Navigator.of(context).pop();
                   },
-                  child: const Text(
-                    'Yes',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Calibri'), // Set text color to white
-                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(
                         0xFFf15f22), // Change to your desired background color
@@ -731,23 +728,29 @@ class _MyleaveslistState extends State<Myleaveslist> {
                           BorderRadius.circular(5), // Set border radius
                     ),
                   ),
+                  child: Text(
+                    'Yes',
+                    style: CommonStyles.txStyF16CpFcF6.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text(
-                    'No',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Calibri'), // Set text color to white
-                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(
                         0xFFf15f22), // Change to your desired background color
                     shape: RoundedRectangleBorder(
                       borderRadius:
                           BorderRadius.circular(5), // Set border radius
+                    ),
+                  ),
+                  child: Text(
+                    'No',
+                    style: CommonStyles.txStyF16CpFcF6.copyWith(
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -853,14 +856,16 @@ class _MyleaveslistState extends State<Myleaveslist> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  const Text(
+                  Text(
                     'Filter By',
+                    style: CommonStyles.txStyF16CbFFb,
                   ),
                   GestureDetector(
                     onTap: onClearAllFilters,
                     //MARK: Clear all filters
-                    child: const Text(
+                    child: Text(
                       'Clear All Filters',
+                      style: CommonStyles.txStyF16CbFFb,
                     ),
                   ),
                 ],

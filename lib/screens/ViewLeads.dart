@@ -759,7 +759,7 @@ class _FilterState extends State<Filter> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const SizedBox(width: 40),
-              const Text('Filter', style: CommonStyles.txStyF20CbFF5),
+              const Text('Filter', style: CommonStyles.txStyF20CbFcF5),
               IconButton(
                   icon: const Icon(
                     Icons.close,

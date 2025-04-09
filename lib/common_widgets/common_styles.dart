@@ -49,11 +49,33 @@ class CommonStyles {
   static const txStyF20CpFF5 = TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.w500,
+      fontFamily: 'Calibri',
       color: CommonStyles.primaryTextColor);
 
-  static const txStyF20CbFF5 = TextStyle(
+  static const txStyF16CpFcF6 = TextStyle(
+    color: CommonStyles.primaryColor,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'Calibri',
+  );
+
+  static const txStyF14CbFcF5 = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    fontFamily: 'Calibri',
+  );
+
+  static const txStyF16CbFFb = TextStyle(
+    color: Color(0xFF000000),
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    fontFamily: 'Calibri',
+  );
+
+  static const txStyF20CbFcF5 = TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.w500,
+      fontFamily: 'Calibri',
       color: CommonStyles.blackColor);
 
   static const txStyF20CwFF5 = TextStyle(
@@ -70,6 +92,7 @@ class CommonStyles {
       fontFamily: "hind_semibold",
       fontWeight: FontWeight.w500,
       color: CommonStyles.primaryColor);
+
   static const txStyF14CbFF5 = TextStyle(
       fontSize: 14,
       fontFamily: "hind_semibold",

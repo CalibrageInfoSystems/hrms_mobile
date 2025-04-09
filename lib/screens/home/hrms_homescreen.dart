@@ -488,14 +488,14 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               const SizedBox(height: 12),
               Text(
                 leaveType,
+                style: CommonStyles.txStyF14CbFcF5,
               ),
               const SizedBox(height: 2),
               Text(
                 data,
-                style: const TextStyle(
-                    color: CommonStyles.blackColor,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
+                style: CommonStyles.txStyF20CbFcF5.copyWith(
+                    // fontWeight: FontWeight.w600,
+                    ),
               )
             ],
           ),
@@ -530,8 +530,9 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             children: [
               Text(
                 isPunchedIn ? "Check In" : "Shift Timings",
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: CommonStyles.txStyF16CbFFb.copyWith(
+                  fontSize: 20,
+                ),
               ),
               Text(
                 isPunchedIn
@@ -633,6 +634,10 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         const SizedBox(width: 5),
         Text(
           _getFormattedDate(),
+          style: CommonStyles.txStyF16CbFFb.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(width: 10),
         Container(
@@ -647,6 +652,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           child: const Text(
             'Shift Morning',
             style: TextStyle(
+              fontSize: 12,
+              fontFamily: 'Calibri',
               color: CommonStyles.primaryColor,
             ),
           ),
@@ -668,13 +675,15 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             children: [
               Text(
                 '$EmployeName',
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: CommonStyles.txStyF20CbFcF5.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              Text(
-                '$employee_designation',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
+              Text('$employee_designation',
+                  style: CommonStyles.txStyF20CbFcF5.copyWith(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                  )),
             ],
           ),
           /*  const Spacer(),
@@ -756,11 +765,56 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               return Skeletonizer(
                 enabled: true,
                 child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white,
+                  ),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        flex: 3,
+                        child: SizedBox(
+                          height: double.infinity,
+                          child: Text(
+                            "Wishing you a very Happy Birthday! Your dedication and hard work are truly valued. We hope this special day is filled with joy and celebration.",
+                            maxLines: 6,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        flex: 2,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.asset(
+                            'assets/birthday_cake2.jpg',
+                            height: 200,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                /* Container(
                   height: size.height * 0.18,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/birthday_cake2.jpg',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ), */
               );
             } else if (snapshot.hasError) {
               return const SizedBox();
@@ -829,6 +883,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 10),
                   Expanded(
                     flex: 2,
                     child: ClipRRect(

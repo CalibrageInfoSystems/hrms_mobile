@@ -281,7 +281,7 @@ class _TestHrmsState extends State<TestHrms> {
               )),
           Text(
             '$data',
-            style: CommonStyles.txStyF20CbFF5.copyWith(
+            style: CommonStyles.txStyF20CbFcF5.copyWith(
               // color: CommonStyles.primaryColor,
               fontSize: 30,
             ),
@@ -343,7 +343,7 @@ class _TestHrmsState extends State<TestHrms> {
               children: [
                 Text(
                   'dd/MM/yyyy',
-                  style: CommonStyles.txStyF14CbFF5,
+                  style: CommonStyles.txStyF14CbFcF5,
                 ),
                 SizedBox(width: 5),
                 Icon(
