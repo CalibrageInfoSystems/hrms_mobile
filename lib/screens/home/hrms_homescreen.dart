@@ -364,6 +364,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14.0),
                 child: bannersCarosuel(context, size),
@@ -549,9 +550,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             child: checkInNOutTemplate(true),
           );
         } else if (snapshot.hasError) {
-          return const Center(
-            child: Text('Failed fetching data'),
-          );
+          return const SizedBox();
         }
         return checkInNOutTemplate(isPunchedIn);
       },
@@ -796,15 +795,15 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                   height: size.height * 0.18,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: Colors.white,
                   ),
                 ),
               );
             } else if (snapshot.hasError) {
-              return Center(
-                child: Text(snapshot.error.toString()),
-                // child: Text('Failed to fetch data'),
-              );
+              return const SizedBox();
+              /*  return Center(
+                child: Text(
+                    snapshot.error.toString().replaceFirst('Exception: ', '')),
+              ); */
             } else {
               final List<BirthdayBanner> birthdayBanners = snapshot.data!;
               if (birthdayBanners.isEmpty) {
@@ -1310,7 +1309,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     return storedList?.map(int.parse).toList() ?? [];
   }
 
-
   void _getCurrentDateTime() {
     final now = DateTime.now();
     _currentDateTime = DateFormat('EEEE, MMM d, yyyy – hh:mm a').format(now);
@@ -1362,7 +1360,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         _longitude = position.longitude.toString();
         _address =
             "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
-     //   _time = currentTime;
+        //   _time = currentTime;
       });
 
       // Move the map camera to the user's location
@@ -1634,7 +1632,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         );
 
         setState(() {
-          _time =    DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+          _time = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
           // Update the marker with the current location
           _currentPosition = currentPosition;
         });
