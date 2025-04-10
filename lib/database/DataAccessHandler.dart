@@ -317,6 +317,22 @@ class DataAccessHandler with ChangeNotifier {
       return null;
     }
   }
+  Future<String?> getOnlyStringValueFromDb(
+      String query,) async {
+    List<Map<String, dynamic>> result;
+    try {
+      final db = await dbHelper.database;
+      result = await db.rawQuery(query);
+
+      if (result.isNotEmpty && result.first.isNotEmpty) {
+        return result.first.values.first.toString();
+      }
+      return null;
+    } catch (e) {
+      debugPrint("Exception: $e");
+      return null;
+    }
+  }
 
   Future<List<Map<String, dynamic>>> getleads(
       {required String createdByUserId, required bool isToday}) async {

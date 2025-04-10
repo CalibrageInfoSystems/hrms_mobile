@@ -109,9 +109,9 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   late Future<List<int>> futureSync;
   Position? _currentPosition;
   GoogleMapController? _mapController;
-  String _latitude = "Fetching...";
-  String _longitude = "Fetching...";
-  String _address = "Fetching address...";
+  String _latitude = "";
+  String _longitude = "";
+  String _address = "";
   String _time = "";
   bool isPunchedIn = false;
   bool isRequestProcessing = false;
@@ -131,7 +131,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   bool? isPunchIn = false;
   int employeid = 0;
   double allottedPriviegeLeaves = 0.0;
-
+  String ? PunchinTime ;
   double usedCasualLeavesInYear = 0.0;
   double allotcausalleaves = 0.0;
   double availablepls = 0.0;
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   void initState() {
     super.initState();
     futureCheckInOutStatus = fetchCheckInOutStatus();
-    getLoginTime();
+    // getLoginTime();
     loadCurrentLocation();
     getuserdata();
     futureBirthdayBanners = fetchBirthBanners();
@@ -700,20 +700,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-  final List<Map<String, dynamic>> _items = [
-    {
-      'img':
-          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
-    },
-    {
-      'img':
-          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
-    },
-    {
-      'img':
-          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
-    },
-  ];
+
 
   Future<List<BirthdayBanner>> fetchBirthBanners() async {
     try {
@@ -1152,18 +1139,25 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     //   userID = prefs.getInt('userID'); //TODO
     RoleId = prefs.getInt('roleID');
 
-    // Fetch total lead counts based on CreatedByUserId
-    totalLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
-        "SELECT COUNT(*) AS totalLeadsCount FROM Leads WHERE CreatedByUserId = '$userID'");
-
+    userID = prefs.getString(SharedKeys.userId) ?? "";
     // Fetch today's lead counts for the current date and userID
     todayLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
         "SELECT COUNT(*) AS todayLeadsCount FROM Leads WHERE DATE(CreatedDate) = '$currentDate' AND CreatedByUserId = '$userID'");
+    totalLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
+        "SELECT COUNT(*) AS totalLeadsCount FROM Leads WHERE CreatedByUserId = '$userID'");
 
-    // Fetch lead counts within a date range for userID (you can modify the date range logic as needed)
-    dateRangeLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
-        "SELECT COUNT(*) AS dateRangeLeadsCount FROM Leads WHERE DATE(CreatedDate) BETWEEN '$currentDate' AND '$currentDate' AND CreatedByUserId = '$userID'");
+    _time  = (await dataAccessHandler.getOnlyStringValueFromDb(
+        "SELECT PunchInTime FROM DailyPunchInAndOut  WHERE DATE(CreatedDate) ='$currentDate' AND CreatedByUserId = '$userID'"))!;
+    print('_time == $_time');
 
+    bool isPunchIn = _time != null && _time.isNotEmpty;
+
+
+    await prefs.setBool(Constants.isPunchIn, isPunchIn);
+
+    setState(() {
+      isPunchedIn = isPunchIn; // Local state variable that drives the UI
+    });
     double calculateDistance(lat1, lon1, lat2, lon2) {
       var p = 0.017453292519943295; // Pi/180 to convert degrees to radians
       var c = cos;
@@ -1267,8 +1261,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         'SELECT Count(*) AS pendingrepoCount FROM FileRepository WHERE ServerUpdatedStatus = 0');
     pendingboundarycount = await dataAccessHandler.getOnlyOneIntValueFromDb(
         'SELECT Count(*) AS pendingboundaryCount FROM GeoBoundaries WHERE ServerUpdatedStatus = 0');
-    pendingweekoffcount = await dataAccessHandler.getOnlyOneIntValueFromDb(
-        'SELECT Count(*) AS pendingweekoffcount FROM UserWeekOffXref WHERE ServerUpdatedStatus = 0');
+
     print('pendingleadscount: $pendingleadscount ');
     print('pendingfilerepocount: $pendingfilerepocount');
     print('pendingboundarycount: $pendingboundarycount ');
@@ -1338,13 +1331,11 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       bool serviceEnabled;
       LocationPermission permission;
 
-      // Check if location services are enabled
       serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         return Future.error('Location services are disabled.');
       }
 
-      // Check for location permissions
       permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -1357,19 +1348,15 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         return Future.error('Location permissions are permanently denied.');
       }
 
-      // Get the current position
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
       List<Placemark> placemarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
+      await placemarkFromCoordinates(position.latitude, position.longitude);
 
       Placemark place = placemarks.first;
-      String currentTime =
-          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
-      // Check if the widget is still mounted before calling setState
       if (!mounted) return;
 
       setState(() {
@@ -1378,11 +1365,17 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         _latitude = position.latitude.toString();
         _longitude = position.longitude.toString();
         _address =
-            "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
-        //   _time = currentTime;
+        "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
       });
 
-      // Move the map camera to the user's location
+      /// ✅ Check if values are still empty
+      if (_latitude.isEmpty || _longitude.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to fetch location coordinates.')),
+        );
+        return;
+      }
+
       if (_mapController != null) {
         _mapController!.animateCamera(
           CameraUpdate.newLatLng(
@@ -1394,16 +1387,21 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       setState(() {
         _currentLocation = "Location unavailable";
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching location: $e')),
+      );
       rethrow;
     }
   }
 
+
   Future<void> _captureAndProcessImage() async {
     try {
       final ImagePicker picker = ImagePicker();
-      final XFile? pickedFile =
-          await picker.pickImage(source: ImageSource.camera);
-
+      final XFile? pickedFile = await picker.pickImage(
+        source: ImageSource.camera,
+        preferredCameraDevice: CameraDevice.front,
+      );
       if (pickedFile == null) {
         if (!mounted) return;
         throw Exception("No image captured!");
@@ -1653,7 +1651,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         );
 
         setState(() {
-          _time = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+          _time = DateTime.now().toIso8601String();
           // Update the marker with the current location
           _currentPosition = currentPosition;
         });
@@ -1995,56 +1993,16 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   }
  */
 
-  Widget _getDefaultImage(String gender, BuildContext context) {
-    return gender == "Male"
-        ? Container(
-            width: MediaQuery.of(context).size.width / 3.8,
-            height: MediaQuery.of(context).size.height / 6.5,
-            padding: const EdgeInsets.all(3.0),
-            decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-                border: Border.all(color: Colors.white, width: 2.0)),
-            child: Image.asset(
-              'assets/men_emp.jpg',
-              // width: MediaQuery.of(context).size.width / 4.5,
-              // height: MediaQuery.of(context).size.height / 6.5,
-            ))
-        : gender == "Female"
-            ? Container(
-                width: MediaQuery.of(context).size.width / 3.8,
-                height: MediaQuery.of(context).size.height / 6.5,
-                padding: const EdgeInsets.all(3.0),
-                decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-                    border: Border.all(color: Colors.white, width: 2.0)),
-                child: Image.asset(
-                  'assets/women-emp.jpg',
-                  // width: MediaQuery.of(context).size.width / 3.8,
-                  // height: MediaQuery.of(context).size.height / 6.5,
-                ),
-              )
-            : Container(
-                width: MediaQuery.of(context).size.width / 3.8,
-                height: MediaQuery.of(context).size.height / 6.5,
-                padding: const EdgeInsets.all(3.0),
-                decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-                    border: Border.all(color: Colors.white, width: 2.0)),
-                child: Image.asset(
-                  'assets/app_logo.png',
-                  // width: MediaQuery.of(context).size.width / 3.8,
-                  // height: MediaQuery.of(context).size.height / 6.5,
-                  // height: 90,
-                ),
-              ); // You can replace Container() with another default image or widget
-  }
 
   String formatPunchTime(String? dateTimeString) {
     try {
-      print('xxx5: $dateTimeString');
-      if (dateTimeString == null) return "Invalid Date";
-      DateTime dateTime =
-          DateFormat("yyyy-MM-dd HH:mm:ss").parse(dateTimeString);
+      DateTime dateTime = DateTime.parse(dateTimeString!);
+
+      // String formattedTime = DateFormat('hh:mm a').format(dateTime);
+      // print('xxx5: $dateTimeString');
+      // if (dateTimeString == null) return "Invalid Date";
+      // DateTime dateTime =
+      //     DateFormat("yyyy-MM-dd HH:mm:ss").parse(dateTimeString);
       return DateFormat("hh:mm a").format(dateTime);
     } catch (e) {
       return "Invalid Date";
@@ -2872,7 +2830,7 @@ bool _isPositionAccurate(Position position) {
       position.speed >= MINIMUM_MOVEMENT_SPEED;
 }
 
-void appendLog(String text) async {
+void   appendLog(String text) async {
   const String fileName = 'hrmstracking.file';
   // final appFolderPath = await getApplicationDocumentsDirectory();
   Directory appFolderPath = Directory('/storage/emulated/0/Download/HRMS');

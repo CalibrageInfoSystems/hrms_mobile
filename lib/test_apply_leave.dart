@@ -1752,9 +1752,10 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final accessToken = prefs.getString("accessToken") ?? '';
       final empId = prefs.getString("employeeId") ?? "";
+      String brnchId = prefs.getString(SharedKeys.brnchId) ?? "";
+      print('====$brnchId');
       String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
-      final apiUrl =
-          '$baseUrl$getleaveStatistics${fromDate.split('-')[2]}/1/$empId';
+      final apiUrl = '$baseUrl$getleaveStatistics${fromDate.split('-')[2]}/$brnchId/$empId';
 
       Map<String, String> headers = {
         'Content-Type': 'application/json',

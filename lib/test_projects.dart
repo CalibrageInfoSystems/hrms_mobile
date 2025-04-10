@@ -33,102 +33,95 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
 
   Future<List<projectmodel>> getProjectDetails() async {
     try {
-      bool isConnected = await Commonutils.checkInternetConnectivity();
+      final isConnected = await Commonutils.checkInternetConnectivity();
       if (!isConnected) {
         Commonutils.showCustomToastMessageLong(
-            'Please Check the Internet Connection', context, 1, 4);
+          'Please Check the Internet Connection',
+          context,
+          1,
+          4,
+        );
         FocusScope.of(context).unfocus();
         throw NetworkException('Please Check the Internet Connection');
       }
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? accessToken = prefs.getString(SharedKeys.accessToken) ?? "";
-      String? employeid = prefs.getString(SharedKeys.employeeId) ?? "";
-      String? loginTime = prefs.getString('loginTime') ?? 'Unknown';
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString(SharedKeys.accessToken) ?? "";
+      final employeeId = prefs.getString(SharedKeys.employeeId) ?? "";
+      final loginTime = prefs.getString('loginTime') ?? 'Unknown';
+      final apiKey = prefs.getString(SharedKeys.APIKey) ?? "";
 
-      DateTime currentTime = DateTime.now();
-      DateTime formattedlogintime = DateTime.parse(loginTime);
+      final currentTime = DateTime.now();
+      final formattedLoginTime = DateTime.tryParse(loginTime);
+      if (formattedLoginTime != null) {
+        final duration = currentTime.difference(formattedLoginTime);
+        print("Login duration: ${duration.inMinutes} minutes");
+      }
 
-      Duration timeDifference = currentTime.difference(formattedlogintime);
-
-      // if (timeDifference.inSeconds > 3600) {
-      //   _showtimeoutdialog(context);
-      //   throw SessionTimeOut('Session Time Out');
-      // }
-
-      /*  if (timeDifference.inSeconds <= 3600) {
-    } else {
-      _showtimeoutdialog(context);
-      throw SessionTimeOut('Session Time Out');
-    } */
-
-      final apiUrl = Uri.parse('$baseUrl$getselfempolyee$employeid');
-
-      String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
-      // String? apiKey = await ApiKeyManager.getApiKey();
-      // print('Stored API Key: $apiKey');
-//  final apiUrl = Uri.parse(baseUrl + getselfempolyee + empolyeid);
-      final jsonResponse = await http.get(
-        apiUrl,
-        headers: {
-          'APIKey': APIKey,
-        },
-      );
+      final apiUrl = Uri.parse('$baseUrl$getselfempolyee$employeeId');
+      final jsonResponse = await http.get(apiUrl, headers: {'APIKey': apiKey});
 
       print('jsonResponse.body: ${jsonResponse.body}');
 
-      if (jsonResponse.statusCode == 200) {
-        final Map<String, dynamic> response = jsonDecode(jsonResponse.body);
-
-        if (response['workingProjects'] != null &&
-            response['workingProjects'].isNotEmpty) {
-          final List<dynamic> workingProjects =
-              jsonDecode(response['workingProjects']);
-          /* workingProjects.map((project) {
-          print('getProjectDetails: ${project['projectName']}');
-        }).toList(); */
-          List<projectmodel> projectList = workingProjects.map((project) {
-            return projectmodel(
-              projectlogo:
-                  convertBase64StringToUint8List(project['projectLogo'])!,
-              projectname: project['projectName'],
-              instances: [
-                ProjectInstance(
-                    projectfromdate: project["sinceFrom"],
-                    projecttodate: project["endAt"] ?? "Progress")
-              ],
-              projectid: project['projectId'],
-            );
-          }).toList();
-
-          return projectList;
-        } else {
-          throw Exception('There is no Assigned Projects for this Employee');
-        }
-      } else {
+      if (jsonResponse.statusCode != 200) {
         throw Exception('Failed to load projects');
       }
+
+      final Map<String, dynamic> response = jsonDecode(jsonResponse.body);
+      final workingProjectsRaw = response['workingProjects'];
+
+      if (workingProjectsRaw == null || workingProjectsRaw.isEmpty) {
+        throw Exception('There are no assigned projects for this employee.');
+      }
+
+      final List<dynamic> workingProjects = jsonDecode(workingProjectsRaw);
+      List<projectmodel> projectList = [];
+
+      for (var project in workingProjects) {
+        final projectName = project['projectName'];
+        final projectId = project['projectId'];
+        final projectLogo = project['projectLogo'];
+        final fromDate = project['sinceFrom'];
+        final toDate = project['endAt'] ?? "Progress";
+
+        Uint8List? logoBytes;
+        if (projectLogo != null) {
+          final parts = projectLogo.split(',');
+          if (parts.length > 1) {
+            final base64Image = parts[1];
+            logoBytes = Uint8List.fromList(base64.decode(base64Image));
+          }
+        }
+
+        final instance = ProjectInstance(
+          projectfromdate: fromDate,
+          projecttodate: toDate,
+        );
+
+        final existingIndex = projectList.indexWhere(
+              (p) => p.projectname == projectName,
+        );
+
+        if (existingIndex != -1) {
+          projectList[existingIndex].instances.add(instance);
+        } else {
+          projectList.add(projectmodel(
+            projectlogo:  convertBase64StringToUint8List(project['projectLogo']),
+            projectname: projectName,
+            instances: [instance],
+            projectid: projectId,
+          ));
+        }
+      }
+
+      return projectList;
     } catch (e) {
-      print('catch: $e');
+      print('Error in getProjectDetails: $e');
       rethrow;
     }
   }
 
-  // Future<bool> checkSessionTimeOut(String? loginTime) async {
-  //   if (loginTime == null) {
-  //     return false;
-  //   }
-  //   DateTime currentTime = DateTime.now();
-  //   DateTime formattedlogintime = DateTime.parse(loginTime);
-  //
-  //   Duration timeDifference = currentTime.difference(formattedlogintime);
-  //
-  //   if (timeDifference.inSeconds > 3600) {
-  //     _showtimeoutdialog(context);
-  //     return false;
-  //   }
-  //   return true;
-  // }
+
 
   Uint8List convertBase64StringToUint8List(String? base64String) {
     if (base64String == null) {

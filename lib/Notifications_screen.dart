@@ -1725,6 +1725,7 @@ class _Notifications_screenState extends State<Notifications> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         accessToken = prefs.getString("accessToken") ?? "";
         sharedEmpId = prefs.getString("employeeId") ?? "";
+        String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
         loggedInEmployeeId = int.tryParse(sharedEmpId);
         userid = prefs.getString("UserId") ?? "";
         loademployeid();
@@ -1739,7 +1740,7 @@ class _Notifications_screenState extends State<Notifications> {
           url,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': accessToken!,
+            'APIKey': APIKey!,
           },
         );
         print('fetchNotifications res: ${response.body}');
@@ -1895,6 +1896,8 @@ class _Notifications_screenState extends State<Notifications> {
       FocusScope.of(context).unfocus();
       return;
     }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     final url = Uri.parse(
         'http://182.18.157.215/HRMS/API/hrmsapi/Notification/GetUpcomingBirthdaysNotifications/1');
     // final url = Uri.parse(baseUrl + getupcomingbirthdays);
@@ -1910,7 +1913,7 @@ class _Notifications_screenState extends State<Notifications> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': accessToken,
+          'APIKey': APIKey,
         },
       );
       print('response body: ${response.body}');

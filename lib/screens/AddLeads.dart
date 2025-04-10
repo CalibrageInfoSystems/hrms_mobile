@@ -254,22 +254,21 @@ class _AddLeadScreenState extends State<AddLeads>
                       readOnly: false,
                       controller: _nameController,
                       hintText: "Enter Name",
-                      // decoration: InputDecoration(
-                      //   labelText: "Name *",
-                      //   hintText: "Enter Name",
-                      //   counterText: "",
-                      //   border: OutlineInputBorder(
-                      //     borderRadius: BorderRadius.circular(10),
-                      //   ),
-                      // ),
-                      maxLength: 30,
+                      keyboardType: TextInputType.name,
+                      maxLength: 50,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')), // allow letters and spaces
+                      ],
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null || value.trim().isEmpty) {
                           return 'Please Enter Name';
+                        } else if (!RegExp(r'^[a-zA-Z]+(?: [a-zA-Z]+)*$').hasMatch(value.trim())) {
+                          return 'Only alphabets and single spaces between words are allowed';
                         }
                         return null;
                       },
                     ),
+
                     Transform.translate(
                       offset: const Offset(-10, 0),
                       child: Row(
@@ -348,7 +347,7 @@ class _AddLeadScreenState extends State<AddLeads>
                       controller: _emailController,
                       hintText: "Enter Email",
                       readOnly: false,
-                      maxLength: 30,
+                      maxLength: 50,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please Enter Email';
@@ -366,7 +365,7 @@ class _AddLeadScreenState extends State<AddLeads>
                       hintText: "Enter Comments",
                       readOnly: false,
                       maxLines: 4,
-                      maxLength: 250,
+                      maxLength: 256,
                     ),
                     const SizedBox(height: 10),
                     Padding(
