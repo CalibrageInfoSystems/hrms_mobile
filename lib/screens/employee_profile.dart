@@ -22,14 +22,14 @@ import 'dart:convert';
 
 import '../api config.dart';
 
-class TestHrms extends StatefulWidget {
-  const TestHrms({super.key});
+class EmployeeProfile extends StatefulWidget {
+  const EmployeeProfile({super.key});
 
   @override
-  State<TestHrms> createState() => _TestHrmsState();
+  State<EmployeeProfile> createState() => _EmployeeProfileState();
 }
 
-class _TestHrmsState extends State<TestHrms> {
+class _EmployeeProfileState extends State<EmployeeProfile> {
   String accessToken = '';
 
   int? bloodGroupId;
@@ -47,6 +47,22 @@ class _TestHrmsState extends State<TestHrms> {
 
   late Future<Map<String, dynamic>> futureEmployeeInfo;
   late Future<Uint8List> futureEmployeeImage;
+
+  final sampleData = {
+    'employeeName': 'data',
+    'designation': 'data',
+    'code': 'data',
+    'gender': 'data',
+    'emailId': 'data',
+    'officeEmailId': 'data',
+    'originalDOB': 'data',
+    'mobileNumber': 'data',
+    'reportingTo': 'data',
+    'experienceInCompany': 'data',
+    'bloodGroup': 'data',
+    'dateofJoin': 'data',
+    'nationality': 'data',
+  };
 
   @override
   void initState() {
@@ -133,7 +149,7 @@ class _TestHrmsState extends State<TestHrms> {
       originalDob = loadedData['originalDOB'];
       signDate = loadedData['signDate'];
       // photo = loadedData['photo'];
-      /*   print('loadEmployeeInfo employeeName: ${loadedData['employeeName']}');
+/*       print('loadEmployeeInfo employeeName: ${loadedData['employeeName']}');
       print('loadEmployeeInfo designation: ${loadedData['designation']}');
       print('loadEmployeeInfo code: ${loadedData['code']}');
       print('loadEmployeeInfo gender: ${loadedData["gender"]}');
@@ -269,8 +285,10 @@ class _TestHrmsState extends State<TestHrms> {
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              return const Center(
-                                  child: CircularProgressIndicator());
+                              return Skeletonizer(
+                                enabled: true,
+                                child: employeeInformation(sampleData, context),
+                              );
                             } else if (snapshot.hasError) {
                               return Center(
                                   child: Text('Error: ${snapshot.error}'));
@@ -284,46 +302,7 @@ class _TestHrmsState extends State<TestHrms> {
                               return const Center(
                                   child: Text('No data available'));
                             }
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Employee Information',
-                                  style: CommonStyles.txStyF20CbFcF5.copyWith(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                /*  customBox(
-                                    context,
-                                    employeeInfo['employeeName'],
-                                    'Employee Id'),
-                                const SizedBox(height: 5),
-                                customBox(
-                                    context,
-                                    employeeInfo['designation'],
-                                    'designation'),
-                                const SizedBox(height: 5), */
-                                customBox(context, employeeInfo['code'],
-                                    'Employee Id'),
-                                customBox(
-                                    context, employeeInfo['gender'], 'Gender'),
-                                customBox(context, employeeInfo['dateofJoin'],
-                                    'Date of Join'),
-                                customBox(
-                                    context,
-                                    employeeInfo['officeEmailId'],
-                                    'Office Email Id'),
-                                customBox(context, employeeInfo['originalDOB'],
-                                    'Date of Birth'),
-                                customBox(context, employeeInfo['mobileNumber'],
-                                    'Mobile Number'),
-                                // const SizedBox(height: 5),
-                                customBox(context, employeeInfo['reportingTo'],
-                                    'Reporting To'),
-                              ],
-                            );
+                            return employeeInformation(employeeInfo, context);
                           }),
                     ),
                   ],
@@ -333,6 +312,58 @@ class _TestHrmsState extends State<TestHrms> {
           ],
         ),
       ),
+    );
+  }
+
+  Column employeeInformation(
+      Map<String, dynamic> employeeInfo, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        /*  Text(
+                                'Employee Information',
+                                style: CommonStyles.txStyF20CbFcF5.copyWith(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 5), */
+        /*  customBox(
+                                  context,
+                                  employeeInfo['employeeName'],
+                                  'Employee Id'),
+                              const SizedBox(height: 5),
+                              customBox(
+                                  context,
+                                  employeeInfo['designation'],
+                                  'designation'),
+                              const SizedBox(height: 5), */
+        if (employeeInfo['code'] != null && employeeInfo['code'] != '')
+          customBox(context, employeeInfo['code'], 'Employee Id', Icons.code),
+        if (employeeInfo['gender'] != null && employeeInfo['gender'] != '')
+          customBox(context, employeeInfo['gender'], 'Gender', Icons.male),
+        if (employeeInfo['dateofJoin'] != null &&
+            employeeInfo['dateofJoin'] != '')
+          customBox(context, employeeInfo['dateofJoin'], 'Date of Join',
+              Icons.calendar_month_rounded),
+        if (employeeInfo['officeEmailId'] != null &&
+            employeeInfo['officeEmailId'] != '')
+          customBox(context, employeeInfo['officeEmailId'], 'Office Email Id',
+              Icons.email),
+        if (employeeInfo['originalDOB'] != null &&
+            employeeInfo['originalDOB'] != '')
+          customBox(context, employeeInfo['originalDOB'], 'Date of Birth',
+              Icons.date_range),
+        if (employeeInfo['mobileNumber'] != null &&
+            employeeInfo['mobileNumber'] != '')
+          customBox(context, employeeInfo['mobileNumber'], 'Mobile Number',
+              Icons.phone),
+        // const SizedBox(height: 5),
+        if (employeeInfo['reportingTo'] != null &&
+            employeeInfo['reportingTo'] != '')
+          customBox(context, employeeInfo['reportingTo'], 'Reporting To',
+              Icons.report),
+      ],
     );
   }
 
@@ -354,14 +385,15 @@ class _TestHrmsState extends State<TestHrms> {
     BuildContext context,
     String? title,
     String? subTitle,
+    IconData? icon,
   ) {
     return Row(
       children: [
         CircleAvatar(
-          radius: 20,
+          radius: 25,
           backgroundColor: CommonStyles.primaryColor.withOpacity(0.4),
-          child: const Icon(
-            Icons.home,
+          child: Icon(
+            icon ?? Icons.home,
             size: 25,
             color: CommonStyles.primaryColor,
           ),
@@ -370,9 +402,13 @@ class _TestHrmsState extends State<TestHrms> {
         Expanded(
           child: ListTile(
             onTap: () {},
+            dense: true,
             contentPadding: const EdgeInsets.all(0),
             style: ListTileStyle.drawer,
-            title: Text('$title'),
+            title: Text(
+              '$title',
+              style: CommonStyles.txStyF20CbFcF5,
+            ),
             subtitle: Text(
               '$subTitle',
               style: CommonStyles.txStyF20CbFcF5.copyWith(
@@ -380,7 +416,6 @@ class _TestHrmsState extends State<TestHrms> {
                 color: Colors.grey,
               ),
             ),
-            titleTextStyle: CommonStyles.txStyF20CbFcF5,
           ),
         ),
         /* const SizedBox(width: 10),
@@ -455,7 +490,20 @@ class _TestHrmsState extends State<TestHrms> {
               future: futureEmployeeInfo,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Skeletonizer(
+                    enabled: true,
+                    child: Column(
+                      children: [
+                        Text('''employeeInfoempName'''),
+                        Text(
+                          '''designation''',
+                        ),
+                        Text(
+                          'dateofJoin',
+                        ),
+                      ],
+                    ),
+                  );
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
@@ -463,37 +511,37 @@ class _TestHrmsState extends State<TestHrms> {
                 if (employeeInfo.isEmpty) {
                   return const SizedBox();
                 }
-                return Column(
-                  children: [
-                    Text(
-                      '${employeeInfo['employeeName']}',
-                      softWrap: true,
-                      textAlign: TextAlign.center,
-                      style: CommonStyles.txStyF20CpFF5.copyWith(
-                        fontSize: 20,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      '${employeeInfo['designation']}',
-                      style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.white,
-                          fontFamily: 'Calibri'),
-                    ),
-                    Text(
-                      '${employeeInfo['dateofJoin']}',
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white,
-                          fontFamily: 'Calibri'),
-                    ),
-                  ],
-                );
+                return employeeNameNdDesignation(employeeInfo);
               }),
         ],
       ),
+    );
+  }
+
+  Column employeeNameNdDesignation(Map<String, dynamic> employeeInfo) {
+    return Column(
+      children: [
+        Text(
+          '${employeeInfo['employeeName']}',
+          softWrap: true,
+          textAlign: TextAlign.center,
+          style: CommonStyles.txStyF20CpFF5.copyWith(
+            fontSize: 20,
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Text(
+          '${employeeInfo['designation']}',
+          style: const TextStyle(
+              fontSize: 15, color: Colors.white, fontFamily: 'Calibri'),
+        ),
+        Text(
+          '${employeeInfo['dateofJoin']}',
+          style: const TextStyle(
+              fontSize: 12, color: Colors.white, fontFamily: 'Calibri'),
+        ),
+      ],
     );
   }
 
@@ -544,7 +592,9 @@ class _TestHrmsState extends State<TestHrms> {
 
   Future<void> pickImage(ImageSource source, BuildContext context) async {
     try {
-      final pickedImage = await ImagePicker().pickImage(source: source);
+      final pickedImage = await ImagePicker().pickImage(
+          source: ImageSource.camera,
+          preferredCameraDevice: CameraDevice.front);
       if (pickedImage == null) {
         throw Exception('No image selected');
       } else {

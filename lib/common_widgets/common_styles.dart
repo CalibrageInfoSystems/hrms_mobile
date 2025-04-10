@@ -29,6 +29,7 @@ class CommonStyles {
   static const startColor = Color(0xFF59ca6b);
   static const dotColor = Color(0xFFEE3618);
   // background:border: 1px solid #EE3618;;
+  static const Color bgColor = Color(0xFFf2f2f2);
 
   static const blackColor = Colors.black;
   static const blackColorShade = Color(0xFF5f5f5f);
@@ -72,6 +73,13 @@ class CommonStyles {
     fontFamily: 'Calibri',
   );
 
+  static const txStyF16CbFF5 = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    fontFamily: 'Calibri',
+    color: CommonStyles.blackColor,
+  );
+
   static const txStyF20CbFcF5 = TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.w500,
@@ -98,10 +106,7 @@ class CommonStyles {
       fontFamily: "hind_semibold",
       fontWeight: FontWeight.w500,
       color: CommonStyles.blackColor);
-  static const txStyF16CbFF5 = TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-      color: CommonStyles.blackColor);
+
   static const txStyF16CpFF5 = TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w500,

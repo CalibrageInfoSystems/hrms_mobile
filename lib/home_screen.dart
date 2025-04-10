@@ -11,6 +11,7 @@ import 'package:hrms/login_screen.dart';
 import 'package:hrms/personal_details.dart';
 import 'package:hrms/projects_screen.dart';
 import 'package:hrms/screens/AddLeads.dart';
+import 'package:hrms/screens/employee_profile.dart';
 import 'package:hrms/screens/home/hrms_homescreen.dart';
 import 'package:hrms/screens/home/sync_screen.dart';
 import 'package:hrms/test_apply_leave.dart';
@@ -158,8 +159,8 @@ class _home_screenState extends State<home_screen>
         _buildNavItem('assets/overview.svg', 'Projects'),
         _buildNavItem('assets/calendar-day.svg', ' Leaves'),
         _buildNavItem('assets/circleuser.svg', 'Profile'),
-      // if (showAddClient!)
-          _buildNavItem('assets/addlead.svg', 'Add Client Visits'),
+        // if (showAddClient!)
+        _buildNavItem('assets/addlead.svg', 'Add Client Visits'),
       ],
     );
   }
@@ -219,7 +220,7 @@ class _home_screenState extends State<home_screen>
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Myleaveslist()),
+                MaterialPageRoute(builder: (context) => const Myleaveslist()),
               );
             },
           ),
@@ -386,7 +387,7 @@ class _home_screenState extends State<home_screen>
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SyncScreen(),
+                  builder: (context) => const SyncScreen(),
                 ),
               );
             },
@@ -475,8 +476,7 @@ class _home_screenState extends State<home_screen>
     // Enable button if any of the counts are greater than 0
     isButtonEnabled = pendingleadscount! > 0 ||
         pendingfilerepocount! > 0 ||
-        pendingboundarycount! > 0
-     ;
+        pendingboundarycount! > 0;
 
     setState(() {
       isLoading = false; // Stop loading
@@ -504,17 +504,17 @@ class _home_screenState extends State<home_screen>
   Widget _buildScreens(int index) {
     switch (index) {
       case 0:
-        return HrmsHomeSreen();
+        return const HrmsHomeSreen();
       case 1:
-        return TestProjectsScreen();
+        return const TestProjectsScreen();
       case 2:
         return leaves_screen();
       case 3:
-        return personal_details();
+        return const EmployeeProfile();
       case 4:
-        return AddLeads();
+        return const AddLeads();
       default:
-        return HrmsHomeSreen();
+        return const HrmsHomeSreen();
     }
   }
 

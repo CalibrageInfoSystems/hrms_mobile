@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -25,14 +24,14 @@ import 'api config.dart';
 import 'home_screen.dart';
 import 'main.dart';
 
-class personal_details extends StatefulWidget {
+class PersonalDetails extends StatefulWidget {
   // final String logintime;
   // personal_details({required this.logintime});
   @override
   _personal_screen_screenState createState() => _personal_screen_screenState();
 }
 
-class _personal_screen_screenState extends State<personal_details> {
+class _personal_screen_screenState extends State<PersonalDetails> {
   int currentTab = 0;
   bool isLoading = false;
   String EmployeName = '';
@@ -122,7 +121,6 @@ class _personal_screen_screenState extends State<personal_details> {
       return;
     }
     final url = Uri.parse('$baseUrl$getdropdown$bloodlookupid');
-    print('fetchBloodGroups :$url');
 
     try {
       final response = await http.get(
@@ -142,7 +140,7 @@ class _personal_screen_screenState extends State<personal_details> {
               "Token is Expired", context as BuildContext, 0, 3);
 
           Navigator.of(context as BuildContext).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => LoginScreen()),
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
             (route) => false,
           );
           return;
@@ -265,19 +263,20 @@ class _personal_screen_screenState extends State<personal_details> {
 
     if (loadedData != null) {
       final employeeName = loadedData['employeeName'];
-      final dateofbirth = loadedData['originalDOB'];
+      final designation = loadedData['designation'];
+      final code = loadedData['code'];
+      final gender = loadedData["gender"];
       final emailid = loadedData['emailId'];
       final officemailid = loadedData['officeEmailId'];
-      final expincompany = loadedData['experienceInCompany'];
+      final dateofbirth = loadedData['originalDOB'];
       final mobilenum = loadedData['mobileNumber'];
-      final bloodgroup = loadedData['bloodGroup'];
-      final gender = loadedData["gender"];
-      final dateofjoining = loadedData['dateofJoin'];
-      final code = loadedData['code'];
-      final designation = loadedData['designation'];
       final reportingTo = loadedData['reportingTo'];
-      final nationality = loadedData['nationality'];
 
+      final expincompany = loadedData['experienceInCompany'];
+      final bloodgroup = loadedData['bloodGroup'];
+      final dateofjoining = loadedData['dateofJoin'];
+      final nationality = loadedData['nationality'];
+/* 
       //   "gender"
       // : "Male"
       print('employeeName: $employeeName');
@@ -286,7 +285,7 @@ class _personal_screen_screenState extends State<personal_details> {
       print('officemail: $officemailid');
       print('expincompany: $expincompany');
       print('mobilenum: $mobilenum');
-      print('bloodgroup: $bloodgroup');
+      print('bloodgroup: $bloodgroup'); */
 
       // Format the date of birth into "dd/MM/yyyy"
       DateTime dobDate = DateTime.parse(dateofbirth);
@@ -412,14 +411,13 @@ class _personal_screen_screenState extends State<personal_details> {
     prefs.remove('loginTime');
   }
 
-
   void onConfirmLogout(BuildContext context) {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
     Commonutils.showCustomToastMessageLong(
         "Logout Successfully", context, 0, 3);
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
       (route) => false,
     );
   }
@@ -489,7 +487,7 @@ class _personal_screen_screenState extends State<personal_details> {
             //   physics: NeverScrollableScrollPhysics(),
             // child:
             isLoading
-                ? Center(
+                ? const Center(
                     child: CircularProgressIndicator(),
                   )
                 : Stack(
@@ -513,14 +511,15 @@ class _personal_screen_screenState extends State<personal_details> {
                                 child: ClipPath(
                                   clipper: CurvedBottomClipper(),
                                   child: Container(
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Color(0xFFf15f22),
                                     ),
                                     width: MediaQuery.of(context).size.width,
                                     height: MediaQuery.of(context).size.height /
                                         3.0,
                                     child: Padding(
-                                      padding: EdgeInsets.only(left: 0, top: 5),
+                                      padding: const EdgeInsets.only(
+                                          left: 0, top: 5),
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -533,7 +532,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                           //     style: TextStyle(fontSize: 22, color: Colors.black, fontFamily: 'Calibri'),
                                           //   ),
                                           // ),
-                                          SizedBox(height: 8.0),
+                                          const SizedBox(height: 8.0),
                                           Align(
                                             alignment: Alignment.topCenter,
                                             child: Container(
@@ -554,7 +553,6 @@ class _personal_screen_screenState extends State<personal_details> {
                                                               .center,
                                                       // alignment: AlignmentDirectional.center,
                                                       children: [
-
                                                         if (_imageFile !=
                                                             null) ...{
                                                           Image.file(
@@ -593,7 +591,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                                       Container(
                                                                     width: 32,
                                                                     height: 32,
-                                                                    child: CircularProgressIndicator
+                                                                    child: const CircularProgressIndicator
                                                                         .adaptive(),
                                                                   ), // Optionally, show a message if photoData is empty
                                                                 );
@@ -613,19 +611,18 @@ class _personal_screen_screenState extends State<personal_details> {
                                                                             .height /
                                                                         6.5,
                                                                     padding:
-                                                                        EdgeInsets.all(
+                                                                        const EdgeInsets
+                                                                            .all(
                                                                             3.0),
                                                                     decoration: BoxDecoration(
                                                                         borderRadius:
-                                                                            BorderRadius.all(Radius.circular(
+                                                                            const BorderRadius.all(Radius.circular(
                                                                                 3.5)),
                                                                         border: Border.all(
-                                                                            color: Colors
-                                                                                .white,
-                                                                            width:
-                                                                                2.0)),
-                                                                    child:
-                                                                        ClipRRect(
+                                                                            color:
+                                                                                Colors.white,
+                                                                            width: 2.0)),
+                                                                    child: ClipRRect(
                                                                       borderRadius:
                                                                           BorderRadius.circular(
                                                                               4.0), // Adjust the radius as needed
@@ -643,8 +640,6 @@ class _personal_screen_screenState extends State<personal_details> {
                                                               }
                                                             },
                                                           )
-
-
                                                         } else if (photoData ==
                                                             null) ...{
                                                           getDefaultImage(
@@ -654,7 +649,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                         // : photoData != null && photoData != ""
                                                         //     ?
 
-                                                        SizedBox(
+                                                        const SizedBox(
                                                           width: 2,
                                                         ),
 
@@ -673,7 +668,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                                 await showBottomSheetForImageSelection(
                                                                     context);
                                                               },
-                                                              child: Icon(
+                                                              child: const Icon(
                                                                 Icons
                                                                     .camera_alt_outlined,
                                                                 size: 22.0,
@@ -685,7 +680,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                         )
                                                       ],
                                                     ),
-                                                    SizedBox(height: 5.0),
+                                                    const SizedBox(height: 5.0),
                                                     Container(
                                                       width:
                                                           MediaQuery.of(context)
@@ -697,17 +692,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                         softWrap: true,
                                                         textAlign:
                                                             TextAlign.center,
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             fontSize: 18,
                                                             color: Colors.white,
                                                             fontFamily:
                                                                 'Calibri'),
                                                       ),
                                                     ),
-                                                    SizedBox(height: 2.0),
+                                                    const SizedBox(height: 2.0),
                                                     Text(
                                                       "$employee_designation",
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                           fontSize: 15,
                                                           color: Colors.white,
                                                           fontFamily:
@@ -758,32 +753,32 @@ class _personal_screen_screenState extends State<personal_details> {
                                       //  SizedBox(height: 40.0),
                                       // SizedBox(height: 40.0),
                                       Padding(
-                                        padding: EdgeInsets.all(16.0),
+                                        padding: const EdgeInsets.all(16.0),
                                         child: Card(
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(8.0),
-                                            side: BorderSide(
+                                            side: const BorderSide(
                                               color: Color(0xFFf15f22),
                                               width: 1.5,
                                             ),
                                           ),
                                           child: Padding(
-                                            padding: EdgeInsets.all(10.0),
+                                            padding: const EdgeInsets.all(10.0),
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Row(
                                                   children: [
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 4,
                                                       child: Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          const Padding(
+                                                          Padding(
                                                             padding: EdgeInsets
                                                                 .fromLTRB(12, 5,
                                                                     0, 0),
@@ -802,7 +797,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                         ],
                                                       ),
                                                     ),
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 0,
                                                       child: Column(
                                                         crossAxisAlignment:
@@ -838,12 +833,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                                 .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets
-                                                                .fromLTRB(10, 5,
-                                                                    0, 0),
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .fromLTRB(
+                                                                    10,
+                                                                    5,
+                                                                    0,
+                                                                    0),
                                                             child: Text(
                                                               "$cisid",
-                                                              style: TextStyle(
+                                                              style:
+                                                                  const TextStyle(
                                                                 color: Colors
                                                                     .black54,
                                                                 fontSize: 14,
@@ -860,17 +860,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     )
                                                   ],
                                                 ),
-                                                SizedBox(height: 5.0),
+                                                const SizedBox(height: 5.0),
                                                 Row(
                                                   children: [
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 4,
                                                       child: Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          const Padding(
+                                                          Padding(
                                                             padding: EdgeInsets
                                                                 .fromLTRB(12, 0,
                                                                     0, 0),
@@ -889,7 +889,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                         ],
                                                       ),
                                                     ),
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 0,
                                                       child: Column(
                                                         crossAxisAlignment:
@@ -925,12 +925,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                                 .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets
-                                                                .fromLTRB(10, 0,
-                                                                    0, 0),
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .fromLTRB(
+                                                                    10,
+                                                                    0,
+                                                                    0,
+                                                                    0),
                                                             child: Text(
                                                               "$Gender",
-                                                              style: TextStyle(
+                                                              style:
+                                                                  const TextStyle(
                                                                 color: Colors
                                                                     .black54,
                                                                 fontSize: 14,
@@ -947,17 +952,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     )
                                                   ],
                                                 ),
-                                                SizedBox(height: 5.0),
+                                                const SizedBox(height: 5.0),
                                                 Row(
                                                   children: [
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 4,
                                                       child: Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          const Padding(
+                                                          Padding(
                                                             padding: EdgeInsets
                                                                 .fromLTRB(12, 0,
                                                                     0, 0),
@@ -976,7 +981,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                         ],
                                                       ),
                                                     ),
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 0,
                                                       child: Column(
                                                         crossAxisAlignment:
@@ -1012,12 +1017,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                                 .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets
-                                                                .fromLTRB(10, 0,
-                                                                    0, 0),
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .fromLTRB(
+                                                                    10,
+                                                                    0,
+                                                                    0,
+                                                                    0),
                                                             child: Text(
                                                               "$OfficeEmailid",
-                                                              style: TextStyle(
+                                                              style:
+                                                                  const TextStyle(
                                                                 color: Colors
                                                                     .black54,
                                                                 fontSize: 14,
@@ -1034,17 +1044,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     )
                                                   ],
                                                 ),
-                                                SizedBox(height: 5.0),
+                                                const SizedBox(height: 5.0),
                                                 Row(
                                                   children: [
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 4,
                                                       child: Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          const Padding(
+                                                          Padding(
                                                             padding: EdgeInsets
                                                                 .fromLTRB(12, 0,
                                                                     0, 0),
@@ -1063,7 +1073,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                         ],
                                                       ),
                                                     ),
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 0,
                                                       child: Column(
                                                         crossAxisAlignment:
@@ -1099,12 +1109,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                                 .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets
-                                                                .fromLTRB(10, 0,
-                                                                    0, 0),
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .fromLTRB(
+                                                                    10,
+                                                                    0,
+                                                                    0,
+                                                                    0),
                                                             child: Text(
                                                               "$formatteddateofjoining",
-                                                              style: TextStyle(
+                                                              style:
+                                                                  const TextStyle(
                                                                 color: Colors
                                                                     .black54,
                                                                 fontSize: 14,
@@ -1121,17 +1136,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     )
                                                   ],
                                                 ),
-                                                SizedBox(height: 5.0),
+                                                const SizedBox(height: 5.0),
                                                 Row(
                                                   children: [
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 4,
                                                       child: Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          const Padding(
+                                                          Padding(
                                                             padding: EdgeInsets
                                                                 .fromLTRB(12, 0,
                                                                     0, 0),
@@ -1150,7 +1165,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                         ],
                                                       ),
                                                     ),
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 0,
                                                       child: Column(
                                                         crossAxisAlignment:
@@ -1186,12 +1201,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                                 .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets
-                                                                .fromLTRB(10, 0,
-                                                                    0, 0),
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .fromLTRB(
+                                                                    10,
+                                                                    0,
+                                                                    0,
+                                                                    0),
                                                             child: Text(
                                                               "$Mobilenum",
-                                                              style: TextStyle(
+                                                              style:
+                                                                  const TextStyle(
                                                                 color: Colors
                                                                     .black54,
                                                                 fontSize: 14,
@@ -1208,17 +1228,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     )
                                                   ],
                                                 ),
-                                                SizedBox(height: 5.0),
+                                                const SizedBox(height: 5.0),
                                                 Row(
                                                   children: [
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 4,
                                                       child: Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          const Padding(
+                                                          Padding(
                                                             padding: EdgeInsets
                                                                 .fromLTRB(12, 0,
                                                                     0, 0),
@@ -1237,7 +1257,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                         ],
                                                       ),
                                                     ),
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 0,
                                                       child: Column(
                                                         crossAxisAlignment:
@@ -1273,12 +1293,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                                 .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets
-                                                                .fromLTRB(10, 0,
-                                                                    0, 0),
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .fromLTRB(
+                                                                    10,
+                                                                    0,
+                                                                    0,
+                                                                    0),
                                                             child: Text(
                                                               "$dob",
-                                                              style: TextStyle(
+                                                              style:
+                                                                  const TextStyle(
                                                                 color: Colors
                                                                     .black54,
                                                                 fontSize: 14,
@@ -1295,17 +1320,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     )
                                                   ],
                                                 ),
-                                                SizedBox(height: 5.0),
+                                                const SizedBox(height: 5.0),
                                                 Row(
                                                   children: [
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 4,
                                                       child: Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          const Padding(
+                                                          Padding(
                                                             padding: EdgeInsets
                                                                 .fromLTRB(12, 0,
                                                                     0, 0),
@@ -1324,7 +1349,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                         ],
                                                       ),
                                                     ),
-                                                    Expanded(
+                                                    const Expanded(
                                                       flex: 0,
                                                       child: Column(
                                                         crossAxisAlignment:
@@ -1360,12 +1385,17 @@ class _personal_screen_screenState extends State<personal_details> {
                                                                 .start,
                                                         children: [
                                                           Padding(
-                                                            padding: EdgeInsets
-                                                                .fromLTRB(10, 0,
-                                                                    0, 0),
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .fromLTRB(
+                                                                    10,
+                                                                    0,
+                                                                    0,
+                                                                    0),
                                                             child: Text(
                                                               "$ReportingTo",
-                                                              style: TextStyle(
+                                                              style:
+                                                                  const TextStyle(
                                                                 color: Colors
                                                                     .black54,
                                                                 fontSize: 14,
@@ -1382,7 +1412,7 @@ class _personal_screen_screenState extends State<personal_details> {
                                                     )
                                                   ],
                                                 ),
-                                                SizedBox(height: 5.0),
+                                                const SizedBox(height: 5.0),
                                                 // Row(
                                                 //   children: [
                                                 //     Expanded(
@@ -1519,7 +1549,7 @@ class _personal_screen_screenState extends State<personal_details> {
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
@@ -1625,14 +1655,14 @@ class _personal_screen_screenState extends State<personal_details> {
           aspectRatioPresets: [
             CropAspectRatioPreset.square,
           ],
-          androidUiSettings: AndroidUiSettings(
+          androidUiSettings: const AndroidUiSettings(
               toolbarTitle: 'Crop Image',
               toolbarColor: Colors.deepOrange,
               toolbarWidgetColor: Colors.white,
               initAspectRatio: CropAspectRatioPreset.square,
               showCropGrid: true,
               lockAspectRatio: true),
-          iosUiSettings: IOSUiSettings(
+          iosUiSettings: const IOSUiSettings(
             minimumAspectRatio: 1.0,
           ),
         );
@@ -1659,7 +1689,6 @@ class _personal_screen_screenState extends State<personal_details> {
 
           base64Image = base64Encode(compressedBytes);
 
-          print('===> Filename: $filename');
           print('===> File Extension: $fileExtension');
           print('===> Base64 Image: $base64Image');
           setState(() {
@@ -1692,11 +1721,11 @@ class _personal_screen_screenState extends State<personal_details> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Image Uploaded'),
-          content: Text('Your image has been successfully uploaded.'),
+          title: const Text('Image Uploaded'),
+          content: const Text('Your image has been successfully uploaded.'),
           actions: [
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 //uploadimgimageapi(context);
                 // Navigator.of(context).pop();
@@ -1760,9 +1789,9 @@ class _personal_screen_screenState extends State<personal_details> {
         ? Container(
             width: MediaQuery.of(context).size.width / 3.8,
             height: MediaQuery.of(context).size.height / 6.5,
-            padding: EdgeInsets.all(3.0),
+            padding: const EdgeInsets.all(3.0),
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                borderRadius: const BorderRadius.all(Radius.circular(4.0)),
                 border: Border.all(color: Colors.white, width: 2.0)),
             child: Image.asset(
               'assets/men_emp.jpg',
@@ -1773,9 +1802,9 @@ class _personal_screen_screenState extends State<personal_details> {
             ? Container(
                 width: MediaQuery.of(context).size.width / 3.8,
                 height: MediaQuery.of(context).size.height / 6.5,
-                padding: EdgeInsets.all(3.0),
+                padding: const EdgeInsets.all(3.0),
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
                     border: Border.all(color: Colors.white, width: 2.0)),
                 child: Image.asset(
                   'assets/women-emp.jpg',
@@ -1786,9 +1815,9 @@ class _personal_screen_screenState extends State<personal_details> {
             : Container(
                 width: MediaQuery.of(context).size.width / 3.8,
                 height: MediaQuery.of(context).size.height / 6.5,
-                padding: EdgeInsets.all(3.0),
+                padding: const EdgeInsets.all(3.0),
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
                     border: Border.all(color: Colors.white, width: 2.0)),
                 child: Image.asset(
                   'assets/app_logo.png',
@@ -1804,13 +1833,14 @@ class _personal_screen_screenState extends State<personal_details> {
     print('====>${parts.length}');
 
     if (parts.length != 2) {
-      throw FormatException('Invalid base64 string: Incorrect number of parts');
+      throw const FormatException(
+          'Invalid base64 string: Incorrect number of parts');
     }
 
     final String dataPart = parts[1];
 
     try {
-      return Base64Codec().decode(dataPart);
+      return const Base64Codec().decode(dataPart);
     } catch (e) {
       throw FormatException('Invalid base64 string: $e');
     }
@@ -1862,7 +1892,7 @@ class _personal_screen_screenState extends State<personal_details> {
           'Content-Type': 'application/json',
           'APIKey': '$APIKey',
         },
-      ).timeout(Duration(seconds: 15), onTimeout: () {
+      ).timeout(const Duration(seconds: 15), onTimeout: () {
         apiCallCompleted = false;
         //   progressDialog.dismiss();
         Commonutils.showCustomToastMessageLong(
@@ -2030,7 +2060,7 @@ class ProgressDialog {
                   1.8, // Adjust the width as needed
               height: MediaQuery.of(context).size.height /
                   4, // Adjust the height as needed
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.transparent,
                 shape: BoxShape.rectangle,
                 // gradient: LinearGradient(
@@ -2048,7 +2078,7 @@ class ProgressDialog {
                   Container(
                     height: 33.0,
                     width: 33.0,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
@@ -2058,7 +2088,7 @@ class ProgressDialog {
                       width: 30.0,
                     ),
                   ),
-                  CircularProgressIndicator(
+                  const CircularProgressIndicator(
                     strokeWidth:
                         3, // Adjust the stroke width of the CircularProgressIndicator
                     valueColor: AlwaysStoppedAnimation<Color>(
@@ -2083,3 +2113,462 @@ class ProgressDialog {
     }
   }
 }
+
+
+// ignore_for_file: deprecated_member_use
+//MARK: New Screen
+/* 
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:hrms/SharedPreferencesHelper.dart';
+import 'package:hrms/common_widgets/common_styles.dart';
+import 'package:hrms/home_screen.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:skeletonizer/skeletonizer.dart';
+import 'dart:convert';
+
+import '../api config.dart';
+
+class PersonalDetails extends StatefulWidget {
+  const PersonalDetails({super.key});
+
+  @override
+  State<PersonalDetails> createState() => _PersonalDetailsState();
+}
+
+class _PersonalDetailsState extends State<PersonalDetails> {
+  String accessToken = '';
+
+  late Future<Map<String, dynamic>> futureEmployeeInfo;
+  late Future<Uint8List> futureEmployeeImage;
+
+  @override
+  void initState() {
+    super.initState();
+    futureEmployeeInfo = loadEmployeeInfo();
+    futureEmployeeImage = fetchEmployeeImage();
+  }
+
+  Future<Map<String, dynamic>> loadEmployeeInfo() async {
+    final loadedData = await SharedPreferencesHelper.getCategories();
+    if (loadedData != null) {
+      return {
+        'employeeName': loadedData['employeeName'],
+        'designation': loadedData['designation'],
+        'code': loadedData['code'],
+        'gender': loadedData["gender"],
+        'emailId': loadedData['emailId'],
+        'officeEmailId': loadedData['officeEmailId'],
+        'originalDOB': DateFormat('dd MMM yyyy')
+            .format(DateTime.parse(loadedData['originalDOB'])),
+        'mobileNumber': loadedData['mobileNumber'],
+        'reportingTo': loadedData['reportingTo'],
+        'experienceInCompany': loadedData['experienceInCompany'],
+        'bloodGroup': loadedData['bloodGroup'],
+        'dateofJoin': DateFormat('dd MMM yyyy')
+            .format(DateTime.parse(loadedData['dateofJoin'])),
+        'nationality': loadedData['nationality'],
+      };
+    } else {
+      throw Exception('Failed to load employee information');
+    }
+  }
+
+  Future<Uint8List> fetchEmployeeImage() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final empolyeid = prefs.getString("employeeId") ?? "";
+
+      final url = Uri.parse(baseUrl + GetEmployeePhoto + empolyeid);
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': accessToken,
+        },
+      );
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+
+        final imageData = data['ImageData'];
+        final List<String> parts = imageData.split(',');
+        if (parts.length != 2) {
+          throw const FormatException('Invalid base64 string');
+        }
+        final String dataPart = parts[1];
+        return const Base64Codec().decode(dataPart);
+      } else {
+        throw Exception('Failed to load employee image');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => home_screen()),
+        );
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: CommonStyles.bgColor,
+        // appBar: appBar(),
+        body: SafeArea(
+          child: Column(
+            children: [
+              headerSection(context),
+              const SizedBox(height: 10),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 5,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: FutureBuilder(
+                            future: futureEmployeeInfo,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              } else if (snapshot.hasError) {
+                                return Center(
+                                    child: Text('Error: ${snapshot.error}'));
+                              } else if (!snapshot.hasData) {
+                                return const Center(
+                                    child: Text('No data available'));
+                              }
+                              final employeeInfo =
+                                  snapshot.data as Map<String, dynamic>;
+                              if (employeeInfo.isEmpty) {
+                                return const Center(
+                                    child: Text('No data available'));
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Employee Information',
+                                    style: CommonStyles.txStyF20CbFcF5.copyWith(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  /*  customBox(
+                                      context,
+                                      employeeInfo['employeeName'],
+                                      'Employee Id'),
+                                  const SizedBox(height: 5),
+                                  customBox(
+                                      context,
+                                      employeeInfo['designation'],
+                                      'designation'),
+                                  const SizedBox(height: 5), */
+                                  customBox(context, employeeInfo['code'],
+                                      'Employee Id'),
+                                  customBox(context, employeeInfo['gender'],
+                                      'Gender'),
+                                  customBox(context, employeeInfo['dateofJoin'],
+                                      'Date of Join'),
+                                  customBox(
+                                      context,
+                                      employeeInfo['officeEmailId'],
+                                      'Office Email Id'),
+                                  customBox(
+                                      context,
+                                      employeeInfo['originalDOB'],
+                                      'Date of Birth'),
+                                  customBox(
+                                      context,
+                                      employeeInfo['mobileNumber'],
+                                      'Mobile Number'),
+                                  // const SizedBox(height: 5),
+                                  customBox(
+                                      context,
+                                      employeeInfo['reportingTo'],
+                                      'Reporting To'),
+                                ],
+                              );
+                            }),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  AppBar appBar() {
+    return AppBar(
+      backgroundColor: const Color(0xFFf15f22),
+      title: const Text(
+        'HRMS',
+        style: TextStyle(color: Colors.white),
+      ),
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      // automaticallyImplyLeading: false,
+      centerTitle: true,
+    );
+  }
+
+  Row customBox(
+    BuildContext context,
+    String? title,
+    String? subTitle,
+  ) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 25,
+          backgroundColor: CommonStyles.primaryColor.withOpacity(0.4),
+          child: const Icon(
+            Icons.home,
+            size: 25,
+            color: CommonStyles.primaryColor,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: ListTile(
+            onTap: () {},
+            contentPadding: const EdgeInsets.all(0),
+            style: ListTileStyle.drawer,
+            title: Text('$title'),
+            subtitle: Text(
+              '$subTitle',
+              style: CommonStyles.txStyF20CbFcF5.copyWith(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+            titleTextStyle: CommonStyles.txStyF20CbFcF5,
+          ),
+        ),
+        /* const SizedBox(width: 10),
+        IconButton(
+          onPressed: () {
+            
+          },
+          icon: const Icon(
+            Icons.arrow_right_rounded,
+            size: 26,
+          ),
+        ), */
+      ],
+    );
+  }
+
+  Widget headerSection(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14.0),
+      width: MediaQuery.of(context).size.width,
+      color: CommonStyles.primaryColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  FutureBuilder(
+                      future: futureEmployeeImage,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Skeletonizer(
+                            child: employeeImageTemplate(context, Uint8List(0)),
+                          );
+                        } else if (snapshot.hasError) {
+                          return const Icon(Icons.error);
+                        }
+                        Uint8List employeeImage = snapshot.data as Uint8List;
+                        return employeeImageTemplate(context, employeeImage);
+                      }),
+                  Positioned(
+                    bottom: 0,
+                    right: 12,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: InkWell(
+                        onTap: () async {
+                          await showBottomSheetForImageSelection(context);
+                        },
+                        child: const Icon(
+                          Icons.camera_alt_outlined,
+                          size: 15.0,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 5.0),
+          FutureBuilder(
+              future: futureEmployeeInfo,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+                final employeeInfo = snapshot.data as Map<String, dynamic>;
+                if (employeeInfo.isEmpty) {
+                  return const SizedBox();
+                }
+                return Column(
+                  children: [
+                    Text(
+                      '${employeeInfo['employeeName']}',
+                      softWrap: true,
+                      textAlign: TextAlign.center,
+                      style: CommonStyles.txStyF20CpFF5.copyWith(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      '${employeeInfo['designation']}',
+                      style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.white,
+                          fontFamily: 'Calibri'),
+                    ),
+                    Text(
+                      '${employeeInfo['dateofJoin']}',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontFamily: 'Calibri'),
+                    ),
+                  ],
+                );
+              }),
+        ],
+      ),
+    );
+  }
+
+  Container employeeImageTemplate(
+      BuildContext context, Uint8List employeeImage) {
+    return Container(
+      width: MediaQuery.of(context).size.width / 3.5,
+      height: MediaQuery.of(context).size.height / 8.0,
+      padding: const EdgeInsets.all(3.0),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        image: DecorationImage(
+          image: MemoryImage(employeeImage),
+          fit: BoxFit.fill,
+        ),
+        border: Border.all(color: Colors.white, width: 2.0),
+      ),
+    );
+  }
+
+  Future<void> showBottomSheetForImageSelection(BuildContext context) async {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.width / 4,
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+            color: Color(0xFFF2713B),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    pickImage(ImageSource.camera, context);
+                  },
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Color(0xFFf15f22),
+                        size: 35,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    pickImage(ImageSource.gallery, context);
+                  },
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.folder,
+                        color: Color(0xFFf15f22),
+                        size: 35,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void pickImage(ImageSource gallery, BuildContext context) {}
+}
+ */
