@@ -99,14 +99,14 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
         );
 
         final existingIndex = projectList.indexWhere(
-              (p) => p.projectname == projectName,
+          (p) => p.projectname == projectName,
         );
 
         if (existingIndex != -1) {
           projectList[existingIndex].instances.add(instance);
         } else {
           projectList.add(projectmodel(
-            projectlogo:  convertBase64StringToUint8List(project['projectLogo']),
+            projectlogo: convertBase64StringToUint8List(project['projectLogo']),
             projectname: projectName,
             instances: [instance],
             projectid: projectId,
@@ -120,8 +120,6 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
       rethrow;
     }
   }
-
-
 
   Uint8List convertBase64StringToUint8List(String? base64String) {
     if (base64String == null) {
@@ -263,7 +261,6 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
       itemCount: projectlist.length,
       itemBuilder: (BuildContext context, int index) {
         projectmodel project = projectlist[index];
-
         return GestureDetector(
             onTap: () async {
               SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -324,11 +321,17 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
                 children: [
                   //SizedBox(height: 5.0),
                   // Display project name and logo only once
-                  CircleAvatar(
-                    radius: 40.0,
-                    backgroundColor: Colors.white,
-                    backgroundImage: MemoryImage(project.projectlogo),
-                  ),
+                  project.projectlogo.isNotEmpty
+                      ? CircleAvatar(
+                          radius: 40.0,
+                          backgroundColor: Colors.white,
+                          backgroundImage: MemoryImage(project.projectlogo),
+                        )
+                      : Image.asset(
+                          'assets/app_logo.png',
+                          width: 80.0,
+                          height: 80.0,
+                        ),
                   const SizedBox(height: 8.0),
                   Text(
                     project.projectname,
@@ -489,7 +492,6 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
 
     return rows;
   }
-
 
   Future<void> deleteLoginTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

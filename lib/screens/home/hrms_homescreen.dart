@@ -131,7 +131,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   bool? isPunchIn = false;
   int employeid = 0;
   double allottedPriviegeLeaves = 0.0;
-  String ? PunchinTime ;
+  String? PunchinTime;
   double usedCasualLeavesInYear = 0.0;
   double allotcausalleaves = 0.0;
   double availablepls = 0.0;
@@ -241,7 +241,10 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   Future<void> fetchCheckInOutStatus() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      isPunchedIn = prefs.getBool(Constants.isPunchIn) ?? false;
+      setState(() {
+        isPunchedIn = prefs.getBool(Constants.isPunchIn) ?? false;
+      });
+
       _time = prefs.getString(Constants.punchTime) ?? 'Invalid Time';
       final now = DateTime.now();
       final int currentHour = now.hour;
@@ -521,7 +524,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-  Row checkInNOutTemplate(bool isPunchedIn) {
+  Row checkInNOutTemplate(bool isCheckIn) {
     return Row(
       children: [
         Expanded(
@@ -529,13 +532,13 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isPunchedIn ? "Check In" : "Shift Timings",
+                isCheckIn ? "Check In" : "Shift Timings",
                 style: CommonStyles.txStyF16CbFFb.copyWith(
                   fontSize: 20,
                 ),
               ),
               Text(
-                isPunchedIn
+                isCheckIn
                     ? "at ${formatPunchTime(_time)}"
                     : "09:00 AM to 6:00 PM",
                 style: TextStyle(fontSize: 14, color: Colors.grey[700]),
@@ -543,7 +546,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             ],
           ),
         ),
-        isPunchedIn
+        isCheckIn
             ? CustomBtn(
                 icon: Icons.logout_outlined,
                 btnText: 'Check Out',
@@ -568,45 +571,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                 isLoading: isRequestProcessing,
                 onTap: checkInOut,
               ),
-        /* CustomBtn(
-            btnText: isRequestProcessing
-                ? "Checking..."
-                : (isPunchedIn ? "Check Out" : "Check In"),
-            isLoading: isRequestProcessing,
-            icon: isPunchedIn ? Icons.logout_outlined : Icons.camera_alt_outlined,
-            backgroundColor: isPunchedIn ? null : CommonStyles.whiteColor,
-            btnTextColor: isPunchedIn ? null : CommonStyles.primaryColor,
-            onTap: () async {
-              setState(() {
-                isRequestProcessing = true;
-              });
-      
-              await showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => punchInOutDialog(context),
-              );
-      
-              /* setState(() {
-                isRequestProcessing = false;
-              }); */
-            },
-          ), */ /* Column(
-                              children: [
-                                CustomBtn(
-                                  btnText: 'Check In',
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                CustomBtn(
-                                  icon: Icons.logout_outlined,
-                                  btnText: 'Check Out',
-                                  backgroundColor: CommonStyles.whiteColor,
-                                  btnTextColor: CommonStyles.primaryColor,
-                                ),
-                              ],
-                            ), */
       ],
     );
   }
@@ -662,7 +626,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-  Container header() {
+/*   Container header() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       color: Colors.white,
@@ -698,9 +662,45 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         ],
       ),
     );
+  } */
+
+  Container header() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      color: Colors.white,
+      child: Row(
+        children: [
+          _buildProfileImage(),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  EmployeName,
+                  style: CommonStyles.txStyF20CbFcF5.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  '$employee_designation',
+                  style: CommonStyles.txStyF20CbFcF5.copyWith(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                  ),
+                  maxLines: 1, // Limit to 1 line
+                  overflow:
+                      TextOverflow.ellipsis, // Add ellipsis if text exceeds
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
-
-
 
   Future<List<BirthdayBanner>> fetchBirthBanners() async {
     try {
@@ -861,13 +861,11 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                     child: Container(
                       alignment: Alignment.center,
                       height: double.infinity,
-                      child: Text(
-                        '${item.wish}',
-                        maxLines: 6,
-                        overflow: TextOverflow.ellipsis,
-
-                        style: CommonStyles.txStyF20CbFcF5.copyWith(fontSize: 14)
-                      ),
+                      child: Text('${item.wish}',
+                          maxLines: 6,
+                          overflow: TextOverflow.ellipsis,
+                          style: CommonStyles.txStyF20CbFcF5
+                              .copyWith(fontSize: 14)),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -1146,18 +1144,12 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     totalLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
         "SELECT COUNT(*) AS totalLeadsCount FROM Leads WHERE CreatedByUserId = '$userID'");
 
-    _time  = (await dataAccessHandler.getOnlyStringValueFromDb(
+    _time = (await dataAccessHandler.getOnlyStringValueFromDb(
         "SELECT PunchInTime FROM DailyPunchInAndOut  WHERE DATE(CreatedDate) ='$currentDate' AND CreatedByUserId = '$userID'"))!;
     print('_time == $_time');
 
     bool isPunchIn = _time != null && _time.isNotEmpty;
 
-
-    await prefs.setBool(Constants.isPunchIn, isPunchIn);
-
-    setState(() {
-      isPunchedIn = isPunchIn; // Local state variable that drives the UI
-    });
     double calculateDistance(lat1, lon1, lat2, lon2) {
       var p = 0.017453292519943295; // Pi/180 to convert degrees to radians
       var c = cos;
@@ -1353,7 +1345,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       );
 
       List<Placemark> placemarks =
-      await placemarkFromCoordinates(position.latitude, position.longitude);
+          await placemarkFromCoordinates(position.latitude, position.longitude);
 
       Placemark place = placemarks.first;
 
@@ -1365,7 +1357,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         _latitude = position.latitude.toString();
         _longitude = position.longitude.toString();
         _address =
-        "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
+            "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
       });
 
       /// ✅ Check if values are still empty
@@ -1393,7 +1385,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       rethrow;
     }
   }
-
 
   Future<void> _captureAndProcessImage() async {
     try {
@@ -1993,7 +1984,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   }
  */
 
-
   String formatPunchTime(String? dateTimeString) {
     try {
       DateTime dateTime = DateTime.parse(dateTimeString!);
@@ -2024,7 +2014,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       String latitude,
       String longitude,
       String address,
-      bool isPunchedIn,
+      bool isCheckedIn,
       String? filePath) async {
     try {
       final dataAccessHandler =
@@ -2043,7 +2033,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
       int punchResult = 0;
 
-      if (!isPunchedIn) {
+      if (!isCheckedIn) {
         // **Punch In: Insert new record in DailyPunchInAndOut**
         Map<String, dynamic> punchInData = {
           'UserId': userId,
@@ -2093,7 +2083,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           // **Prevent duplicate inserts**
           List<Map<String, dynamic>> existingFiles = await db.rawQuery(
               "SELECT * FROM FileRepository WHERE FileName = ? AND LookupType = ? AND ServerUpdatedStatus = 0",
-              [fileName, isPunchedIn ? 24 : 23]);
+              [fileName, isCheckedIn ? 24 : 23]);
 
           if (existingFiles.isEmpty) {
             Map<String, dynamic> fileData = {
@@ -2108,7 +2098,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               'UpdatedDate': punchTime,
               'ServerUpdatedStatus': 0, // Ensure it's marked for sync
               'LookupType':
-                  isPunchedIn ? 376 : 377, // 23 for Punch In, 24 for Punch Out
+                  isCheckedIn ? 376 : 377, // 23 for Punch In, 24 for Punch Out
             };
 
             // **Insert Image (Only One at a Time)**
@@ -2830,7 +2820,7 @@ bool _isPositionAccurate(Position position) {
       position.speed >= MINIMUM_MOVEMENT_SPEED;
 }
 
-void   appendLog(String text) async {
+void appendLog(String text) async {
   const String fileName = 'hrmstracking.file';
   // final appFolderPath = await getApplicationDocumentsDirectory();
   Directory appFolderPath = Directory('/storage/emulated/0/Download/HRMS');
