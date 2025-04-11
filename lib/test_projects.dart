@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Model%20Class/projectmodel.dart';
 import 'package:hrms/api%20config.dart';
+import 'package:hrms/common_widgets/common_styles.dart';
 import 'package:hrms/home_screen.dart';
 import 'package:hrms/login_screen.dart';
 import 'package:hrms/shared_keys.dart';
@@ -147,87 +148,52 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
         return true;
       },
       child: Scaffold(
-        /*  
-            appBar: AppBar(
-              backgroundColor: Colors.white,
-              title: const Text(
-                'Projects',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'Calibri',
-                ),
-              ),
-              leading: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.black,
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
+        backgroundColor: CommonStyles.bgColor,
+        body: Container(
+          padding: const EdgeInsets.all(10),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const SizedBox(
+              height: 20.0,
             ),
-            */
-
-        body: Stack(
-          children: [
-            Image.asset(
-              'assets/background_layer_2.png',
-              fit: BoxFit.cover,
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
+            const Text(
+              'Assigned Projects',
+              style: TextStyle(
+                  fontSize: 26, color: Colors.black, fontFamily: 'Calibri'),
             ),
-            Container(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(
-                      height: 25.0,
-                    ),
-                    const Text(
-                      'Assigned Projects',
-                      style: TextStyle(
-                          fontSize: 26,
-                          color: Colors.black,
-                          fontFamily: 'Calibri'),
-                    ),
-                    const SizedBox(
-                      height: 25.0,
-                    ),
-                    Expanded(
-                        child: FutureBuilder(
-                            future: futureProjects,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              } else if (snapshot.hasError) {
-                                if (snapshot.error is NetworkException) {
-                                  return Center(
-                                    child: Text(
-                                        (snapshot.error as NetworkException)
-                                            .message),
-                                  );
-                                }
-                                return Center(
-                                  child: Text(
-                                    snapshot.error
-                                        .toString()
-                                        .replaceFirst('Exception: ', ''),
-                                    style: const TextStyle(
-                                        fontSize: 18,
-                                        color: Colors.black,
-                                        fontFamily: 'Calibri'),
-                                  ),
-                                );
-                              }
-                              final projectList =
-                                  snapshot.data as List<projectmodel>;
-                              return projectsGrid(projectList);
-                              /*  return ListView.builder(
+            const SizedBox(
+              height: 20.0,
+            ),
+            Expanded(
+                child: FutureBuilder(
+                    future: futureProjects,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (snapshot.hasError) {
+                        if (snapshot.error is NetworkException) {
+                          return Center(
+                            child: Text(
+                                (snapshot.error as NetworkException).message),
+                          );
+                        }
+                        return Center(
+                          child: Text(
+                            snapshot.error
+                                .toString()
+                                .replaceFirst('Exception: ', ''),
+                            style: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.black,
+                                fontFamily: 'Calibri'),
+                          ),
+                        );
+                      }
+                      final projectList = snapshot.data as List<projectmodel>;
+                      return projectsGrid(projectList);
+                      /*  return ListView.builder(
                                     itemCount: projectList.length,
                                     itemBuilder:
                                         (BuildContext context, int index) {
@@ -237,11 +203,20 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
                                       );
                                     },
                                   ); */
-                            }))
-                  ]),
-            ),
-          ],
+                    }))
+          ]),
         ),
+
+        /* Stack(
+          children: [
+            /*  Image.asset(
+              'assets/background_layer_2.png',
+              fit: BoxFit.cover,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+            ), */
+            ],
+        ), */
       ),
     );
   }

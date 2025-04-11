@@ -198,7 +198,6 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
         url,
         headers: {
           'Content-Type': 'application/json',
-
           'APIKey': APIKey,
         },
       );
@@ -265,7 +264,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
         body: Column(
           children: [
             headerSection(context),
-         //   const SizedBox(height: 10),
+            //   const SizedBox(height: 10),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -343,9 +342,19 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                   'designation'),
                               const SizedBox(height: 5), */
         if (employeeInfo['code'] != null && employeeInfo['code'] != '')
-          customBox(context, employeeInfo['code'], 'Employee Id',  svgAsset: 'assets/idbadge.svg',),
+          customBox(
+            context,
+            employeeInfo['code'],
+            'Employee Id',
+            svgAsset: 'assets/idbadge.svg',
+          ),
         if (employeeInfo['gender'] != null && employeeInfo['gender'] != '')
-          customBox(context, employeeInfo['gender'], 'Gender',   svgAsset: 'assets/venusmars.svg',),
+          customBox(
+            context,
+            employeeInfo['gender'],
+            'Gender',
+            svgAsset: 'assets/venusmars.svg',
+          ),
         if (employeeInfo['dateofJoin'] != null &&
             employeeInfo['dateofJoin'] != '')
           customBox(context, employeeInfo['dateofJoin'], 'Date of Join',
@@ -361,7 +370,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
         if (employeeInfo['mobileNumber'] != null &&
             employeeInfo['mobileNumber'] != '')
           customBox(context, employeeInfo['mobileNumber'], 'Mobile Number',
-              icon:   Icons.phone),
+              icon: Icons.phone),
         // const SizedBox(height: 5),
         if (employeeInfo['reportingTo'] != null &&
             employeeInfo['reportingTo'].trim() != '')
@@ -385,12 +394,8 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
     );
   }
 
-  Row customBox(
-      BuildContext context,
-      String? title,
-      String? subTitle,
-      {String? svgAsset, IconData? icon}
-      ) {
+  Row customBox(BuildContext context, String? title, String? subTitle,
+      {String? svgAsset, IconData? icon}) {
     return Row(
       children: [
         CircleAvatar(
@@ -398,16 +403,16 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
           backgroundColor: CommonStyles.primaryColor.withOpacity(0.4),
           child: svgAsset != null
               ? SvgPicture.asset(
-            svgAsset,
-            width: 25,
-            height: 25,
-            color: CommonStyles.primaryColor,
-          )
+                  svgAsset,
+                  width: 25,
+                  height: 25,
+                  color: CommonStyles.primaryColor,
+                )
               : Icon(
-            icon ?? Icons.home,
-            size: 25,
-            color: CommonStyles.primaryColor,
-          ),
+                  icon ?? Icons.home,
+                  size: 25,
+                  color: CommonStyles.primaryColor,
+                ),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -432,14 +437,16 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
       ],
     );
   }
+
   Widget headerSection(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(left: 16,right: 16,top: 16,bottom: 16),
-      margin: const EdgeInsets.only(left: 10,right: 10,top: 10),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16),
+      margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
         color: CommonStyles.whiteColor,
-        borderRadius: BorderRadius.circular(12), // ✅ Rounded corners
+        // color: CommonStyles.primaryColor,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -470,7 +477,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                     child: Container(
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: CommonStyles.bgColor,
                       ),
                       padding: const EdgeInsets.all(8),
                       child: InkWell(
@@ -524,13 +531,20 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
           '${employeeInfo['employeeName']}',
           softWrap: true,
           textAlign: TextAlign.center,
-            style: CommonStyles.txStyF20CbFcF5,
+          style: CommonStyles.txStyF20CpFF5.copyWith(
+            fontSize: 20,
+            color: CommonStyles.blackColor,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         Text(
           '${employeeInfo['designation']}',
-          style: CommonStyles.txStyF20CbFcF5,
+          style: const TextStyle(
+            fontSize: 15,
+            color: CommonStyles.blackColor,
+            fontFamily: 'Calibri',
+          ),
         ),
-
       ],
     );
   }
@@ -547,7 +561,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
           image: MemoryImage(employeeImage),
           fit: BoxFit.fill,
         ),
-        border: Border.all(color: Colors.white, width: 2.0),
+        border: Border.all(color: CommonStyles.primaryColor, width: 2.0),
       ),
     );
   }
@@ -582,8 +596,13 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
 
   Future<void> pickImage(ImageSource source, BuildContext context) async {
     try {
-      final pickedImage = await ImagePicker()
-          .pickImage(source: source, preferredCameraDevice: CameraDevice.front);
+      final pickedImage = await ImagePicker().pickImage(
+        source: source,
+        preferredCameraDevice: CameraDevice.front,
+        imageQuality: 80,
+        maxWidth: 800,
+        maxHeight: 800,
+      );
       if (pickedImage == null) {
         throw Exception('No image selected');
       } else {

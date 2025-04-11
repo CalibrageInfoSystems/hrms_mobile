@@ -198,6 +198,7 @@ class _AddLeadScreenState extends State<AddLeads>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: CommonStyles.bgColor,
       // appBar: AppBar(
       //   elevation: 0,
       //   backgroundColor: Color(0xFFf15f22),
@@ -257,12 +258,14 @@ class _AddLeadScreenState extends State<AddLeads>
                       keyboardType: TextInputType.name,
                       maxLength: 50,
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')), // allow letters and spaces
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'[a-zA-Z ]')), // allow letters and spaces
                       ],
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please Enter Name';
-                        } else if (!RegExp(r'^[a-zA-Z]+(?: [a-zA-Z]+)*$').hasMatch(value.trim())) {
+                        } else if (!RegExp(r'^[a-zA-Z]+(?: [a-zA-Z]+)*$')
+                            .hasMatch(value.trim())) {
                           return 'Only alphabets and single spaces between words are allowed';
                         }
                         return null;
@@ -580,20 +583,20 @@ class _AddLeadScreenState extends State<AddLeads>
                         ),
                         child: isRequestProcessing
                             ? const SizedBox(
-                          width: 25,
-                          height: 25,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
-                          ),
-                        )
+                                width: 25,
+                                height: 25,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
                             : const Text(
-                          "Add Client Visit",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        ),
+                                "Add Client Visit",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
 
@@ -636,14 +639,19 @@ class _AddLeadScreenState extends State<AddLeads>
       builder: (BuildContext context) {
         return const Dialog(
           backgroundColor: Colors.transparent,
-          child: Center(child: CircularProgressIndicator(   color: Styles.primaryColor,)),
+          child: Center(
+              child: CircularProgressIndicator(
+            color: Styles.primaryColor,
+          )),
         );
       },
     );
   }
+
   void hideLoadingDialog(BuildContext context) {
     Navigator.of(context).pop();
   }
+
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       FocusScope.of(context).unfocus();
@@ -707,7 +715,7 @@ class _AddLeadScreenState extends State<AddLeads>
               'Failed to Add Client Visit Data.', context, 1, 2);
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) =>  home_screen()),
+            MaterialPageRoute(builder: (context) => home_screen()),
           );
           return;
         }
@@ -771,7 +779,7 @@ class _AddLeadScreenState extends State<AddLeads>
               .whenComplete(() {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) =>  home_screen()),
+              MaterialPageRoute(builder: (context) => home_screen()),
             );
           });
         } else {
@@ -782,7 +790,7 @@ class _AddLeadScreenState extends State<AddLeads>
               'Client Visit added successfully.', context, 0, 2);
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) =>  home_screen()),
+            MaterialPageRoute(builder: (context) => home_screen()),
           );
         }
 
@@ -918,7 +926,7 @@ class _AddLeadScreenState extends State<AddLeads>
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userID = prefs.getString(SharedKeys.userId) ?? "";
     Username = "Roja";
-    empCode= prefs.getString(SharedKeys.employeeId) ?? "";
+    empCode = prefs.getString(SharedKeys.employeeId) ?? "";
 
     //TODO
     // userID = prefs.getInt('userID');

@@ -46,8 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
     // _userNameController.text = 'CIS00000';
     // _passwordController.text = 'Live@291024';
 
-    // _userNameController.text = 'CIS00054';
-    // _passwordController.text = 'Ranjith@469';
+    _userNameController.text = 'CIS00090'; // 'CIS00054';
+    _passwordController.text = 'Ranjith@469';
 
     // _userNameController.text = 'BakiHanm';
     // _passwordController.text = 'Test@123';
@@ -57,40 +57,42 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      backgroundColor: CommonStyles.bgColor,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  logoNdTitle(),
+                  const SizedBox(height: 20),
+                  userNameField(),
+                  const SizedBox(height: 20),
+                  passwordField(),
+                  const SizedBox(height: 15),
+                  forgotpasswordField(),
+                  const SizedBox(height: 30),
+                  signinBtn(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+
+      /* Stack(
         children: [
-          Positioned.fill(
+         /*  Positioned.fill(
             child: Image.asset(
               'assets/background_layer_2.png',
               fit: BoxFit.cover,
             ),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(40.0),
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      logoNdTitle(),
-                      const SizedBox(height: 20),
-                      userNameField(),
-                      const SizedBox(height: 20),
-                      passwordField(),
-                      const SizedBox(height: 15),
-                      forgotpasswordField(),
-                      const SizedBox(height: 30),
-                      signinBtn(),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+          ), */
+           ],
+      ), */
     );
   }
 
@@ -365,11 +367,11 @@ class _LoginScreenState extends State<LoginScreen> {
         prefs.setString(SharedKeys.userId, userid!);
         prefs.setString(SharedKeys.brnchId, branchId!);
         print('branchId: $branchId');
-        loginUser(prefs, employeeId!, isFirstTimeLogin, userid,accessToken);
+        loginUser(prefs, employeeId!, isFirstTimeLogin, userid, accessToken);
 // Ensure employeeId is an integer before comparison
 
         //  showAddClient = prefs.getBool('canAddClient') ?? true;
-   //   empolyelogin(prefs, employeeId!, isFirstTimeLogin, userid, accessToken);
+        //   empolyelogin(prefs, employeeId!, isFirstTimeLogin, userid, accessToken);
       } else {
         setState(() {
           // progressDialog.dismiss();
@@ -507,12 +509,10 @@ class _LoginScreenState extends State<LoginScreen> {
       throw Exception(
           'Failed to load Lookup Keys. Status Code: ${response.statusCode}');
     }
+  }
 
-
- }
-  void loginUser(SharedPreferences prefs, String empolyeid,
-      String isfirstTime, String userid, String? accessToken) async {
-
+  void loginUser(SharedPreferences prefs, String empolyeid, String isfirstTime,
+      String userid, String? accessToken) async {
     final url = Uri.parse(baseUrl + GenerateApiKey);
     final response = await http.get(
       url,
@@ -536,13 +536,19 @@ class _LoginScreenState extends State<LoginScreen> {
             empolyelogin(prefs, empolyeid!, isfirstTime, userid, accessToken);
           } else {
             Commonutils.showCustomToastMessageLong(
-                'Permission denied. Please contact admin to enable access', context, 1, 4);
+                'Permission denied. Please contact admin to enable access',
+                context,
+                1,
+                4);
             print('API key not found in response');
           }
         } else if (decoded is String) {
           print('Server says: $decoded');
           Commonutils.showCustomToastMessageLong(
-              'Permission denied. Please contact admin to enable access', context, 1, 4);
+              'Permission denied. Please contact admin to enable access',
+              context,
+              1,
+              4);
           // Show a proper message to the user if it's a permission issue
         }
       } catch (e) {
@@ -553,12 +559,7 @@ class _LoginScreenState extends State<LoginScreen> {
       print('Failed to load API key. Status Code: ${response.statusCode}');
       print('Response body: ${response.body}');
     }
-
-
-
-
   }
-
 }
 
 class AuthService {

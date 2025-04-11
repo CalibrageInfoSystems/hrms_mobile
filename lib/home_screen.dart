@@ -179,29 +179,6 @@ class _home_screenState extends State<home_screen>
               height: 100, // Adjust the height as needed
             ),
           ),
-          // ListTile(
-          //   leading: SvgPicture.asset(
-          //     'assets/atten.svg',
-          //     width: 20,
-          //     height: 20,
-          //     fit: BoxFit.contain,
-          //     color: Colors.black,
-          //   ),
-          //   title: const Text(
-          //     'My Profile',
-          //     style: TextStyle(
-          //       color: Colors.black,
-          //       fontFamily: 'hind_semibold',
-          //     ),
-          //   ),
-          //   onTap: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //           builder: (context) => personal_details()),
-          //     );
-          //   },
-          // ),
           ListTile(
             leading: SvgPicture.asset(
               'assets/atten.svg',
@@ -224,26 +201,6 @@ class _home_screenState extends State<home_screen>
               );
             },
           ),
-          /*  ListTile(
-            leading: const Icon(
-              Icons.star,
-              color: Colors.black,
-            ), // Change the icon as needed
-            title: const Text(
-              'Feedback',
-              style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'hind_semibold',
-              ),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => feedback_Screen()),
-              );
-              // Handle the onTap action for Logout
-            },
-          ), */
           ListTile(
             leading: Image.asset(
               'assets/holiday.png',
@@ -271,13 +228,6 @@ class _home_screenState extends State<home_screen>
               color: Colors.black,
               weight: 20,
             ),
-            // SvgPicture.asset(
-            //   'assets/atten.svg',
-            //   width: 20,
-            //   height: 20,
-            //   fit: BoxFit.contain,
-            //   color: Colors.black,
-            // ),
             title: const Text(
               'Notifications',
               style: TextStyle(
@@ -298,13 +248,6 @@ class _home_screenState extends State<home_screen>
               color: Colors.black,
               weight: 20,
             ),
-            // SvgPicture.asset(
-            //   'assets/atten.svg',
-            //   width: 20,
-            //   height: 20,
-            //   fit: BoxFit.contain,
-            //   color: Colors.black,
-            // ),
             title: const Text(
               'Resignation Request',
               style: TextStyle(
@@ -320,7 +263,6 @@ class _home_screenState extends State<home_screen>
               );
             },
           ),
-
           ListTile(
             leading: const Icon(
               Icons.logout,
@@ -434,8 +376,8 @@ class _home_screenState extends State<home_screen>
   Future<void> onConfirmLogout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
- SharedPreferencesHelper.putBool(Constants.isPunchIn, false);
-   prefs.remove(Constants.punchTime);
+    SharedPreferencesHelper.putBool(Constants.isPunchIn, false);
+    prefs.remove(Constants.punchTime);
     Commonutils.showCustomToastMessageLong(
         "Logout Successfully", context, 0, 3);
     // Navigator.pushReplacement(

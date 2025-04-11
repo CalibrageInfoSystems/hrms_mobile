@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_event_calendar/flutter_event_calendar.dart';
 import 'package:flutter_month_picker/flutter_month_picker.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hrms/common_widgets/common_styles.dart';
 import 'package:hrms/holiday_model.dart';
 import 'package:hrms/leave_model.dart';
 import 'package:hrms/login_screen.dart';
@@ -88,7 +89,6 @@ class _leaves_screen_screenState extends State<leaves_screen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('loginTime');
   }
-
 
   void onConfirmLogout(BuildContext context) {
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
@@ -206,14 +206,966 @@ class _leaves_screen_screenState extends State<leaves_screen> {
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           home: Scaffold(
-            body: Stack(
+            backgroundColor: CommonStyles.bgColor,
+            body: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              padding: EdgeInsets.only(
+                  top: 15.0, left: 15.0, right: 15.0, bottom: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Padding(
+                          //   padding:
+                          //       EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0),
+                          //   child: Container(
+                          //     width: double.infinity,
+                          //     decoration: BoxDecoration(
+                          //       color: Color(0xFFf15f22),
+                          //       borderRadius: BorderRadius.circular(6.0),
+                          //     ),
+                          //     child:
+                          // ElevatedButton(
+                          //   onPressed: () async {
+                          //     Navigator.of(context).pushReplacement(
+                          //       MaterialPageRoute(
+                          //         builder: (context) => apply_leave(
+                          //           buttonName: "test", // Example button name
+                          //           lookupDetailId: -3, // Pass the lookupDetailId
+                          //         ),
+                          //       ),
+                          //     );
+                          //   },
+                          //   child: Text(
+                          //     'Apply',
+                          //     style: TextStyle(
+                          //       color: Colors.white,
+                          //       fontSize: 16,
+                          //       fontFamily: 'hind_semibold',
+                          //     ),
+                          //   ),
+                          //   style: ElevatedButton.styleFrom(
+                          //     primary: Colors.transparent,
+                          //     elevation: 0,
+                          //     shape: RoundedRectangleBorder(
+                          //       borderRadius: BorderRadius.circular(4.0),
+                          //     ),
+                          //   ),
+                          // ),
+                          //   ),
+                          //  ),
+                          Spacer(),
+                          ElevatedButton(
+                            onPressed: () {
+                              DateTime currentTime = DateTime.now();
+                              DateTime formattedlogintime =
+                                  DateTime.parse(logintime!);
+                              DateTime loginTime =
+                                  formattedlogintime /* Replace with your login time */;
+
+                              // Calculate the time difference
+                              Duration timeDifference =
+                                  currentTime.difference(loginTime);
+
+                              // Check if the time difference is less than or equal to 1 hour (3600 seconds)
+                              //  if (timeDifference.inSeconds <= 3600) {
+                              // Login is within the allowed window
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return
+                                        /* apply_leave(
+                                            buttonName:
+                                                "test", // Example button name
+                                            lookupDetailId: -3,
+                                            employename:
+                                                '${EmployeName}', // Pass the lookupDetailId 
+                                          ); */
+                                        const TestApplyLeave();
+                                  },
+                                ),
+                              );
+
+                              //    print(
+                              //        "Login is within 1 hour of current time.");
+                              //  } else {
+                              //    // Login is outside the allowed window
+                              // //   _showtimeoutdialog(context);
+                              //    print(
+                              //        "Login is more than 1 hour from current time.");
+                              //  }
+
+                              // Handle the apply button click event
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFFf15f22),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4.0),
+                              ),
+                            ),
+                            child: Text(
+                              "Apply",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 8.0,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width / 3.5,
+                            height: 95,
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(6.0),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Color(0xFF746cdf),
+                                  Color(0xFF81aed5),
+                                ], // Adjust the colors as needed
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(top: 19.0),
+                                  // Adjust the padding as needed
+                                  child: Text(
+                                    "PL's",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        fontFamily: 'Calibri'),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10.0,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "$usedPrivilegeLeavesInYear",
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          fontFamily: 'Calibri'),
+                                    ),
+                                    SizedBox(
+                                      width: 2.0,
+                                    ),
+                                    Text(
+                                      "/",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 2.0,
+                                    ),
+                                    Text(
+                                      "$allottedPrivilegeLeaves",
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          fontFamily: 'Calibri'),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width / 3.5,
+                            height: 95,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6.0),
+                              // Adjust the radius as needed
+                              border: Border.all(
+                                color: Color(0xFF7F7FE1),
+                                // Specify the border color
+                                width: 2.0, // Adjust the border width as needed
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(top: 3.0),
+                                  // Adjust the padding as needed
+                                  child: Text(
+                                    "Monthly PL's",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFFf15f22),
+                                        fontFamily: 'Calibri'),
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: width / 6,
+                                      height: 30.0,
+                                      child: IconButton(
+                                        padding: EdgeInsets.only(right: 0.0),
+                                        onPressed: () {
+                                          _selectPreviousMonthPL();
+                                        },
+                                        iconSize: 20.0,
+                                        icon: Icon(
+                                          Icons.arrow_left,
+                                          color: Color(0xFFf15f22),
+                                        ),
+                                      ),
+                                    ),
+                                    // Container(
+                                    //   width: width / 1.6, // Set your desired width here
+                                    //   child: Text(
+                                    //     DateFormat('MMMM').format(_selectedMonthPL),
+                                    //     style: TextStyle(
+                                    //       fontSize: 14,
+                                    //       fontWeight: FontWeight.w600,
+                                    //       fontFamily: 'Calibri',
+                                    //       color: Color(0xFF746cdf),
+                                    //     ),
+                                    //     textAlign: TextAlign.center,
+                                    //   ),
+                                    // ),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        final selected = await showMonthPicker(
+                                          context: context,
+                                          initialDate: DateTime.now(),
+                                          firstDate: DateTime(2000),
+                                          lastDate: DateTime(2100),
+                                        );
+                                        if (selected != null) {
+                                          // Print the selected month and year
+                                          print(
+                                              'Selected month: ${selected.month}, year: ${selected.year}');
+
+                                          // Optionally, update the UI with the selected month and year
+                                          setState(() {
+                                            _selectedMonthPL = selected;
+                                            montlyleavesPl(
+                                                selected.month, selected.year);
+                                          });
+                                        }
+                                        // showmonthpickerforpl();
+                                      },
+                                      child: Container(
+                                        width: width / 1.6,
+                                        child: Text(
+                                          '${_selectedMonthPL.month}/${_selectedMonthPL.year}',
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: 'Calibri',
+                                              color: Color(0xFF746cdf)),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+
+                                    Container(
+                                      width: width / 6,
+                                      height: 30.0,
+                                      child: IconButton(
+                                          padding: EdgeInsets.only(left: 0),
+                                          onPressed: () {
+                                            _selectNextMonthPL();
+                                          },
+                                          iconSize: 20.0,
+                                          icon: Icon(
+                                            Icons.arrow_right,
+                                            color: Color(0xFFf15f22),
+                                          ),
+                                          alignment: Alignment.center),
+                                    ),
+                                  ],
+                                ),
+                                // Padding(
+                                //   padding: EdgeInsets.only(top: 1.0),
+                                //   // Adjust the padding as needed
+                                //   child: Text(
+                                //     "$noOfleavesinPLs",
+                                //     style: TextStyle(
+                                //       fontSize: 18,
+                                //       fontWeight: FontWeight.w600,
+                                //       fontFamily: 'Calibri',
+                                //       color: Color(0xFFf15f22),
+                                //     ),
+                                //   ),
+                                // ),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 1.0),
+                                  // Adjust the padding as needed
+                                  child: isLoading
+                                      ? Container(
+                                          width: 15,
+                                          height: 15,
+                                          child: CircularProgressIndicator
+                                              .adaptive(),
+                                        ) // Show circular loading indicator
+                                      : Text(
+                                          "${noOfleavesinPLs ?? 0.0}",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: 'Calibri',
+                                            color: Color(0xFFf15f22),
+                                          ),
+                                        ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width / 3.5,
+                            height: 95,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6.0),
+                              // Adjust the radius as needed
+                              border: Border.all(
+                                color: Color(0xFF7F7FE1),
+                                // Specify the border color
+                                width: 2.0, // Adjust the border width as needed
+                              ),
+                            ),
+                            child: Column(children: [
+                              Padding(
+                                padding: EdgeInsets.only(top: 3.0),
+                                // Adjust the padding as needed
+                                child: Text(
+                                  "Available PL's",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'Calibri',
+                                    color: Color(0xFFf15f22),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.only(top: 4.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // Your click listener logic here
+                                    print("Container Clicked!");
+
+                                    //  printLookupDetailId('PL');
+
+                                    DateTime currentTime = DateTime.now();
+                                    DateTime formattedlogintime =
+                                        DateTime.parse(logintime!);
+                                    // Replace this with your actual login time
+                                    DateTime loginTime =
+                                        formattedlogintime /* Replace with your login time */;
+
+                                    // Calculate the time difference
+                                    Duration timeDifference =
+                                        currentTime.difference(loginTime);
+
+                                    // Check if the time difference is less than or equal to 1 hour (3600 seconds)
+                                    //    if (timeDifference.inSeconds <= 3600) {
+                                    // Login is within the allowed window
+                                    if (availablepls <= 0) {
+                                      // Show a toast message
+                                      Commonutils.showCustomToastMessageLong(
+                                          'No PLs Available!', context, 1, 3);
+                                    } else {
+                                      printLookupDetailId('PL');
+                                    }
+                                    print(
+                                        "Login is within 1 hour of current time.");
+                                    /*  } else {
+                                          // Login is outside the allowed window
+                                       //   _showtimeoutdialog(context);
+                                          print(
+                                              "Login is more than 1 hour from current time.");
+                                        }*/
+
+                                    // Navigator.of(context).pushReplacement(
+                                    //   MaterialPageRoute(
+                                    //       builder: (context) => apply_leave()),
+                                    // );
+                                  },
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "$availablepls",
+                                        style: TextStyle(
+                                          fontSize: 23,
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: 'Calibri',
+                                          color: Color(0xFFf15f22),
+                                        ),
+                                      ),
+                                      // SizedBox(
+                                      //   height: 3.0,
+                                      // ),
+                                      Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: Text(
+                                          "Click Here to Apply",
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: 'Calibri',
+                                            color: Color(0xFF7F7FE1),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ]),
+                            // Other child widgets or content can be added here
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 16.0,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width / 3.5,
+                            height: 95,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(6.0),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Color(0xFF746cdf),
+                                  Color(0xFF81aed5),
+                                ], // Adjust the colors as needed
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(top: 19.0),
+                                  // Adjust the padding as needed
+                                  child: Text(
+                                    "CL's",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'Calibri',
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10.0,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "$usedCasualLeavesInYear",
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Calibri',
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 2.0,
+                                    ),
+                                    Text(
+                                      "/",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 2.0,
+                                    ),
+                                    Text(
+                                      "$allotcausalleaves",
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Calibri',
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width / 3.5,
+                            height: 95,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6.0),
+                              // Adjust the radius as needed
+                              border: Border.all(
+                                color: Color(0xFF7F7FE1),
+                                // Specify the border color
+                                width: 2.0, // Adjust the border width as needed
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(top: 3.0),
+                                  // Adjust the padding as needed
+                                  child: Text(
+                                    "Monthly CL's",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'Calibri',
+                                      color: Color(0xFFf15f22),
+                                    ),
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: width / 6,
+                                      height: 30.0,
+                                      child: IconButton(
+                                        padding: EdgeInsets.only(right: 0.0),
+                                        onPressed: () {
+                                          _selectPreviousMonthCL();
+                                          //       ///_calender();
+                                        },
+                                        iconSize: 20.0,
+                                        icon: Icon(
+                                          Icons.arrow_left,
+                                          color: Color(0xFFf15f22),
+                                        ),
+                                      ),
+                                    ),
+                                    // Container(
+                                    //   width: width / 1.6, // Set your desired width here
+                                    //   child: Text(
+                                    //     DateFormat('MMMM').format(_selectedMonthCL),
+                                    //     style: TextStyle(
+                                    //       fontSize: 14,
+                                    //       fontWeight: FontWeight.w600,
+                                    //       fontFamily: 'Calibri',
+                                    //       color: Color(0xFF746cdf),
+                                    //     ),
+                                    //     textAlign: TextAlign.center,
+                                    //   ),
+                                    // ),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        final selected = await showMonthPicker(
+                                          context: context,
+                                          initialDate: DateTime.now(),
+                                          firstDate: DateTime(2000),
+                                          lastDate: DateTime(2100),
+                                        );
+                                        if (selected != null) {
+                                          // Print the selected month and year
+                                          print(
+                                              'Selected month: ${selected.month}, year: ${selected.year}');
+
+                                          // Optionally, update the UI with the selected month and year
+                                          setState(() {
+                                            _selectedMonthCL = selected;
+                                            montlyleavesCL(
+                                                selected.month, selected.year);
+                                          });
+                                        }
+                                      },
+                                      child: Container(
+                                        width: width / 1.6,
+                                        child: Text(
+                                          '${_selectedMonthCL.month}/${_selectedMonthCL.year}',
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: 'Calibri',
+                                              color: Color(0xFF746cdf)),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+
+                                    Container(
+                                      width: width / 6,
+                                      height: 30.0,
+                                      child: IconButton(
+                                          padding: EdgeInsets.only(left: 0),
+                                          onPressed: () {
+                                            _selectNextMonthCL();
+                                          },
+                                          iconSize: 20.0,
+                                          icon: Icon(
+                                            Icons.arrow_right,
+                                            color: Color(0xFFf15f22),
+                                          ),
+                                          alignment: Alignment.center),
+                                    ),
+                                  ],
+                                ),
+                                // Padding(
+                                //   padding: EdgeInsets.only(top: 1.0),
+                                //   // Adjust the padding as needed
+                                //   child: Text(
+                                //     "$noOfleavesinCLs",
+                                //     style: TextStyle(
+                                //       fontSize: 18,
+                                //       fontWeight: FontWeight.w600,
+                                //       fontFamily: 'Calibri',
+                                //       color: Color(0xFFf15f22),
+                                //     ),
+                                //   ),
+                                // ),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 1.0),
+                                  // Adjust the padding as needed
+                                  child: _isLoading
+                                      ? Container(
+                                          width: 15,
+                                          height: 15,
+                                          child: CircularProgressIndicator
+                                              .adaptive(),
+                                        ) // Show circular loading indicator
+                                      : Text(
+                                          "${noOfleavesinCLs ?? 0.0}",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: 'Calibri',
+                                            color: Color(0xFFf15f22),
+                                          ),
+                                        ),
+                                ),
+                              ],
+                            ),
+
+                            // Other child widgets or content can be added here
+                          ),
+
+                          Container(
+                            width: MediaQuery.of(context).size.width / 3.5,
+                            height: 95,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6.0),
+                              border: Border.all(
+                                color: Color(0xFF7F7FE1),
+                                width: 2.0,
+                              ),
+                            ),
+                            child: InkWell(
+                              onTap: () {
+                                DateTime currentTime = DateTime.now();
+                                DateTime formattedlogintime =
+                                    DateTime.parse(logintime!);
+                                // Replace this with your actual login time
+                                DateTime loginTime =
+                                    formattedlogintime /* Replace with your login time */;
+
+                                // Calculate the time difference
+                                Duration timeDifference =
+                                    currentTime.difference(loginTime);
+
+                                // Check if the time difference is less than or equal to 1 hour (3600 seconds)
+                                //  if (timeDifference.inSeconds <= 3600) {
+                                // Login is within the allowed window
+                                if (availablecls <= 0) {
+                                  // Show a toast message
+                                  Commonutils.showCustomToastMessageLong(
+                                      'No CLs Available!', context, 1, 3);
+                                } else {
+                                  printLookupDetailId('CL');
+                                }
+                                //   print(
+                                //       "Login is within 1 hour of current time.");
+                                // } else {
+                                //   // Login is outside the allowed window
+                                // //  _showtimeoutdialog(context);
+                                //   print(
+                                //       "Login is more than 1 hour from current time.");
+                                // }
+                                //  printLookupDetailId('CL');
+                              },
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 3.0),
+                                    child: Text(
+                                      "Available CL's",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Calibri',
+                                        color: Color(0xFFf15f22),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.only(top: 4.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "$availablecls",
+                                          style: TextStyle(
+                                            fontSize: 23,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: 'Calibri',
+                                            color: Color(0xFFf15f22),
+                                          ),
+                                        ),
+                                        // SizedBox(
+                                        //   height: 3.0,
+                                        // ),
+                                        Align(
+                                          alignment: Alignment.bottomCenter,
+                                          child: Text(
+                                            "Click Here to Apply",
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: 'Calibri',
+                                              color: Color(0xFF7F7FE1),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          //
+                        ],
+                      ),
+                      SizedBox(
+                        height: 16.0,
+                      ),
+                    ],
+                  ),
+                  // Container(
+                  //   width: MediaQuery.of(context).size.width,
+                  //
+                  //   padding: EdgeInsets.all(10.0),
+                  //   color: Color(0xFFf15f22), // Set background color to orange
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //     children: [
+                  //       Padding(
+                  //         padding: EdgeInsets.only(left: 4.0),
+                  //         child: Column(
+                  //           children: [
+                  //             Text(
+                  //               'Holiday Title',
+                  //               style: TextStyle(color: Colors.white), // Set text color to white
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       ),
+                  //       Padding(
+                  //         padding: EdgeInsets.only(right: 8.0),
+                  //         child: Column(
+                  //           children: [
+                  //             Text(
+                  //               'From Date',
+                  //               style: TextStyle(color: Colors.white), // Set text color to white
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       ),
+                  //       Padding(
+                  //         padding: EdgeInsets.only(right: 25.0),
+                  //         child: Column(
+                  //           children: [
+                  //             Text(
+                  //               'To Date',
+                  //               style: TextStyle(color: Colors.white), // Set text color to white
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       )
+                  //     ],
+                  //   ),
+                  // ),
+                  // FutureBuilder(
+                  //   future: fetchHolidayList(),
+                  //   builder: (context, snapshot) {
+                  //     if (snapshot.connectionState == ConnectionState.waiting) {
+                  //       return Container(
+                  //           padding: EdgeInsets.all(25.0),
+                  //           child: Center(
+                  //             child: CircularProgressIndicator(),
+                  //           ));
+                  //     } else if (snapshot.hasError) {
+                  //       return Container(
+                  //           padding: EdgeInsets.all(25.0),
+                  //           child: Center(
+                  //             child: Text('Please Login to Check Holidays List'),
+                  //           ));
+                  //     } else if (snapshot.hasData) {
+                  //       List<dynamic> holidays = snapshot.data as List<dynamic>;
+                  //       if (holidays.isEmpty) {
+                  //         return Center(
+                  //           child: Text('No holidays'),
+                  //         );
+                  //       } else {
+                  //         return
+                  // Expanded(
+                  //     //   width: MediaQuery.of(context).size.width,
+                  //     //   height: MediaQuery.of(context).size.height,
+                  //     child: ListView.builder(
+                  //   itemCount: holidaylist.length,
+                  //   scrollDirection: Axis.vertical,
+                  //   shrinkWrap: true,
+                  //   physics: ClampingScrollPhysics(),
+                  //   itemBuilder: (context, index) {
+                  //     Holiday_Model holiday = holidaylist[index];
+                  //     if (holiday.isActive == true) {
+                  //       String? formattedFromDate;
+                  //       String? formattedToDate;
+                  //
+                  //       if (holiday.fromDate != null) {
+                  //         formattedFromDate = DateFormat('dd MMM yyyy').format(DateTime.parse(holiday.fromDate.toString()));
+                  //         print('formattedFromDate$formattedFromDate');
+                  //       }
+                  //
+                  //       // if (holiday.toDate.toString() == null) {
+                  //       //   formattedToDate = DateFormat('dd MMM yyyy').format(DateTime.parse(holiday.toDate.toString()));
+                  //       //   print('formattedToDate$formattedToDate');
+                  //       // } else {
+                  //       //   formattedToDate = formattedFromDate;
+                  //       // }
+                  //
+                  //       if (holiday.toDate == null) {
+                  //         formattedToDate = formattedFromDate;
+                  //       } else {
+                  //         formattedToDate = DateFormat('dd MMM yyyy').format(DateTime.parse(holiday.toDate.toString()));
+                  //         print('formattedToDate: $formattedToDate');
+                  //       }
+                  //
+                  //       return Scrollbar(
+                  //           child: Column(
+                  //         children: [
+                  //           Container(
+                  //             // margin: EdgeInsets.symmetric(vertical: 10.0),
+                  //             //width: MediaQuery.of(context).size.width,
+                  //             //   height: MediaQuery.of(context).size.height,
+                  //             color: Colors.white,
+                  //             padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: 5.0),
+                  //             child: Row(
+                  //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //               children: [
+                  //                 Column(
+                  //                   children: [
+                  //                     //  Text('Holiday Title'),
+                  //                     Container(
+                  //                       width: 100,
+                  //                       child: Text(
+                  //                         holiday.title,
+                  //                         softWrap: true,
+                  //                       ),
+                  //                     )
+                  //                   ],
+                  //                 ),
+                  //                 Column(
+                  //                   mainAxisAlignment: MainAxisAlignment.center,
+                  //                   crossAxisAlignment: CrossAxisAlignment.center,
+                  //                   children: [
+                  //                     //  Text('From Date'),
+                  //                     Container(
+                  //                         width: 90,
+                  //                         child: Text(
+                  //                           formattedFromDate!,
+                  //                           textAlign: TextAlign.center,
+                  //                         ))
+                  //                   ],
+                  //                 ),
+                  //                 Column(
+                  //                   mainAxisAlignment: MainAxisAlignment.center,
+                  //                   crossAxisAlignment: CrossAxisAlignment.center,
+                  //                   children: [
+                  //                     //  Text('From Date'),
+                  //                     Container(
+                  //                         width: 90,
+                  //                         child: Text(
+                  //                           formattedToDate!,
+                  //                           textAlign: TextAlign.center,
+                  //                         ))
+                  //                   ],
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //           ),
+                  //           Container(
+                  //             color: Colors.grey.shade300,
+                  //             width: MediaQuery.of(context).size.width,
+                  //             height: 1.0,
+                  //           )
+                  //         ],
+                  //       ));
+                  //     } else {
+                  //       return Container(); // Return empty container for inactive holidays
+                  //     }
+                  //   },
+                  // ))
+                  //       }
+                  //     } else {
+                  //       return Center(
+                  //         child: Text('No data available'),
+                  //       );
+                  //     }
+                  //   },
+                  // ),
+                ],
+              ),
+            ),
+
+            /* Stack(
               children: [
-                Image.asset(
+                /* Image.asset(
                   'assets/background_layer_2.png',
                   fit: BoxFit.cover,
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,
-                ),
+                ), */
                 // SingleChildScrollView(
                 //   child:
                 Container(
@@ -1181,7 +2133,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                 ),
                 // ),
               ],
-            ),
+            ), */
           ),
         ));
   }
