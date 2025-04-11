@@ -50,7 +50,7 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
       final employeeId = prefs.getString(SharedKeys.employeeId) ?? "";
       final loginTime = prefs.getString('loginTime') ?? 'Unknown';
       final apiKey = prefs.getString(SharedKeys.APIKey) ?? "";
-
+print('apiKey=====$apiKey');
       final currentTime = DateTime.now();
       final formattedLoginTime = DateTime.tryParse(loginTime);
       if (formattedLoginTime != null) {
@@ -59,7 +59,10 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
       }
 
       final apiUrl = Uri.parse('$baseUrl$getselfempolyee$employeeId');
-      final jsonResponse = await http.get(apiUrl, headers: {'APIKey': apiKey});
+
+      final jsonResponse = await http.get(apiUrl,
+          headers: {
+        'APIKey': apiKey});
 
       print('jsonResponse.body: ${jsonResponse.body}');
 

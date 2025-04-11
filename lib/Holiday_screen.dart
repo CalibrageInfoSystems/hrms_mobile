@@ -134,7 +134,7 @@ class HolidaysScreen_screenState extends State<HolidaysScreen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
       String brnchId = prefs.getString(SharedKeys.brnchId) ?? "";
-
+      print('branchId: $brnchId');
       final url = Uri.parse(baseUrl + GetHolidayList + '$currentYear' + '/' + brnchId);
       print('fetchHoliday: $url');
       Map<String, String> headers = {

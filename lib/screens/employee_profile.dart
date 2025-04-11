@@ -78,6 +78,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final bloodlookupid = prefs.getInt('BloodGroups') ?? 0;
     final accessToken = prefs.getString("accessToken") ?? "";
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     if (!isConnected) {
       Commonutils.showCustomToastMessageLong(
           'Please Check the Internet Connection',
@@ -94,7 +95,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': accessToken,
+          'APIKey': APIKey,
         },
       );
 
@@ -190,13 +191,14 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final empolyeid = prefs.getString("employeeId") ?? "";
-
+      String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
       final url = Uri.parse(baseUrl + GetEmployeePhoto + empolyeid);
       final response = await http.get(
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': accessToken,
+
+          'APIKey': APIKey,
         },
       );
       if (response.statusCode == 200) {
@@ -499,9 +501,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                         Text(
                           '''designation''',
                         ),
-                        Text(
-                          'dateofJoin',
-                        ),
+
                       ],
                     ),
                   );
@@ -537,11 +537,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
           style: const TextStyle(
               fontSize: 15, color: Colors.white, fontFamily: 'Calibri'),
         ),
-        Text(
-          '${employeeInfo['dateofJoin']}',
-          style: const TextStyle(
-              fontSize: 12, color: Colors.white, fontFamily: 'Calibri'),
-        ),
+
       ],
     );
   }

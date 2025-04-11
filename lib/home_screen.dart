@@ -434,8 +434,8 @@ class _home_screenState extends State<home_screen>
   Future<void> onConfirmLogout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     SharedPreferencesHelper.putBool(Constants.IS_LOGIN, false);
-    // SharedPreferencesHelper.putBool(Constants.isPunchIn, false);
-    // prefs.remove(Constants.punchTime);
+ SharedPreferencesHelper.putBool(Constants.isPunchIn, false);
+   prefs.remove(Constants.punchTime);
     Commonutils.showCustomToastMessageLong(
         "Logout Successfully", context, 0, 3);
     // Navigator.pushReplacement(

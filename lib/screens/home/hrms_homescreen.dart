@@ -1140,6 +1140,11 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
     bool isPunchIn = _time != null && _time.isNotEmpty;
 
+    await prefs.setBool(Constants.isPunchIn, isPunchIn);
+
+    setState(() {
+      isPunchedIn = isPunchIn; // Local state variable that drives the UI
+    });
     double calculateDistance(lat1, lon1, lat2, lon2) {
       var p = 0.017453292519943295; // Pi/180 to convert degrees to radians
       var c = cos;
@@ -1307,7 +1312,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     final now = DateTime.now();
     _currentDateTime = DateFormat('EEEE, MMM d, yyyy – hh:mm a').format(now);
   }
-
   Future<void> _getCurrentLocation() async {
     try {
       bool serviceEnabled;
@@ -1334,11 +1338,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
-
-      Placemark place = placemarks.first;
-
       if (!mounted) return;
 
       setState(() {
@@ -1346,16 +1345,28 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         _currentPosition = position;
         _latitude = position.latitude.toString();
         _longitude = position.longitude.toString();
-        _address =
-            "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
       });
 
-      /// ✅ Check if values are still empty
-      if (_latitude.isEmpty || _longitude.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to fetch location coordinates.')),
-        );
-        return;
+      // ✅ Print coordinates regardless of address resolution
+      debugPrint("Latitude: $_latitude, Longitude: $_longitude");
+
+      // Now try to get the address (requires internet)
+      try {
+        List<Placemark> placemarks =
+        await placemarkFromCoordinates(position.latitude, position.longitude);
+
+        Placemark place = placemarks.first;
+
+        setState(() {
+          _address =
+          "${place.thoroughfare} ${place.subLocality}, ${place.locality}, "
+              "${place.administrativeArea}, ${place.postalCode}, ${place.country}";
+        });
+      } catch (e) {
+        debugPrint("Failed to fetch address: $e");
+        setState(() {
+          _address = "Address unavailable (offline)";
+        });
       }
 
       if (_mapController != null) {
@@ -1369,12 +1380,76 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       setState(() {
         _currentLocation = "Location unavailable";
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching location: $e')),
-      );
       rethrow;
     }
   }
+
+  // Future<void> _getCurrentLocation() async {
+  //   try {
+  //     bool serviceEnabled;
+  //     LocationPermission permission;
+  //
+  //     serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  //     if (!serviceEnabled) {
+  //       return Future.error('Location services are disabled.');
+  //     }
+  //
+  //     permission = await Geolocator.checkPermission();
+  //     if (permission == LocationPermission.denied) {
+  //       permission = await Geolocator.requestPermission();
+  //       if (permission == LocationPermission.denied) {
+  //         return Future.error('Location permissions are denied');
+  //       }
+  //     }
+  //
+  //     if (permission == LocationPermission.deniedForever) {
+  //       return Future.error('Location permissions are permanently denied.');
+  //     }
+  //
+  //     Position position = await Geolocator.getCurrentPosition(
+  //       desiredAccuracy: LocationAccuracy.high,
+  //     );
+  //
+  //     List<Placemark> placemarks =
+  //         await placemarkFromCoordinates(position.latitude, position.longitude);
+  //
+  //     Placemark place = placemarks.first;
+  //
+  //     if (!mounted) return;
+  //
+  //     setState(() {
+  //       _currentLocation = "${position.latitude}, ${position.longitude}";
+  //       _currentPosition = position;
+  //       _latitude = position.latitude.toString();
+  //       _longitude = position.longitude.toString();
+  //       _address = "${place.thoroughfare} ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}";
+  //     });
+  //
+  //     /// ✅ Check if values are still empty
+  //     if (_latitude.isEmpty || _longitude.isEmpty) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Failed to fetch location coordinates.')),
+  //       );
+  //       return;
+  //     }
+  //
+  //     if (_mapController != null) {
+  //       _mapController!.animateCamera(
+  //         CameraUpdate.newLatLng(
+  //           LatLng(position.latitude, position.longitude),
+  //         ),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     setState(() {
+  //       _currentLocation = "Location unavailable";
+  //     });
+  //     // ScaffoldMessenger.of(context).showSnackBar(
+  //     //   SnackBar(content: Text('Error fetching location: $e')),
+  //     // );
+  //     rethrow;
+  //   }
+  // }
 
   Future<void> _captureAndProcessImage() async {
     try {
@@ -1410,8 +1485,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         ],
       );
 
-      String textContent =
-          "Time: $_time\nLocation: $_latitude, $_longitude\n$_address";
+      String textContent = "Time: $_time\nLocation: $_latitude, $_longitude\n$_address";
 
       TextPainter textPainter = TextPainter(
         text: TextSpan(text: textContent, style: textStyle),

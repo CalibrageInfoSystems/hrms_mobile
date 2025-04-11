@@ -283,7 +283,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                       currentTime.difference(loginTime);
 
                                   // Check if the time difference is less than or equal to 1 hour (3600 seconds)
-                                  if (timeDifference.inSeconds <= 3600) {
+                                //  if (timeDifference.inSeconds <= 3600) {
                                     // Login is within the allowed window
                                     Navigator.of(context).pushReplacement(
                                       MaterialPageRoute(
@@ -301,14 +301,14 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                       ),
                                     );
 
-                                    print(
-                                        "Login is within 1 hour of current time.");
-                                  } else {
-                                    // Login is outside the allowed window
-                                 //   _showtimeoutdialog(context);
-                                    print(
-                                        "Login is more than 1 hour from current time.");
-                                  }
+                                 //    print(
+                                 //        "Login is within 1 hour of current time.");
+                                 //  } else {
+                                 //    // Login is outside the allowed window
+                                 // //   _showtimeoutdialog(context);
+                                 //    print(
+                                 //        "Login is more than 1 hour from current time.");
+                                 //  }
 
                                   // Handle the apply button click event
                                 },
@@ -602,7 +602,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                             currentTime.difference(loginTime);
 
                                         // Check if the time difference is less than or equal to 1 hour (3600 seconds)
-                                        if (timeDifference.inSeconds <= 3600) {
+                                    //    if (timeDifference.inSeconds <= 3600) {
                                           // Login is within the allowed window
                                           if (availablepls <= 0) {
                                             // Show a toast message
@@ -617,12 +617,12 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                           }
                                           print(
                                               "Login is within 1 hour of current time.");
-                                        } else {
+                                      /*  } else {
                                           // Login is outside the allowed window
                                        //   _showtimeoutdialog(context);
                                           print(
                                               "Login is more than 1 hour from current time.");
-                                        }
+                                        }*/
 
                                         // Navigator.of(context).pushReplacement(
                                         //   MaterialPageRoute(
@@ -924,7 +924,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                         currentTime.difference(loginTime);
 
                                     // Check if the time difference is less than or equal to 1 hour (3600 seconds)
-                                    if (timeDifference.inSeconds <= 3600) {
+                                  //  if (timeDifference.inSeconds <= 3600) {
                                       // Login is within the allowed window
                                       if (availablecls <= 0) {
                                         // Show a toast message
@@ -933,14 +933,14 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                                       } else {
                                         printLookupDetailId('CL');
                                       }
-                                      print(
-                                          "Login is within 1 hour of current time.");
-                                    } else {
-                                      // Login is outside the allowed window
-                                    //  _showtimeoutdialog(context);
-                                      print(
-                                          "Login is more than 1 hour from current time.");
-                                    }
+                                    //   print(
+                                    //       "Login is within 1 hour of current time.");
+                                    // } else {
+                                    //   // Login is outside the allowed window
+                                    // //  _showtimeoutdialog(context);
+                                    //   print(
+                                    //       "Login is more than 1 hour from current time.");
+                                    // }
                                     //  printLookupDetailId('CL');
                                   },
                                   child: Column(
