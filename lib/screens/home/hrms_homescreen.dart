@@ -124,7 +124,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   String? photoData;
   String Gender = '';
   String EmployeName = '';
-  String? employee_designation;
+  String employee_designation = '';
   String empolyeid = '';
   String accessToken = '';
   String APIKey = '';
@@ -1389,9 +1389,11 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   Future<void> _captureAndProcessImage() async {
     try {
       final ImagePicker picker = ImagePicker();
+
       final XFile? pickedFile = await picker.pickImage(
         source: ImageSource.camera,
-        preferredCameraDevice: CameraDevice.front,
+        preferredCameraDevice: CameraDevice.front, // Request front camera
+        imageQuality: 30,
       );
       if (pickedFile == null) {
         if (!mounted) return;
@@ -1451,7 +1453,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       final directory = await getApplicationDocumentsDirectory();
       final filePath = '${directory.path}/hrms_emp.png';
       File file = File(filePath);
-      await file.writeAsBytes(pngBytes);
+      file.writeAsBytes(pngBytes);
       // Insert into DailyPunchInAndOut table
       await _insertPunchData(
         DateTime.now().toIso8601String(),

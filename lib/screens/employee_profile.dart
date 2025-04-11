@@ -592,9 +592,8 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
 
   Future<void> pickImage(ImageSource source, BuildContext context) async {
     try {
-      final pickedImage = await ImagePicker().pickImage(
-          source: ImageSource.camera,
-          preferredCameraDevice: CameraDevice.front);
+      final pickedImage = await ImagePicker()
+          .pickImage(source: source, preferredCameraDevice: CameraDevice.front);
       if (pickedImage == null) {
         throw Exception('No image selected');
       } else {

@@ -224,7 +224,7 @@ class _home_screenState extends State<home_screen>
               );
             },
           ),
-          ListTile(
+          /*  ListTile(
             leading: const Icon(
               Icons.star,
               color: Colors.black,
@@ -243,7 +243,7 @@ class _home_screenState extends State<home_screen>
               );
               // Handle the onTap action for Logout
             },
-          ),
+          ), */
           ListTile(
             leading: Image.asset(
               'assets/holiday.png',
