@@ -2,13 +2,13 @@ class DailyPunch {
 
   final String userId;
   final DateTime punchDate;
-  final int isPunchIn;
+  final bool isPunchIn;
   final double latitude;
   final double longitude;
    String? address;
   final String remarks;
   final String punchMode;
-  final int serverUpdateStatus;
+  final bool serverUpdateStatus;
   final String createdByUserId;
   final DateTime createdDate;
 
@@ -31,13 +31,17 @@ class DailyPunch {
     return DailyPunch(
       userId: json['UserId'],
       punchDate: DateTime.parse(json['PunchDate']),
-      isPunchIn: json['IsPunchIn'],
+      isPunchIn: json['IsPunchIn'] is bool
+          ? json['IsPunchIn']
+          : json['IsPunchIn'] == 1,
       latitude: (json['Latitude'] as num).toDouble(),
       longitude: (json['Longitude'] as num).toDouble(),
       address: json['Address'],
       remarks: json['Remarks'] ?? '',
       punchMode: json['PunchMode'],
-      serverUpdateStatus: json['ServerUpdateStatus'],
+      serverUpdateStatus: json['ServerUpdateStatus'] is bool
+          ? json['ServerUpdateStatus']
+          : json['ServerUpdateStatus'] == 1,
       createdByUserId: json['CreatedByUserId'],
       createdDate: DateTime.parse(json['CreatedDate']),
     );

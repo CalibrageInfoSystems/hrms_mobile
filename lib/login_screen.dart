@@ -504,6 +504,7 @@ class _LoginScreenState extends State<LoginScreen> {
       prefs.setInt('leavereasons', lookups['LeaveReasons']);
       prefs.setInt('ResignationReasons', lookups['ResignationReasons']);
       prefs.setInt('BloodGroups', lookups['BloodGroups']);
+      prefs.setInt('PunchModes', lookups['PunchModes']);
       return jsonData;
     } else {
       throw Exception(

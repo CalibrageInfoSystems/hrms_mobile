@@ -2124,7 +2124,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           'Longitude': longitude,
           'Address': address,
           'Remarks':"",
-          'PunchMode':"Mobile",
+          'PunchMode':410,
           'CreatedByUserId': userId,
           'CreatedDate': punchTime,
           'ServerUpdateStatus': false, // Unsynced data
