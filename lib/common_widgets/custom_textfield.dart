@@ -7,6 +7,7 @@ class CustomTextField extends StatelessWidget {
   final bool readOnly;
   final int maxLines;
   final Color? fillColor;
+  final Color? borderColor;
   final VoidCallback? onTap;
   final void Function(String)? onChanged;
   final String? Function(String?)? validator;
@@ -35,6 +36,7 @@ class CustomTextField extends StatelessWidget {
     this.suffixIcon,
     this.errorText,
     this.keyboardType,
+    this.borderColor,
   });
 
   @override
@@ -64,23 +66,24 @@ class CustomTextField extends StatelessWidget {
             fontWeight: FontWeight.normal,
           ), // Replace with your custom hint style
           border: customBorder(
-            borderColor: Colors.black.withOpacity(0.6),
+            // borderColor: borderColor,
+            borderColor: borderColor ?? Colors.black.withOpacity(0.6),
             // borderColor: Styles.primaryColor,
           ),
           focusedErrorBorder: customBorder(
-            borderColor: Colors.black.withOpacity(0.6),
+            borderColor: borderColor ?? Colors.black.withOpacity(0.6),
             // borderColor: Styles.primaryColor,
           ),
           disabledBorder: customBorder(
-            borderColor: Colors.black.withOpacity(0.6),
+            borderColor: borderColor ?? Colors.black.withOpacity(0.6),
             // borderColor: Styles.primaryColor,
           ),
           enabledBorder: customBorder(
-            borderColor: Colors.black.withOpacity(0.6),
+            borderColor: borderColor ?? Colors.black.withOpacity(0.6),
             // borderColor: Styles.primaryColor,
           ),
           focusedBorder: customBorder(
-            borderColor: Colors.black.withOpacity(0.6),
+            borderColor: borderColor ?? Colors.black.withOpacity(0.6),
             // borderColor: Styles.primaryColor,
           ),
           errorBorder: customBorder(

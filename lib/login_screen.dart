@@ -58,41 +58,40 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CommonStyles.bgColor,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  logoNdTitle(),
-                  const SizedBox(height: 20),
-                  userNameField(),
-                  const SizedBox(height: 20),
-                  passwordField(),
-                  const SizedBox(height: 15),
-                  forgotpasswordField(),
-                  const SizedBox(height: 30),
-                  signinBtn(),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-
-      /* Stack(
+      body: Stack(
         children: [
-         /*  Positioned.fill(
+          Positioned.fill(
             child: Image.asset(
               'assets/background_layer_2.png',
               fit: BoxFit.cover,
             ),
-          ), */
-           ],
-      ), */
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(40.0),
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      logoNdTitle(),
+                      const SizedBox(height: 20),
+                      userNameField(),
+                      const SizedBox(height: 20),
+                      passwordField(),
+                      const SizedBox(height: 15),
+                      forgotpasswordField(),
+                      const SizedBox(height: 30),
+                      signinBtn(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -247,6 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: _userNameController,
       errorText: _commonError ? _commonErrorMsg : null,
       maxLength: 8,
+      borderColor: CommonStyles.primaryColor,
       inputFormatters: [
         // Allow only alphanumeric characters
         FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
@@ -280,6 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
       maxLength: 25,
       counterText: '',
       obscureText: _obscureText,
+      borderColor: CommonStyles.primaryColor,
       suffixIcon: IconButton(
         icon: Icon(
           _obscureText ? Icons.visibility_off : Icons.visibility,

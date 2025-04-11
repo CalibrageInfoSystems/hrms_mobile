@@ -317,8 +317,10 @@ class DataAccessHandler with ChangeNotifier {
       return null;
     }
   }
+
   Future<String?> getOnlyStringValueFromDb(
-      String query,) async {
+    String query,
+  ) async {
     List<Map<String, dynamic>> result;
     try {
       final db = await dbHelper.database;
@@ -616,6 +618,7 @@ class DataAccessHandler with ChangeNotifier {
         ? result.first['TrackType']
         : ''; // Default to '09:00' if no result
   }
+
 // Method to check if GeoBoundary has a point for the current date
   Future<bool> hasPointForToday() async {
     // Get a reference to the database
@@ -675,8 +678,7 @@ class DataAccessHandler with ChangeNotifier {
     appendLog("Executing query _checkIfExcludedDate: $query");
 
     // Query the HolidayConfiguration table for the current date
-    final List<Map<String, dynamic>> result =
-        await db.rawQuery(query);
+    final List<Map<String, dynamic>> result = await db.rawQuery(query);
 
     // If the result is not empty, the current date is a holiday (excluded)
     return result.isNotEmpty;
@@ -686,19 +688,35 @@ class DataAccessHandler with ChangeNotifier {
   Future<String> getShiftinTime() async {
     final db = await dbHelper.database;
 
-    final List<Map<String, dynamic>> result = await db
-        .rawQuery('SELECT ShiftIn FROM  ShiftDetails ');
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery('SELECT ShiftIn FROM  ShiftDetails ');
     return result.isNotEmpty
         ? result.first['ShiftIn']
         : ''; // Default to '09:00' if no result
+  }
+
+  Future<List<Map<String, dynamic>>> getEmployeeShiftDetails() async {
+    final db = await dbHelper.database;
+
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery('SELECT * from ShiftDetails');
+    return result.isNotEmpty ? result : [];
+  }
+
+  Future<List<Map<String, dynamic>>> getTrackingInfo() async {
+    final db = await dbHelper.database;
+
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery('SELECT * from TrackingInfo');
+    return result.isNotEmpty ? result : [];
   }
 
 // Fetch the ShiftToTime from the UserInfos table
   Future<String> getShiftoutTime() async {
     final db = await dbHelper.database;
 
-    final List<Map<String, dynamic>> result = await db
-        .rawQuery('SELECT ShiftOut FROM  ShiftDetails ');
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery('SELECT ShiftOut FROM  ShiftDetails ');
     return result.isNotEmpty
         ? result.first['ShiftOut']
         : ''; // Default to '09:00' if no result
