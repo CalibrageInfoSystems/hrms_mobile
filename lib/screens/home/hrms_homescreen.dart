@@ -142,16 +142,23 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
   late Future<List<BirthdayBanner>> futureBirthdayBanners;
 
+  late Future<Map<String, dynamic>> futureEmployeeShiftDetails;
+
+  late Future<String> futureTrackingInfo;
+
   @override
   void initState() {
     super.initState();
     futureCheckInOutStatus = fetchCheckInOutStatus();
+    futureEmployeeShiftDetails = getEmployeeShiftDetails();
+
     // getLoginTime();
     loadCurrentLocation();
     getuserdata();
     futureBirthdayBanners = fetchBirthBanners();
     _loademployeleaves();
     fetchLeadCounts();
+    futureTrackingInfo = getTrackingInfo();
     fetchpendingrecordscount();
     backgroundService =
         BackgroundService(userId: userID, dataAccessHandler: dataAccessHandler);
@@ -209,6 +216,17 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       setState(() {
         ismatchedlogin = true;
       });
+    }
+  }
+
+  Future<String> getTrackingInfo() async {
+    try {
+      final dataAccessHandler = DataAccessHandler();
+      List<Map<String, dynamic>> results =
+          await dataAccessHandler.getTrackingInfo();
+      return results.first['TrackType'];
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -312,15 +330,41 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                             borderRadius: BorderRadius.circular(16),
                             color: Colors.white,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              shiftTimingAndStatus(),
-                              const SizedBox(height: 5),
-                              checkInNOut(),
-                            ],
-                          ),
+                          child: FutureBuilder(
+                              future: futureEmployeeShiftDetails,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Skeletonizer(
+                                    enabled: true,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        shiftTimingAndStatus({}),
+                                        const SizedBox(height: 5),
+                                        checkInNOut({}),
+                                      ],
+                                    ),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return const SizedBox();
+                                }
+                                final Map<String, dynamic> shiftDetails =
+                                    snapshot.data!;
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    shiftTimingAndStatus(shiftDetails),
+                                    const SizedBox(height: 5),
+                                    checkInNOut(shiftDetails),
+                                  ],
+                                );
+                              }),
                         ),
                         const SizedBox(height: 10),
                         hrmsSection(size),
@@ -344,6 +388,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
+/* 
   Row hrmsSection(Size size) {
     final isTablet = size.width > 600;
     return Row(
@@ -352,7 +397,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           leaveType: 'PL\'s',
           size: size,
           data: "$usedPrivilegeLeavesInYear/$allottedPrivilegeLeaves",
-          icon: Icons.edit_calendar_outlined,
+          assetName: 'assets/pl.svg',
           themeColor: const Color(0xffDC2626),
           onTap: () {
             Navigator.push(
@@ -368,7 +413,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           leaveType: 'CL\'s',
           size: size,
           data: "$usedCasualLeavesInYear/$allotcausalleaves",
-          icon: Icons.calendar_month,
+          assetName: 'assets/cl.svg',
           themeColor: const Color(0xff2563EB),
           onTap: () {
             Navigator.push(
@@ -384,7 +429,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           leaveType: 'Comp Off',
           data: '1/0',
           size: size,
-          icon: Icons.calendar_today_rounded,
+          assetName: 'assets/comp-off.svg',
           themeColor: const Color(0xff9333EA),
         ),
       ],
@@ -398,16 +443,17 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         customLeaveTypeBox(
           leaveType: 'Travelled',
           size: size,
-          data: totalDistance.toStringAsFixed(2) + ' KM',
-          icon: Icons.mode_of_travel_outlined,
+          data: '${totalDistance.toStringAsFixed(2)} KM',
+          assetName: 'assets/travelled.svg',
           themeColor: const Color(0xffFBBF24),
+          hasToolTipRequired: true,
         ),
         SizedBox(width: isTablet ? 20 : 12), // Adjust spacing for tablets
         customLeaveTypeBox(
           leaveType: 'Today Visits',
           size: size,
           data: '$todayLeadsCount',
-          icon: Icons.calendar_month,
+          assetName: 'assets/today-visit.svg',
           themeColor: const Color(0xff16A34A),
           onTap: () {
             Navigator.push(
@@ -423,7 +469,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           leaveType: 'Total Visits',
           size: size,
           data: '$totalLeadsCount',
-          icon: Icons.calendar_today_rounded,
+          assetName: 'assets/total-visits.svg',
           themeColor: const Color(0xff4F46E5),
           onTap: () {
             Navigator.push(
@@ -442,9 +488,10 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     required String leaveType,
     required String data,
     required Color themeColor,
-    IconData? icon,
+    required String assetName,
     void Function()? onTap,
     required Size size,
+    bool hasToolTipRequired = false,
   }) {
     final isTablet = size.width > 600;
     return Expanded(
@@ -457,41 +504,255 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             borderRadius: BorderRadius.circular(16),
             color: Colors.white,
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Stack(
             children: [
-              Container(
-                padding: EdgeInsets.all(isTablet ? 20 : 16),
-                decoration: BoxDecoration(
-                  color: themeColor.withOpacity(0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: /* Image.asset(
-                  'assets/pl_vector.png',
-                  fit: BoxFit.cover,
-                  width: 30,
-                  height: 30,
-                ), */
+              Positioned.fill(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(isTablet ? 20 : 16),
+                      decoration: BoxDecoration(
+                        color: themeColor.withOpacity(0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: /* Image.asset(
+                        'assets/pl_vector.png',
+                        fit: BoxFit.cover,
+                        width: 30,
+                        height: 30,
+                      ), */
+                          SvgPicture.asset(
+                        assetName,
+                        fit: BoxFit.cover,
+                        width: isTablet ? 40 : 30,
+                        height: isTablet ? 40 : 30,
+                      ),
 
-                    Icon(
-                  icon ?? Icons.check_circle_outline,
-                  color: themeColor,
-                  size: isTablet ? 40 : 30,
+                      /*  Icon(
+                        icon ?? Icons.check_circle_outline,
+                        color: themeColor,
+                        size: isTablet ? 40 : 30,
+                      ), */
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      leaveType,
+                      style: CommonStyles.txStyF14CbFcF5.copyWith(
+                        fontSize: isTablet ? 16 : 14,
+                      ),
+                    ),
+                    Text(
+                      data,
+                      style: CommonStyles.txStyF20CbFcF5.copyWith(
+                        fontSize: isTablet ? 16 : 14,
+                      ),
+                    )
+                  ],
                 ),
               ),
-              const SizedBox(height: 5),
-              Text(
-                leaveType,
-                style: CommonStyles.txStyF14CbFcF5.copyWith(
-                  fontSize: isTablet ? 16 : 14,
+             
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+ */
+
+  Row hrmsSection(Size size) {
+    final isTablet = size.width > 600;
+    return Row(
+      children: [
+        customLeaveTypeBox(
+          leaveType: 'PL\'s',
+          size: size,
+          data: "$usedPrivilegeLeavesInYear/$allottedPrivilegeLeaves",
+          assetName: 'assets/pl.svg',
+          iconColor: CommonStyles.plBgColor,
+          iconBgColor: CommonStyles.plColor,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Myleaveslist(leaveType: 'PL'),
+              ),
+            );
+          },
+        ),
+        SizedBox(width: isTablet ? 20 : 12), // Adjust spacing for tablets
+        customLeaveTypeBox(
+          leaveType: 'CL\'s',
+          size: size,
+          iconColor: CommonStyles.clBgColor,
+          iconBgColor: CommonStyles.clColor,
+          data: "$usedCasualLeavesInYear/$allotcausalleaves",
+          assetName: 'assets/cl.svg',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Myleaveslist(leaveType: 'CL'),
+              ),
+            );
+          },
+        ),
+        SizedBox(width: isTablet ? 20 : 12), // Adjust spacing for tablets
+        customLeaveTypeBox(
+          leaveType: 'Comp Off',
+          data: '1/0',
+          size: size,
+          assetName: 'assets/comp-off.svg',
+          iconColor: CommonStyles.compoffColor,
+          iconBgColor: CommonStyles.compoffBgColor,
+        ),
+      ],
+    );
+  }
+
+  Row sgtSection(Size size) {
+    final isTablet = size.width > 600;
+    return Row(
+      children: [
+        customLeaveTypeBox(
+          leaveType: 'Travelled',
+          size: size,
+          data: '${totalDistance.toStringAsFixed(2)} KM',
+          assetName: 'assets/travelled.svg',
+          iconColor: CommonStyles.travelledColor,
+          iconBgColor: CommonStyles.travelledBgColor,
+          hasToolTipRequired: true,
+        ),
+        SizedBox(width: isTablet ? 20 : 12), // Adjust spacing for tablets
+        customLeaveTypeBox(
+          leaveType: 'Today Visits',
+          size: size,
+          data: '$todayLeadsCount',
+          assetName: 'assets/today-visit.svg',
+          iconColor: CommonStyles.todaysVisitColor,
+          iconBgColor: CommonStyles.todaysVisitBgColor,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ViewLeads(isToday: true),
+              ),
+            );
+          },
+        ),
+        SizedBox(width: isTablet ? 20 : 12), // Adjust spacing for tablets
+        customLeaveTypeBox(
+          leaveType: 'Total Visits',
+          size: size,
+          data: '$totalLeadsCount',
+          assetName: 'assets/total-visits.svg',
+          iconColor: CommonStyles.totalVisitColor,
+          iconBgColor: CommonStyles.totalVisitBgColor,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ViewLeads(),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget customLeaveTypeBox({
+    required String leaveType,
+    required String data,
+    required Color iconColor,
+    required Color iconBgColor,
+    required String assetName,
+    void Function()? onTap,
+    required Size size,
+    bool hasToolTipRequired = false,
+  }) {
+    final isTablet = size.width > 600;
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: size.height * 0.19,
+          padding: EdgeInsets.all(isTablet ? 20 : 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Colors.white,
+          ),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(isTablet ? 20 : 16),
+                      decoration: BoxDecoration(
+                        color: iconBgColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: /* Image.asset(
+                        'assets/pl_vector.png',
+                        fit: BoxFit.cover,
+                        width: 30,
+                        height: 30,
+                      ), */
+                          SvgPicture.asset(
+                        assetName,
+                        color: iconColor,
+                        fit: BoxFit.cover,
+                        width: isTablet ? 40 : 30,
+                        height: isTablet ? 40 : 30,
+                      ),
+
+                      /*  Icon(
+                        icon ?? Icons.check_circle_outline,
+                        color: themeColor,
+                        size: isTablet ? 40 : 30,
+                      ), */
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      leaveType,
+                      style: CommonStyles.txStyF14CbFcF5.copyWith(
+                        fontSize: isTablet ? 16 : 14,
+                      ),
+                    ),
+                    Text(
+                      data,
+                      style: CommonStyles.txStyF20CbFcF5.copyWith(
+                        fontSize: isTablet ? 16 : 14,
+                      ),
+                    )
+                  ],
                 ),
               ),
-              Text(
-                data,
-                style: CommonStyles.txStyF20CbFcF5.copyWith(
-                  fontSize: isTablet ? 16 : 14,
-                ),
-              )
+              if (hasToolTipRequired)
+                FutureBuilder(
+                    future: futureTrackingInfo,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SizedBox();
+                      } else if (snapshot.hasError) {
+                        return const SizedBox();
+                      }
+                      final String employeeTrackType = snapshot.data!;
+                      return Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Tooltip(
+                          message: employeeTrackType,
+                          child: Icon(
+                            Icons.info_outline,
+                            color: Colors.grey[700],
+                            size: 20,
+                          ),
+                        ),
+                      );
+                    }),
             ],
           ),
         ),
@@ -499,24 +760,25 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-  Widget checkInNOut() {
+  Widget checkInNOut(Map<String, dynamic> shiftDetails) {
     return FutureBuilder(
       future: futureCheckInOutStatus,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Skeletonizer(
             enabled: true,
-            child: checkInNOutTemplate(true),
+            child: checkInNOutTemplate(true, shiftDetails),
           );
         } else if (snapshot.hasError) {
           return const SizedBox();
         }
-        return checkInNOutTemplate(isPunchedIn);
+        return checkInNOutTemplate(isPunchedIn, shiftDetails);
       },
     );
   }
 
-  Row checkInNOutTemplate(bool isCheckIn) {
+  Row checkInNOutTemplate(bool isCheckIn, Map<String, dynamic> shiftDetails) {
+    print('ddd: ${shiftDetails['ShiftIn']}');
     return Row(
       children: [
         Expanded(
@@ -532,7 +794,11 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               Text(
                 isCheckIn
                     ? "at ${formatPunchTime(_time)}"
-                    : "09:00 AM to 6:00 PM",
+                    : shiftDetails['ShiftIn'] != null &&
+                            shiftDetails['ShiftOut'] != null
+                        ? "${formatShiftTime(shiftDetails['ShiftIn'])} to ${formatShiftTime(shiftDetails['ShiftOut'])}"
+                        : "No Shift Timings",
+                // : "09:00 AM to 6:00 PM",
                 style: TextStyle(fontSize: 14, color: Colors.grey[700]),
               ),
             ],
@@ -567,6 +833,24 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
+  String? formatShiftTime(String? timeString) {
+    if (timeString == null || timeString.isEmpty) {
+      return null; // Return null if the input is null or empty
+    }
+
+    try {
+      // Parse the input string into a DateTime object
+      final DateTime time = DateFormat('HH:mm:ss').parse(timeString);
+
+      // Format the time into the desired format (e.g., 09:00 AM / 6:00 PM)
+      return DateFormat('hh:mm a').format(time);
+    } catch (e) {
+      // Handle parsing errors
+      print('Error formatting time: $e');
+      return null;
+    }
+  }
+
   Future<void> checkInOut() async {
     setState(() {
       isRequestProcessing = true;
@@ -579,7 +863,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-  Row shiftTimingAndStatus() {
+  Row shiftTimingAndStatus(Map<String, dynamic> shiftDetails) {
     return Row(
       children: [
         const Icon(
@@ -596,25 +880,43 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           ),
         ),
         const SizedBox(width: 10),
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 3,
-          ),
-          decoration: BoxDecoration(
-            color: CommonStyles.primaryColor.withOpacity(0.4),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Text(
-            'Shift Morning',
-            style: TextStyle(
-              fontSize: 12,
-              fontFamily: 'Calibri',
-              color: CommonStyles.primaryColor,
-            ),
-          ),
-        )
+        shiftType(shiftDetails['ShiftTypeName'] ?? 'Null'),
+        /* FutureBuilder(
+            future: futureEmployeeShiftDetails,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Skeletonizer(
+                  enabled: true,
+                  child: shiftType('Morning Shift'),
+                );
+              } else if (snapshot.hasError) {
+                return const SizedBox();
+              }
+              final Map<String, dynamic> shiftDetails = snapshot.data!;
+              return shiftType(shiftDetails['ShiftTypeName'] ?? 'Null');
+            }) */
       ],
+    );
+  }
+
+  Container shiftType(String type) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 3,
+      ),
+      decoration: BoxDecoration(
+        color: CommonStyles.primaryColor.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        type,
+        style: TextStyle(
+          fontSize: 12,
+          fontFamily: 'Calibri',
+          color: CommonStyles.primaryColor,
+        ),
+      ),
     );
   }
 
@@ -2115,24 +2417,23 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       int punchResult = 0;
 
       // if (!isCheckedIn) {
-        // **Punch In: Insert new record in DailyPunchInAndOutDetails**
-        Map<String, dynamic> punchInData = {
-          'UserId': userId,
-          'PunchDate': punchTime,
-          'IsPunchIn': isCheckedIn,
-          'Latitude': latitude,
-          'Longitude': longitude,
-          'Address': address,
-          'Remarks':"",
-          'PunchMode':410,
-          'CreatedByUserId': userId,
-          'CreatedDate': punchTime,
-          'ServerUpdateStatus': false, // Unsynced data
-        };
+      // **Punch In: Insert new record in DailyPunchInAndOutDetails**
+      Map<String, dynamic> punchInData = {
+        'UserId': userId,
+        'PunchDate': punchTime,
+        'IsPunchIn': isCheckedIn,
+        'Latitude': latitude,
+        'Longitude': longitude,
+        'Address': address,
+        'Remarks': "",
+        'PunchMode': 410,
+        'CreatedByUserId': userId,
+        'CreatedDate': punchTime,
+        'ServerUpdateStatus': false, // Unsynced data
+      };
 
-        punchResult = await db.insert('DailyPunchInAndOutDetails', punchInData);
+      punchResult = await db.insert('DailyPunchInAndOutDetails', punchInData);
       // }
-
 
       // else {
       //   // **Punch Out: Update last Punch In record**
@@ -2168,7 +2469,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           // **Prevent duplicate inserts**
           List<Map<String, dynamic>> existingFiles = await db.rawQuery(
               "SELECT * FROM FileRepository WHERE FileName = ? AND LookupType = ? AND ServerUpdatedStatus = 0",
-              [fileName, isCheckedIn ?  376 : 377]);
+              [fileName, isCheckedIn ? 376 : 377]);
 
           if (existingFiles.isEmpty) {
             Map<String, dynamic> fileData = {
@@ -2520,6 +2821,17 @@ class BackgroundService {
   }
 }
 
+Future<Map<String, dynamic>> getEmployeeShiftDetails() async {
+  try {
+    final dataAccessHandler = DataAccessHandler();
+    List<Map<String, dynamic>> results =
+        await dataAccessHandler.getEmployeeShiftDetails();
+    return results.first;
+  } catch (e) {
+    rethrow;
+  }
+}
+
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   appendLog('Service started...');
@@ -2587,8 +2899,10 @@ void onStart(ServiceInstance service) async {
         DateTime now = DateTime.now();
 
         // Fetch shift timings and weekoffs from the database
-     final shiftFromTime = await dataAccessHandler.getShiftinTime(); // Example user ID 13
-        final shiftToTime = await dataAccessHandler.getShiftoutTime(); // Example user ID 13
+        final shiftFromTime =
+            await dataAccessHandler.getShiftinTime(); // Example user ID 13
+        final shiftToTime =
+            await dataAccessHandler.getShiftoutTime(); // Example user ID 13
         //  final weekoffs = await dataAccessHandler.getweekoffs();            // List of week-off days (e.g., [DateTime.monday, DateTime.friday])
 
         // Parse the shift times into DateTime objects for comparison
@@ -2607,9 +2921,10 @@ void onStart(ServiceInstance service) async {
         print('shiftStart==========>${shiftStart}');
         print('shiftEnd==========>${shiftEnd}');
         // Check if the current time is within the shift hours
-        bool isWithinTrackingHours = now.isAfter(shiftStart) && now.isBefore(shiftEnd);
+        bool isWithinTrackingHours =
+            now.isAfter(shiftStart) && now.isBefore(shiftEnd);
         print("track condition for data insert: $isWithinTrackingHours ");
-    /*    //  bool isWeekend = now.weekday == DateTime.sunday;
+        /*    //  bool isWeekend = now.weekday == DateTime.sunday;
         final String weekoffsString = await dataAccessHandler.getweekoffs();
         // Map weekday names to their corresponding integer values (1 = Monday, ..., 7 = Sunday)
         final Map<String, int> dayToIntMap = {
@@ -2644,19 +2959,18 @@ void onStart(ServiceInstance service) async {
 
         appendLog("track condition for data insert: $isWithinTrackingHours  ");
 
-
         // Check if tracking is allowed
         // if (isWithinTrackingHours && !isExcludedDate && !isWeekOff) {
         //   //   if ( !isExcludedDate ) {
         //   service.invoke('on_location_changed', position.toJson());
         //
 
-       bool  canTrackEmployee = await dataAccessHandler.canTrackEmployee();
+        bool canTrackEmployee = await dataAccessHandler.canTrackEmployee();
         print(" track condition for canTrackEmployee: $canTrackEmployee");
-   String trackCondition = await dataAccessHandler.gettracktype();
+        String trackCondition = await dataAccessHandler.gettracktype();
         print(" track condition for tracktype: $trackCondition");
         bool hasPointToday = await dataAccessHandler.hasPointForToday();
-       bool hasleaveToday = await dataAccessHandler.hasleaveForToday();
+        bool hasleaveToday = await dataAccessHandler.hasleaveForToday();
         //
         //   print(
         //       "track condition hasleaveToday: $hasleaveToday  hasPointToday ======> $hasPointToday");

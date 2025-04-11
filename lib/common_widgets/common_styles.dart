@@ -18,6 +18,24 @@ class CommonStyles {
   static const primaryColor = Color(0xFFf15f22);
   static const appBgColor = Color(0xFFf2f2f2);
 
+  static const travelledColor = Color(0xFF2563EB);
+  static const travelledBgColor = Color(0xFFDBEAFE);
+
+  static const todaysVisitColor = Color(0xFF16A34A);
+  static const todaysVisitBgColor = Color(0xFFDCFCE7);
+
+  static const totalVisitColor = Color(0xFF9333EA);
+  static const totalVisitBgColor = Color(0xFFF3E8FF);
+
+  static const plColor = Color(0xFFFEE2E2);
+  static const plBgColor = Color(0xFFDC2626);
+
+  static const clColor = Color(0xFFE0E7FF);
+  static const clBgColor = Color(0xFF4F46E5);
+
+  static const compoffColor = Color(0xFFD97706);
+  static const compoffBgColor = Color(0xFFFEF3C7);
+
   static const statusBlueBg = Color(0xffc3c8cc);
   static const statusBlueText = Color(0xFF11528f);
   static const statusGreenBg = Color(0xFFe5ffeb);
