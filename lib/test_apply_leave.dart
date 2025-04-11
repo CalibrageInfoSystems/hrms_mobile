@@ -11,6 +11,7 @@ import 'package:hrms/Model%20Class/employee_self_leaves.dart';
 import 'package:hrms/SharedPreferencesHelper.dart';
 import 'package:hrms/api%20config.dart';
 import 'package:hrms/common_widgets/custom_textfield.dart';
+import 'package:hrms/database/ApiKeyManager.dart';
 import 'package:hrms/holiday_model.dart';
 import 'package:hrms/home_screen.dart';
 import 'package:hrms/login_screen.dart';
@@ -174,12 +175,13 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final accessToken = prefs.getString('accessToken') ?? '';
+      final ApiKey = prefs.getString(SharedKeys.APIKey) ?? "";
       final apiUrl = Uri.parse(baseUrl + getadminsettings);
       final jsonResponse = await http.get(
         apiUrl,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': accessToken,
+          'ApiKey': ApiKey,
         },
       );
       print('dcsdc: $apiUrl');
@@ -226,13 +228,14 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken') ?? '';
     final employeeId = prefs.getString("employeeId") ?? "";
+    final ApiKey = prefs.getString(SharedKeys.APIKey) ?? "";
     int currentYear = DateTime.now().year;
     final apiUrl = Uri.parse('$baseUrl$getleavesapi$employeeId/$currentYear');
     final jsonResponse = await http.get(
       apiUrl,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': accessToken,
+        'ApiKey': ApiKey,
       },
     );
     print('getEmpLeaves: ${jsonResponse.body}');
@@ -1210,7 +1213,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       await getLoginTime();
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final employeeId = prefs.getString("employeeId");
-      final accessToken = prefs.getString("accessToken") ?? '';
+     // final accessToken = prefs.getString("accessToken") ?? '';
+      final APIKey = prefs.getString(SharedKeys.APIKey) ?? '';
       final apiUrl = Uri.parse(baseUrl + applyleaveapi);
       final loadedData = await SharedPreferencesHelper.getCategories();
       final employeeName = loadedData?['employeeName'];
@@ -1278,7 +1282,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         body: requestBody,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': accessToken,
+          'APIKey': APIKey,
         },
       );
       setState(() {

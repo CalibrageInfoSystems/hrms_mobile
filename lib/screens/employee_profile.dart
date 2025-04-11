@@ -400,7 +400,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
       children: [
         CircleAvatar(
           radius: 25,
-          backgroundColor: CommonStyles.primaryColor.withOpacity(0.4),
+          backgroundColor: CommonStyles.primaryColor.withOpacity(0.2),
           child: svgAsset != null
               ? SvgPicture.asset(
                   svgAsset,

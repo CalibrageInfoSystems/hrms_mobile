@@ -798,15 +798,16 @@ class _apply_leaveeState extends State<apply_leave> {
 
     // Extract the current year
     int currentYear = now.year;
-
-    if (accessToken != null) {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+   String ApiKey = prefs.getString(SharedKeys.APIKey) ?? "";
+  // if (accessToken != null) {
       try {
         final url =
             Uri.parse(baseUrl + getleavesapi + empolyeeId + '/$currentYear');
         print('myLeavesApi $url');
         Map<String, String> headers = {
           'Content-Type': 'application/json',
-          'Authorization': '$accessToken',
+          'ApiKey': '$ApiKey',
         };
 
         final response = await http.get(url, headers: headers);
@@ -869,9 +870,10 @@ class _apply_leaveeState extends State<apply_leave> {
       } catch (error) {
         print('Error: $error');
       }
-    } else {
-      print('Error: accessToken is null');
-    }
+  //  }
+  // else {
+  //     print('Error: accessToken is null');
+  //   }
   }
 
 //Working code for wfh restriction, commented to add other leave types by Arun

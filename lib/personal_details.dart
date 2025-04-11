@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hrms/database/ApiKeyManager.dart';
 import 'package:hrms/login_screen.dart';
 import 'package:hrms/shared_keys.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -47,6 +48,7 @@ class _personal_screen_screenState extends State<PersonalDetails> {
 
   String empolyeid = '';
   String _nationality = '';
+  String APIKey = '';
   String accessToken = '';
   String? Dateofjoining;
   String? formatteddateofjoining;
@@ -66,6 +68,7 @@ class _personal_screen_screenState extends State<PersonalDetails> {
   String? stringsigndate;
   bool ismatchedlogin = false;
   int bloodlookupid = 0;
+  String? ApiKey;
   int bloodmatchid = 0;
   List<LookupDetail> lookupDetails = [];
 
@@ -102,8 +105,10 @@ class _personal_screen_screenState extends State<PersonalDetails> {
   // }
   Future<void> getBloodlookupid() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
     setState(() {
       bloodlookupid = prefs.getInt('BloodGroups') ?? 0;
+       ApiKey = prefs.getString(SharedKeys.APIKey) ?? "";
     });
     print("bloodlookupid:$bloodlookupid");
     fetchBloodGroups(bloodlookupid);
@@ -127,7 +132,7 @@ class _personal_screen_screenState extends State<PersonalDetails> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': '$accessToken',
+          'ApiKey': '$ApiKey',
         },
       );
 
@@ -1760,6 +1765,7 @@ class _personal_screen_screenState extends State<PersonalDetails> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       empolyeid = prefs.getString("employeeId") ?? "";
+       APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     });
     print("empolyeidinapplyleave:$empolyeid");
     final url = Uri.parse(baseUrl + GetEmployeePhoto + '$empolyeid');
@@ -1768,7 +1774,7 @@ class _personal_screen_screenState extends State<PersonalDetails> {
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': '$accessToken',
+        'APIKey': '$APIKey',
       },
     );
     if (response.statusCode == 200) {

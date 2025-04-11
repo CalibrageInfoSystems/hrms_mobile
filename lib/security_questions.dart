@@ -8,6 +8,7 @@ import 'package:hrms/changepassword.dart';
 import 'package:hrms/home_screen.dart';
 import 'package:hrms/login_screen.dart';
 import 'package:hrms/questions_model.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -808,6 +809,8 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
 
   Future<void> sendingQuestion() async {
     bool isConnected = await Commonutils.checkInternetConnectivity();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     if (!isConnected) {
       Commonutils.showCustomToastMessageLong(
           'Please Check the Internet Connection', context, 1, 4);
@@ -848,7 +851,7 @@ class _securityscreenscreenState extends State<security_questionsscreen> {
       };
       Map<String, String> headers = {
         'Content-Type': 'application/json',
-        'Authorization': '$accessToken',
+        'APIKey': '$APIKey',
       };
       // Encode the request body as JSON
       String requestBodyJson = jsonEncode(requestBody);

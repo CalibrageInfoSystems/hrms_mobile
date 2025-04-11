@@ -62,6 +62,7 @@ class _TestHrmsState extends State<TestHrms> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final bloodlookupid = prefs.getInt('BloodGroups') ?? 0;
     final accessToken = prefs.getString("accessToken") ?? "";
+    final ApiKey = prefs.getString(SharedKeys.APIKey) ?? "";
     if (!isConnected) {
       Commonutils.showCustomToastMessageLong(
           'Please Check the Internet Connection',
@@ -78,7 +79,7 @@ class _TestHrmsState extends State<TestHrms> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': accessToken,
+          'ApiKey': ApiKey,
         },
       );
 
@@ -173,13 +174,13 @@ class _TestHrmsState extends State<TestHrms> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final empolyeid = prefs.getString("employeeId") ?? "";
-
+final APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
       final url = Uri.parse(baseUrl + GetEmployeePhoto + empolyeid);
       final response = await http.get(
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': accessToken,
+          'APIKey': APIKey,
         },
       );
       if (response.statusCode == 200) {
