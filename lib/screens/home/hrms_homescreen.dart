@@ -281,11 +281,10 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-//    if (ismatchedlogin) Future.microtask(() => _showtimeoutdialog(context));
+    final isTablet = size.width > 600;
 
     return RefreshIndicator(
       onRefresh: () async {
-        // Re-fetch data and refresh UI
         fetchpendingrecordscount();
         setState(() {});
       },
@@ -298,17 +297,17 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           body: Column(
             children: [
               header(),
+              SizedBox(height: isTablet ? 20 : 12),
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.only(
-                        left: 14.0, right: 14.0, top: 10, bottom: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 14.0),
                     child: Column(
                       children: [
                         Container(
                           width: double.infinity,
-                          height: size.height * 0.12,
-                          padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(
+                              isTablet ? 20 : 12), // Adjust padding for tablets
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             color: Colors.white,
@@ -318,6 +317,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               shiftTimingAndStatus(),
+                              const SizedBox(height: 5),
                               checkInNOut(),
                             ],
                           ),
@@ -339,26 +339,13 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               const SizedBox(height: 10),
             ],
           ),
-          // floatingActionButton: FloatingActionButton(
-          //   onPressed: () {
-          //     String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-          //     String to_day = DateFormat('dd/MM/yyyy').format(DateTime.now());
-          //     setState(() {
-          //       //  selectedOption = 'Today'; // Reset the dropdown to "Today"
-          //       calenderDate = to_day; // Set calendar to today's date
-          //       fetchdatewiseleads(today, today); // Fetch date-wise leads
-          //       fetchpendingrecordscount(); // Fetch other counts
-          //     });
-          //   },
-          //   child: const Icon(Icons.refresh), // Refresh icon
-          //   tooltip: 'Refresh',
-          // ),
         ),
       ),
     );
   }
 
   Row hrmsSection(Size size) {
+    final isTablet = size.width > 600;
     return Row(
       children: [
         customLeaveTypeBox(
@@ -376,7 +363,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             );
           },
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: isTablet ? 20 : 12), // Adjust spacing for tablets
         customLeaveTypeBox(
           leaveType: 'CL\'s',
           size: size,
@@ -392,20 +379,20 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             );
           },
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: isTablet ? 20 : 12), // Adjust spacing for tablets
         customLeaveTypeBox(
           leaveType: 'Comp Off',
           data: '1/0',
           size: size,
           icon: Icons.calendar_today_rounded,
           themeColor: const Color(0xff9333EA),
-          // themeColor: CommonStyles.blueColor,background: #9333EA;
         ),
       ],
     );
   }
 
   Row sgtSection(Size size) {
+    final isTablet = size.width > 600;
     return Row(
       children: [
         customLeaveTypeBox(
@@ -414,42 +401,39 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           data: totalDistance.toStringAsFixed(2) + ' KM',
           icon: Icons.mode_of_travel_outlined,
           themeColor: const Color(0xffFBBF24),
-          // themeColor: Color(0xffFBBF24),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: isTablet ? 20 : 12), // Adjust spacing for tablets
         customLeaveTypeBox(
-            leaveType: 'Today Visits',
-            size: size,
-            data: '$todayLeadsCount',
-            icon: Icons.calendar_month,
-            themeColor: const Color(0xff16A34A),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ViewLeads(isToday: true),
-                ),
-              );
-            }
-            // themeColor: CommonStyles.greenColor,background: #16A34A;background: #;
-            ),
-        const SizedBox(width: 12),
+          leaveType: 'Today Visits',
+          size: size,
+          data: '$todayLeadsCount',
+          icon: Icons.calendar_month,
+          themeColor: const Color(0xff16A34A),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ViewLeads(isToday: true),
+              ),
+            );
+          },
+        ),
+        SizedBox(width: isTablet ? 20 : 12), // Adjust spacing for tablets
         customLeaveTypeBox(
-            leaveType: 'Total Visits',
-            size: size,
-            data: '$totalLeadsCount',
-            icon: Icons.calendar_today_rounded,
-            themeColor: const Color(0xff4F46E5),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ViewLeads(),
-                ),
-              );
-            }
-            // themeColor: CommonStyles.blueColor,background: #9333EA;
-            ),
+          leaveType: 'Total Visits',
+          size: size,
+          data: '$totalLeadsCount',
+          icon: Icons.calendar_today_rounded,
+          themeColor: const Color(0xff4F46E5),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ViewLeads(),
+              ),
+            );
+          },
+        ),
       ],
     );
   }
@@ -462,12 +446,13 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     void Function()? onTap,
     required Size size,
   }) {
+    final isTablet = size.width > 600;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           height: size.height * 0.19,
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(isTablet ? 20 : 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             color: Colors.white,
@@ -476,7 +461,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(isTablet ? 20 : 16),
                 decoration: BoxDecoration(
                   color: themeColor.withOpacity(0.3),
                   shape: BoxShape.circle,
@@ -484,21 +469,21 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                 child: Icon(
                   icon ?? Icons.check_circle_outline,
                   color: themeColor,
-                  size: (size.height * 0.19) * 0.15,
-                  // size: 20,
+                  size: isTablet ? 40 : 30,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 5),
               Text(
                 leaveType,
-                style: CommonStyles.txStyF14CbFcF5,
+                style: CommonStyles.txStyF14CbFcF5.copyWith(
+                  fontSize: isTablet ? 16 : 14,
+                ),
               ),
-              const SizedBox(height: 2),
               Text(
                 data,
                 style: CommonStyles.txStyF20CbFcF5.copyWith(
-                    // fontWeight: FontWeight.w600,
-                    ),
+                  fontSize: isTablet ? 16 : 14,
+                ),
               )
             ],
           ),
@@ -534,7 +519,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               Text(
                 isCheckIn ? "Check In" : "Shift Timings",
                 style: CommonStyles.txStyF16CbFFb.copyWith(
-                  fontSize: 20,
+                  fontSize: 18,
                 ),
               ),
               Text(
@@ -745,64 +730,12 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: size.height * 0.18,
+      // color: Colors.red,
       child: FutureBuilder(
           future: futureBirthdayBanners,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Skeletonizer(
-                enabled: true,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: Colors.white,
-                  ),
-                  child: Row(
-                    children: [
-                      const Expanded(
-                        flex: 3,
-                        child: SizedBox(
-                          height: double.infinity,
-                          child: Text(
-                            "Wishing you a very Happy Birthday! Your dedication and hard work are truly valued. We hope this special day is filled with joy and celebration.",
-                            maxLines: 6,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        flex: 2,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.asset(
-                            'assets/birthday_cake2.jpg',
-                            height: 200,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                /* Container(
-                  height: size.height * 0.18,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      'assets/birthday_cake2.jpg',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ), */
-              );
+              return bannerLoading();
             } else if (snapshot.hasError) {
               return const SizedBox();
               /*  return Center(
@@ -820,6 +753,63 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               }
             }
           }),
+    );
+  }
+
+  Skeletonizer bannerLoading() {
+    return Skeletonizer(
+      enabled: true,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+        ),
+        child: Row(
+          children: [
+            const Expanded(
+              flex: 3,
+              child: SizedBox(
+                height: double.infinity,
+                child: Text(
+                  "Wishing you a very Happy Birthday! Your dedication and hard work are truly valued. We hope this special day is filled with joy and celebration.",
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              flex: 2,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'assets/birthday_cake2.jpg',
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      /* Container(
+                height: size.height * 0.18,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/birthday_cake2.jpg',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ), */
     );
   }
 
@@ -862,7 +852,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                       alignment: Alignment.center,
                       height: double.infinity,
                       child: Text('${item.wish}',
-                          maxLines: 6,
+                          maxLines: 5,
                           overflow: TextOverflow.ellipsis,
                           style: CommonStyles.txStyF20CbFcF5
                               .copyWith(fontSize: 14)),

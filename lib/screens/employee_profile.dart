@@ -148,6 +148,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
       gender = loadedData['gender'];
       originalDob = loadedData['originalDOB'];
       signDate = loadedData['signDate'];
+
       // photo = loadedData['photo'];
 /*       print('loadEmployeeInfo employeeName: ${loadedData['employeeName']}');
       print('loadEmployeeInfo designation: ${loadedData['designation']}');
@@ -360,7 +361,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
               Icons.phone),
         // const SizedBox(height: 5),
         if (employeeInfo['reportingTo'] != null &&
-            employeeInfo['reportingTo'] != '')
+            employeeInfo['reportingTo'].trim() != '')
           customBox(context, employeeInfo['reportingTo'], 'Reporting To',
               Icons.report),
       ],
