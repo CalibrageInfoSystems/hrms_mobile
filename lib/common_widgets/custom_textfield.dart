@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hrms/styles.dart';
 
 class CustomTextField extends StatelessWidget {
   final String hintText;
@@ -65,19 +64,24 @@ class CustomTextField extends StatelessWidget {
             fontWeight: FontWeight.normal,
           ), // Replace with your custom hint style
           border: customBorder(
-            borderColor: Styles.primaryColor,
+            borderColor: Colors.black.withOpacity(0.6),
+            // borderColor: Styles.primaryColor,
           ),
           focusedErrorBorder: customBorder(
-            borderColor: Styles.primaryColor,
+            borderColor: Colors.black.withOpacity(0.6),
+            // borderColor: Styles.primaryColor,
           ),
           disabledBorder: customBorder(
-            borderColor: Styles.primaryColor,
+            borderColor: Colors.black.withOpacity(0.6),
+            // borderColor: Styles.primaryColor,
           ),
           enabledBorder: customBorder(
-            borderColor: Styles.primaryColor,
+            borderColor: Colors.black.withOpacity(0.6),
+            // borderColor: Styles.primaryColor,
           ),
           focusedBorder: customBorder(
-            borderColor: Styles.primaryColor,
+            borderColor: Colors.black.withOpacity(0.6),
+            // borderColor: Styles.primaryColor,
           ),
           errorBorder: customBorder(
             borderColor: Colors.red,

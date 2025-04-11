@@ -466,7 +466,14 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                   color: themeColor.withOpacity(0.3),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: /* Image.asset(
+                  'assets/pl_vector.png',
+                  fit: BoxFit.cover,
+                  width: 30,
+                  height: 30,
+                ), */
+
+                    Icon(
                   icon ?? Icons.check_circle_outline,
                   color: themeColor,
                   size: isTablet ? 40 : 30,
@@ -851,11 +858,17 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                     child: Container(
                       alignment: Alignment.center,
                       height: double.infinity,
-                      child: Text('${item.wish}',
-                          maxLines: 5,
-                          overflow: TextOverflow.ellipsis,
-                          style: CommonStyles.txStyF20CbFcF5
-                              .copyWith(fontSize: 14)),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${item.employeeName}',
+                                style: CommonStyles.txStyF20CbFcF5),
+                            Text('${item.wish}',
+                                maxLines: 5,
+                                overflow: TextOverflow.ellipsis,
+                                style: CommonStyles.txStyF20CbFcF5
+                                    .copyWith(fontSize: 14)),
+                          ]),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -1312,6 +1325,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     final now = DateTime.now();
     _currentDateTime = DateFormat('EEEE, MMM d, yyyy – hh:mm a').format(now);
   }
+
   Future<void> _getCurrentLocation() async {
     try {
       bool serviceEnabled;
@@ -1352,14 +1366,14 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
       // Now try to get the address (requires internet)
       try {
-        List<Placemark> placemarks =
-        await placemarkFromCoordinates(position.latitude, position.longitude);
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+            position.latitude, position.longitude);
 
         Placemark place = placemarks.first;
 
         setState(() {
           _address =
-          "${place.thoroughfare} ${place.subLocality}, ${place.locality}, "
+              "${place.thoroughfare} ${place.subLocality}, ${place.locality}, "
               "${place.administrativeArea}, ${place.postalCode}, ${place.country}";
         });
       } catch (e) {
@@ -1485,7 +1499,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         ],
       );
 
-      String textContent = "Time: $_time\nLocation: $_latitude, $_longitude\n$_address";
+      String textContent =
+          "Time: $_time\nLocation: $_latitude, $_longitude\n$_address";
 
       TextPainter textPainter = TextPainter(
         text: TextSpan(text: textContent, style: textStyle),

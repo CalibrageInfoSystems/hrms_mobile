@@ -200,7 +200,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
   Future<List<Holiday_Model>> getLeaves() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken') ?? '';
-   final APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
+    final APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
     int currentYear = DateTime.now().year;
     // final apiUrl = Uri.parse(
     // 'http://182.18.157.215/HRMS/API/hrmsapi/Admin/GetHolidays/2025/1');
@@ -297,82 +297,84 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
 //MARK: Build Method
   @override
   Widget build(BuildContext context) {
-  //  if (ismatchedlogin) Future.microtask(() => showtimeoutdialog(context));
+    //  if (ismatchedlogin) Future.microtask(() => showtimeoutdialog(context));
     return Scaffold(
-        appBar: appBar(),
-        body: Stack(
-          children: [
-            backgroundImage(),
-            SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
+      appBar: appBar(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+                leaveRequestText(),
+                const SizedBox(height: 10),
+                leaveTypeDropdown(),
+                if (leaveTypeValidator)
+                  Column(
+                    children: [
+                      leaveTypeValidation(),
+                      // const SizedBox(height: 10),
+                    ],
+                  ),
+                const SizedBox(height: 10),
+                if (selectedDropdownLeaveName == 'CL' ||
+                    selectedDropdownLeaveName == 'PL' ||
+                    widget.leaveTypeId != null)
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 12),
-                      leaveRequestText(),
-                      const SizedBox(height: 10),
-                      leaveTypeDropdown(),
-                      if (leaveTypeValidator)
+                      leaveDescriptionDropdown(),
+                      if (leaveDescriptionValidator)
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            leaveTypeValidation(),
+                            leaveDescriptionValidation(),
                             // const SizedBox(height: 10),
                           ],
                         ),
                       const SizedBox(height: 10),
-                      if (selectedDropdownLeaveName == 'CL' ||
-                          selectedDropdownLeaveName == 'PL' ||
-                          widget.leaveTypeId != null)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            leaveDescriptionDropdown(),
-                            if (leaveDescriptionValidator)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  leaveDescriptionValidation(),
-                                  // const SizedBox(height: 10),
-                                ],
-                              ),
-                            const SizedBox(height: 10),
-                          ],
-                        ),
-                      if (selectedDropdownLeaveName == 'CL' ||
-                          selectedDropdownLeaveName == 'PL' ||
-                          widget.leaveTypeId != null)
-                        Column(
-                          children: [
-                            halfDayCheckBox(),
-                            const SizedBox(height: 10),
-                          ],
-                        ),
-                      fromDateField(),
-                      const SizedBox(height: 10),
-                      if (selectedDropdownLeaveName != 'CL' &&
-                          isHalfDayLeave == false)
-                        Column(
-                          children: [
-                            toDateField(),
-                            const SizedBox(height: 10),
-                          ],
-                        ),
-                      leaveDescription(),
-                      const SizedBox(height: 20),
-                      addLeaveBtn(),
-                      /* const SizedBox(height: 10),
-                      ElevatedButton(
-                          onPressed: () {}, child: const Text('test')), */
                     ],
                   ),
-                ),
-              ),
-            )
-          ],
-        ));
+                if (selectedDropdownLeaveName == 'CL' ||
+                    selectedDropdownLeaveName == 'PL' ||
+                    widget.leaveTypeId != null)
+                  Column(
+                    children: [
+                      halfDayCheckBox(),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                fromDateField(),
+                const SizedBox(height: 10),
+                if (selectedDropdownLeaveName != 'CL' &&
+                    isHalfDayLeave == false)
+                  Column(
+                    children: [
+                      toDateField(),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                leaveDescription(),
+                const SizedBox(height: 20),
+                addLeaveBtn(),
+                /* const SizedBox(height: 10),
+                      ElevatedButton(
+                          onPressed: () {}, child: const Text('test')), */
+              ],
+            ),
+          ),
+        ),
+      ),
+
+      /* Stack(
+          children: [
+            backgroundImage(),
+               ],
+        ), */
+    );
   }
 
 //MARK: Descrption Box
@@ -1213,7 +1215,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       await getLoginTime();
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final employeeId = prefs.getString("employeeId");
-     // final accessToken = prefs.getString("accessToken") ?? '';
+      // final accessToken = prefs.getString("accessToken") ?? '';
       final APIKey = prefs.getString(SharedKeys.APIKey) ?? '';
       final apiUrl = Uri.parse(baseUrl + applyleaveapi);
       final loadedData = await SharedPreferencesHelper.getCategories();
@@ -1403,7 +1405,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       height: 45,
       alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
-        border: Border.all(color: Styles.primaryColor, width: 1.5),
+        border: Border.all(color: Colors.black.withOpacity(0.6), width: 1.5),
         borderRadius: BorderRadius.circular(5.0),
         color: Colors.white,
       ),
@@ -1592,7 +1594,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       height: 45,
       alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
-        border: Border.all(color: Styles.primaryColor, width: 1.5),
+        border: Border.all(color: Colors.black.withOpacity(0.6), width: 1.5),
         borderRadius: BorderRadius.circular(5.0),
         color: Colors.white,
       ),
@@ -1722,7 +1724,6 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
     _leaveReasonController.clear();
   }
 
-
   Future<void> deleteLoginTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('loginTime');
@@ -1759,7 +1760,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       String brnchId = prefs.getString(SharedKeys.brnchId) ?? "";
       print('====$brnchId');
       String APIKey = prefs.getString(SharedKeys.APIKey) ?? "";
-      final apiUrl = '$baseUrl$getleaveStatistics${fromDate.split('-')[2]}/$brnchId/$empId';
+      final apiUrl =
+          '$baseUrl$getleaveStatistics${fromDate.split('-')[2]}/$brnchId/$empId';
 
       Map<String, String> headers = {
         'Content-Type': 'application/json',

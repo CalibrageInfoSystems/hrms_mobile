@@ -1161,7 +1161,7 @@ class _leaves_screen_screenState extends State<leaves_screen> {
             /* Stack(
               children: [
                 /* Image.asset(
-                  'assets/background_layer_2.png',
+                  'assets/pl_vector.png',
                   fit: BoxFit.cover,
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,

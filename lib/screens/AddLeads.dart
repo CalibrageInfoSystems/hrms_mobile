@@ -274,24 +274,33 @@ class _AddLeadScreenState extends State<AddLeads>
 
                     Transform.translate(
                       offset: const Offset(-10, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Checkbox(
-                            value: _isCompany,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                _isCompany = value!;
-                                if (!_isCompany) {
-                                  // Clear the text when switching to false
-                                  _companyNameController.clear();
-                                }
-                              });
-                            },
-                            activeColor: Styles.primaryColor,
-                          ),
-                          const Text("Is Company"),
-                        ],
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isCompany = !_isCompany;
+                            if (!_isCompany) {
+                              _companyNameController.clear();
+                            }
+                          });
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Checkbox(
+                              value: _isCompany,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  _isCompany = value!;
+                                  if (!_isCompany) {
+                                    _companyNameController.clear();
+                                  }
+                                });
+                              },
+                              activeColor: Styles.primaryColor,
+                            ),
+                            const Text("Is Company"),
+                          ],
+                        ),
                       ),
                     ),
                     Visibility(
@@ -385,7 +394,7 @@ class _AddLeadScreenState extends State<AddLeads>
                                     mobileImagePicker(context);
                                   },
                                   child: DottedBorder(
-                                    color: CommonStyles.dotColor,
+                                    color: Colors.black.withOpacity(0.6),
                                     strokeWidth: 2,
                                     dashPattern: const [6, 3],
                                     borderType: BorderType.RRect,
@@ -393,6 +402,7 @@ class _AddLeadScreenState extends State<AddLeads>
                                     child: Container(
                                       height: 120,
                                       alignment: Alignment.center,
+                                      color: Colors.white,
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -403,7 +413,9 @@ class _AddLeadScreenState extends State<AddLeads>
                                             "assets/add_a_photo.svg",
                                             width: 50,
                                             height: 50,
-                                            color: CommonStyles.dotColor,
+                                            color:
+                                                Colors.black.withOpacity(0.6),
+                                            // color: CommonStyles.dotColor,
                                           ),
                                           const SizedBox(height: 8),
                                           const Text('Upload Image',
@@ -421,7 +433,7 @@ class _AddLeadScreenState extends State<AddLeads>
                                 child: GestureDetector(
                                   onTap: _pickFile,
                                   child: DottedBorder(
-                                    color: CommonStyles.dotColor,
+                                    color: Colors.black.withOpacity(0.6),
                                     strokeWidth: 2,
                                     dashPattern: const [6, 3],
                                     borderType: BorderType.RRect,
@@ -429,6 +441,7 @@ class _AddLeadScreenState extends State<AddLeads>
                                     child: Container(
                                       height: 120,
                                       alignment: Alignment.center,
+                                      color: Colors.white,
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -439,7 +452,8 @@ class _AddLeadScreenState extends State<AddLeads>
                                             "assets/fileuploadicon.svg",
                                             width: 50,
                                             height: 50,
-                                            color: CommonStyles.dotColor,
+                                            color:
+                                                Colors.black.withOpacity(0.6),
                                           ),
                                           const SizedBox(height: 8),
                                           const Text('Upload Doc',
