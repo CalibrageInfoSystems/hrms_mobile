@@ -597,11 +597,12 @@ class DataAccessHandler with ChangeNotifier {
   Future<bool> canTrackEmployee() async {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> result = await db.rawQuery(
-      'SELECT canTrackEmployee FROM TrackingInfo ',
+      'SELECT CanTrackEmployee FROM TrackingInfo',
     );
 
-    return result.isNotEmpty ? (result.first['canTrackEmployee'] == 1) : false;
+    return result.isNotEmpty ? (result.first['CanTrackEmployee'] == 1) : false;
   }
+
 
   Future<String> gettracktype() async {
     final db = await dbHelper.database;
@@ -702,6 +703,53 @@ class DataAccessHandler with ChangeNotifier {
         ? result.first['ShiftOut']
         : ''; // Default to '09:00' if no result
   }
+  Future<String> getTrackinTime() async {
+    final db = await dbHelper.database;
+
+    final List<Map<String, dynamic>> result = await db
+        .rawQuery('Select TrackInTime FROM TrackingInfo');
+    return result.isNotEmpty
+        ? result.first['TrackInTime']
+        : ''; // Default to '09:00' if no result
+  }
+
+// Fetch the ShiftToTime from the UserInfos table
+  Future<String> getTrackoutTime() async {
+    final db = await dbHelper.database;
+
+    final List<Map<String, dynamic>> result = await db
+        .rawQuery('Select TrackOutTime FROM TrackingInfo');
+    return result.isNotEmpty
+        ? result.first['TrackOutTime']
+        : ''; // Default to '09:00' if no result
+  }
+  Future<String> getpuchinTime() async {
+    final db = await dbHelper.database;
+
+    final List<Map<String, dynamic>> result = await db
+        .rawQuery('Select PunchDate FROM DailyPunchInAndOutDetails WHERE IsPunchIn = 1');
+    return result.isNotEmpty
+        ? result.first['PunchDate']
+        : ''; // Default to '09:00' if no result
+  }
+
+// Fetch the ShiftToTime from the UserInfos table
+  Future<String> getpunchoutTime() async {
+    final db = await dbHelper.database;
+
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+        'SELECT PunchDate FROM DailyPunchInAndOutDetails WHERE IsPunchIn = 0'
+    );
+
+    if (result.isNotEmpty && result.first['PunchDate'] != null) {
+      return result.first['PunchDate'];
+    } else {
+      // Default: current date with 23:59
+      final now = DateTime.now();
+      final defaultDateTime = DateTime(now.year, now.month, now.day, 23, 59);
+      return defaultDateTime.toIso8601String();
+    }
+  }
 
   // Future<String> getweekoffs() async {
   //   final db = await dbHelper.database;
@@ -736,28 +784,7 @@ class DataAccessHandler with ChangeNotifier {
     return result.isNotEmpty;
   }
 
-  Future<bool> hasleaveForToday() async {
-    // Get a reference to the database
-    final db = await dbHelper.database;
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? userID = prefs.getInt('userID');
-    String currentDate = getCurrentDate();
-    // SQL query with additional conditions for IsActive and UserId
-    String query =
-        "SELECT * FROM UserWeekOffXref WHERE DATE(Date) = ? AND IsActive = 1 AND UserId = ?";
 
-    // Print the query and parameters
-    print("Executing query: $query with parameters: $currentDate, $userID");
-    appendLog(
-        "Executing query hasleaveForToday: $query with parameters: $currentDate, $userID");
-
-    // Query the GeoBoundaries table for points on the current date, IsActive, and UserId
-    final List<Map<String, dynamic>> result =
-        await db.rawQuery(query, [currentDate, userID]);
-
-    // If the result is not empty, a point exists for today
-    return result.isNotEmpty;
-  }
 
   // Method to execute update queries
   Future<void> updateData(String query, List<dynamic> arguments) async {

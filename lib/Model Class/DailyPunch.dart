@@ -7,7 +7,7 @@ class DailyPunch {
   final double longitude;
    String? address;
   final String remarks;
-  final String punchMode;
+  final int punchMode;
   final bool serverUpdateStatus;
   final String createdByUserId;
   final DateTime createdDate;

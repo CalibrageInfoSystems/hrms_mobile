@@ -487,7 +487,9 @@ class _home_screenState extends State<home_screen>
     final employeeInfos = await fetchEmployeeInfo();
     await clearAllTables(db);
     for (var info in employeeInfos) {
-    bool isleave =   info.isLeaveToday == 1 ? true : false;
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool('isLeaveToday', info.isLeaveToday);
+      print('isleave: ${info.isLeaveToday}');
       await insertEmployeeInfo(db, info);
     }
   }

@@ -203,7 +203,11 @@ class SyncService {
    print("Updating ServerUpdatedStatus for table: $tableName");
    final db = await dbHelper.database;
    try {
-     await db.rawUpdate("UPDATE $tableName SET ServerUpdatedStatus = '1' WHERE ServerUpdatedStatus = '0'");
+     if(tableName == dailyPunchTable){
+       await db.rawUpdate("UPDATE $tableName SET ServerUpdateStatus = '1' WHERE ServerUpdateStatus = '0'");
+     }
+     else{
+     await db.rawUpdate("UPDATE $tableName SET ServerUpdatedStatus = '1' WHERE ServerUpdatedStatus = '0'");}
      print("Updated ServerUpdatedStatus for $tableName successfully.");
    } catch (e) {
      print("Error updating ServerUpdatedStatus for $tableName: $e");

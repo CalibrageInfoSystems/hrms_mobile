@@ -47,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // _passwordController.text = 'Live@291024';
 
     _userNameController.text = 'CIS00090'; // 'CIS00054';
-    _passwordController.text = 'Ranjith@469';
+    _passwordController.text = 'Abcd@123';
 
     // _userNameController.text = 'BakiHanm';
     // _passwordController.text = 'Test@123';
@@ -497,7 +497,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (response.statusCode == 200) {
       Map<String, dynamic> jsonData = json.decode(response.body);
       Map<String, dynamic> lookups = jsonData['Lookups'];
-
+// "PunchTypes": 101,
+// "PunchModes": 108,
       // Save DayWorkStatus in SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setInt('dayWorkStatus', lookups['DayWorkStatus']);
