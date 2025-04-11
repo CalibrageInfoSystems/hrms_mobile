@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hrms/Commonutils.dart';
 import 'package:hrms/Constants.dart';
 import 'package:hrms/Model%20Class/LookupDetail.dart';
@@ -264,7 +265,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
         body: Column(
           children: [
             headerSection(context),
-            const SizedBox(height: 10),
+         //   const SizedBox(height: 10),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -342,30 +343,30 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                   'designation'),
                               const SizedBox(height: 5), */
         if (employeeInfo['code'] != null && employeeInfo['code'] != '')
-          customBox(context, employeeInfo['code'], 'Employee Id', Icons.code),
+          customBox(context, employeeInfo['code'], 'Employee Id',  svgAsset: 'assets/idbadge.svg',),
         if (employeeInfo['gender'] != null && employeeInfo['gender'] != '')
-          customBox(context, employeeInfo['gender'], 'Gender', Icons.male),
+          customBox(context, employeeInfo['gender'], 'Gender',   svgAsset: 'assets/venusmars.svg',),
         if (employeeInfo['dateofJoin'] != null &&
             employeeInfo['dateofJoin'] != '')
           customBox(context, employeeInfo['dateofJoin'], 'Date of Join',
-              Icons.calendar_month_rounded),
+              icon: Icons.calendar_month_rounded),
         if (employeeInfo['officeEmailId'] != null &&
             employeeInfo['officeEmailId'] != '')
           customBox(context, employeeInfo['officeEmailId'], 'Office Email Id',
-              Icons.email),
+              icon: Icons.email),
         if (employeeInfo['originalDOB'] != null &&
             employeeInfo['originalDOB'] != '')
           customBox(context, employeeInfo['originalDOB'], 'Date of Birth',
-              Icons.date_range),
+              icon: Icons.date_range),
         if (employeeInfo['mobileNumber'] != null &&
             employeeInfo['mobileNumber'] != '')
           customBox(context, employeeInfo['mobileNumber'], 'Mobile Number',
-              Icons.phone),
+              icon:   Icons.phone),
         // const SizedBox(height: 5),
         if (employeeInfo['reportingTo'] != null &&
             employeeInfo['reportingTo'].trim() != '')
           customBox(context, employeeInfo['reportingTo'], 'Reporting To',
-              Icons.report),
+              svgAsset: 'assets/employeeman.svg'),
       ],
     );
   }
@@ -385,17 +386,24 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
   }
 
   Row customBox(
-    BuildContext context,
-    String? title,
-    String? subTitle,
-    IconData? icon,
-  ) {
+      BuildContext context,
+      String? title,
+      String? subTitle,
+      {String? svgAsset, IconData? icon}
+      ) {
     return Row(
       children: [
         CircleAvatar(
           radius: 25,
           backgroundColor: CommonStyles.primaryColor.withOpacity(0.4),
-          child: Icon(
+          child: svgAsset != null
+              ? SvgPicture.asset(
+            svgAsset,
+            width: 25,
+            height: 25,
+            color: CommonStyles.primaryColor,
+          )
+              : Icon(
             icon ?? Icons.home,
             size: 25,
             color: CommonStyles.primaryColor,
@@ -421,25 +429,18 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
             ),
           ),
         ),
-        /* const SizedBox(width: 10),
-        IconButton(
-          onPressed: () {
-            
-          },
-          icon: const Icon(
-            Icons.arrow_right_rounded,
-            size: 26,
-          ),
-        ), */
       ],
     );
   }
-
   Widget headerSection(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14.0),
+      padding: const EdgeInsets.only(left: 16,right: 16,top: 16,bottom: 16),
+      margin: const EdgeInsets.only(left: 10,right: 10,top: 10),
       width: MediaQuery.of(context).size.width,
-      color: CommonStyles.primaryColor,
+      decoration: BoxDecoration(
+        color: CommonStyles.whiteColor,
+        borderRadius: BorderRadius.circular(12), // ✅ Rounded corners
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -498,10 +499,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                     child: Column(
                       children: [
                         Text('''employeeInfoempName'''),
-                        Text(
-                          '''designation''',
-                        ),
-
+                        Text('''designation'''),
                       ],
                     ),
                   );
@@ -526,16 +524,11 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
           '${employeeInfo['employeeName']}',
           softWrap: true,
           textAlign: TextAlign.center,
-          style: CommonStyles.txStyF20CpFF5.copyWith(
-            fontSize: 20,
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+            style: CommonStyles.txStyF20CbFcF5,
         ),
         Text(
           '${employeeInfo['designation']}',
-          style: const TextStyle(
-              fontSize: 15, color: Colors.white, fontFamily: 'Calibri'),
+          style: CommonStyles.txStyF20CbFcF5,
         ),
 
       ],

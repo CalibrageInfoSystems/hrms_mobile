@@ -46,6 +46,7 @@ class CommonStyles {
   static const whiteColor = Colors.white;
   static const hintTextColor = Color(0xCBBEBEBE);
   static const RedColor = Color(0xFFC93437);
+
   // styles
   static const txStyF20CpFF5 = TextStyle(
       fontSize: 20,
