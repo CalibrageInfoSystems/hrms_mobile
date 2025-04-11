@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,11 +20,14 @@ import 'package:hrms/test_projects.dart';
 import 'package:hrms/screens/test_hrms.dart';
 import 'package:ntp/ntp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:sqflite_common/sqlite_api.dart';
 import 'Constants.dart';
 
 import 'Database/DataAccessHandler.dart';
+import 'Database/HRMSDatabaseHelper.dart';
 import 'Holiday_screen.dart';
+import 'Model Class/EmployeeInfo.dart';
 import 'common_widgets/CommonUtils.dart';
 import 'common_widgets/PermissionManager.dart';
 import 'screens/home/HomeScreen.dart';
@@ -64,8 +68,9 @@ class _home_screenState extends State<home_screen>
   int? pendingleadscount;
   int? pendingfilerepocount;
   int? pendingboundarycount;
-  int? pendingweekoffcount;
+  int? pendingAttendencecount;
   bool isButtonEnabled = false;
+  final dbHelper = HRMSDatabaseHelper();
   final dataAccessHandler = DataAccessHandler();
   @override
   void initState() {
@@ -390,6 +395,8 @@ class _home_screenState extends State<home_screen>
   }
 
   void checkLoginuserdata() async {
+
+    _initializeData();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       showAddClient = PermissionManager.hasPermission("CanManageClientVisits");
@@ -409,16 +416,14 @@ class _home_screenState extends State<home_screen>
         'SELECT Count(*) AS pendingrepoCount FROM FileRepository WHERE ServerUpdatedStatus = 0');
     pendingboundarycount = await dataAccessHandler.getOnlyOneIntValueFromDb(
         'SELECT Count(*) AS pendingboundaryCount FROM GeoBoundaries WHERE ServerUpdatedStatus = 0');
-    pendingweekoffcount = await dataAccessHandler.getOnlyOneIntValueFromDb(
-        'SELECT Count(*) AS pendingweekoffcount FROM UserWeekOffXref WHERE ServerUpdatedStatus = 0');
+    pendingAttendencecount = await dataAccessHandler.getOnlyOneIntValueFromDb(
+        'SELECT Count(*) AS pendingAttendencecount FROM DailyPunchInAndOutDetails WHERE ServerUpdateStatus = 0');
     print('pendingleadscount: $pendingleadscount ');
     print('pendingfilerepocount: $pendingfilerepocount');
     print('pendingboundarycount: $pendingboundarycount ');
-
+    print('pendingweekoffcount: $pendingAttendencecount');
     // Enable button if any of the counts are greater than 0
-    isButtonEnabled = pendingleadscount! > 0 ||
-        pendingfilerepocount! > 0 ||
-        pendingboundarycount! > 0;
+    isButtonEnabled = pendingleadscount! > 0 || pendingAttendencecount! > 0 || pendingfilerepocount! > 0 || pendingboundarycount! > 0;
 
     setState(() {
       isLoading = false; // Stop loading
@@ -476,4 +481,75 @@ class _home_screenState extends State<home_screen>
         return '';
     }
   }
+
+  Future<void> _initializeData() async {
+    final db = await dbHelper.database; // Replace with your database initialization
+    final employeeInfos = await fetchEmployeeInfo();
+    await clearAllTables(db);
+    for (var info in employeeInfos) {
+    bool isleave =   info.isLeaveToday == 1 ? true : false;
+      await insertEmployeeInfo(db, info);
+    }
+  }
+
+  Future<List<EmployeeInfo>> fetchEmployeeInfo() async {
+    final response = await http.get(Uri.parse('http://182.18.157.215/HRMS/API/hrmsapi/Employee/GetEmployeeInfoForMobile/a3080ac2-a823-4850-8333-cad6881abdc6/2025-04-11'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((e) => EmployeeInfo.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load employee info');
+    }
+  }
+
+  Future<void> insertEmployeeInfo(Database db, EmployeeInfo info) async {
+
+    // Insert ShiftDetails
+    for (var shift in info.shiftDetails) {
+      await db.insert('ShiftDetails', {
+
+        'ShiftId': shift.shiftId,
+        'ShiftIn': shift.shiftIn,
+        'ShiftOut': shift.shiftOut,
+        'MinimumWorkingHours': shift.minimumWorkingHours,
+        'GraceTime': shift.graceTime,
+        'RecreationTime': shift.recreationTime,
+        'ShiftName': shift.shiftName,
+        'ShiftTypeName': shift.shiftTypeName,
+        'WorkingDays': shift.workingDays,
+      });
+    }
+
+
+    // Insert TrackingInfo
+    for (var track in info.trackingInfo) {
+      await db.insert('TrackingInfo', {
+        'canTrackEmployee': track.canTrackEmployee ? 1 : 0,
+        'trackTypeId': track.trackTypeId,
+        'trackType': track.trackType,
+        'trackInTime': track.trackInTime,
+        'trackOutTime': track.trackOutTime,
+      });
+    }
+
+    // Insert Holidays
+    for (var holiday in info.holidays) {
+      await db.insert('Holidays', {
+
+        'Id': holiday.id,
+        'name': holiday.name,
+        'fromDate': holiday.fromDate,
+        'toDate': holiday.toDate,
+      });
+    }
+  }
+
+  Future<void> clearAllTables(Database db) async {
+
+    await db.delete('ShiftDetails');
+    await db.delete('TrackingInfo');
+    await db.delete('Holidays');
+  }
+
 }

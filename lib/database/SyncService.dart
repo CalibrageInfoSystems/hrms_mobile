@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:geocoding/geocoding.dart';
 import 'package:hrms/Model%20Class/DailyPunch.dart';
 
@@ -32,7 +32,7 @@ class SyncService {
   static const String geoBoundariesTable = 'geoBoundaries';
   static const String leadsTable = 'leads';
   static const String fileRepositoryTable = 'FileRepository';
- static const String dailyPunchTable = 'DailyPunchInAndOut';
+ static const String dailyPunchTable = 'DailyPunchInAndOutDetails';
  final dbHelper = HRMSDatabaseHelper();
 
  final DataAccessHandler dataAccessHandler;
@@ -100,25 +100,22 @@ class SyncService {
 
    // Fetching Daily Punch
    List<DailyPunch> dailyPunchList =
-   await _fetchData(dbHelper.getDailyPunchDetails, 'DailyPunchInAndOut');
+   await _fetchData(dbHelper.getDailyPunchDetails, 'DailyPunchInAndOutDetails');
 
    if (dailyPunchList.isNotEmpty) {
      List<DailyPunch> updatedDailyPunchList = [];
 
      for (var punch in dailyPunchList) {
-       if (punch.punchInLatitude != null && punch.punchInLongitude != null) {
-         punch.punchInAddress =
-         await getAddressFromLatLong(punch.punchInLatitude, punch.punchInLongitude);
+       if (punch.latitude != null && punch.latitude != null) {
+         punch.address =
+         await getAddressFromLatLong(punch.latitude, punch.latitude);
        }
-       if (punch.punchOutLatitude != null && punch.punchOutLongitude != null) {
-         punch.punchOutAddress =
-         await getAddressFromLatLong(punch.punchOutLatitude!, punch.punchOutLongitude!);
-       }
+
        updatedDailyPunchList.add(punch);
      }
 
      refreshTransactionsDataMap[dailyPunchTable] =
-         updatedDailyPunchList.map((model) => model.toMap()).toList();
+         updatedDailyPunchList.map((model) => model.toJson()).toList();
    }
 
    // Fetching fileRepoList - Make sure this happens regardless of other data

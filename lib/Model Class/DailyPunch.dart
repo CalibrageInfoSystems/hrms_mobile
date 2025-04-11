@@ -1,76 +1,61 @@
 class DailyPunch {
+
   final String userId;
-  final DateTime punchInTime;
-  final double punchInLatitude;
-  final double punchInLongitude;
-    String? punchInAddress;
-  final DateTime? punchOutTime;
-  final double? punchOutLatitude;
-  final double? punchOutLongitude;
- String? punchOutAddress;
+  final DateTime punchDate;
+  final int isPunchIn;
+  final double latitude;
+  final double longitude;
+   String? address;
+  final String remarks;
+  final String punchMode;
+  final int serverUpdateStatus;
   final String createdByUserId;
   final DateTime createdDate;
-  final String updatedByUserId;
-  final DateTime updatedDate;
-  final bool serverUpdatedStatus;
 
   DailyPunch({
+
     required this.userId,
-    required this.punchInTime,
-    required this.punchInLatitude,
-    required this.punchInLongitude,
-    this.punchInAddress,
-    this.punchOutTime,
-    this.punchOutLatitude,
-    this.punchOutLongitude,
-    this.punchOutAddress,
+    required this.punchDate,
+    required this.isPunchIn,
+    required this.latitude,
+    required this.longitude,
+    required this.address,
+    required this.remarks,
+    required this.punchMode,
+    required this.serverUpdateStatus,
     required this.createdByUserId,
     required this.createdDate,
-    required this.updatedByUserId,
-    required this.updatedDate,
-    required this.serverUpdatedStatus,
   });
 
-  // Convert a DailyPunch object into a Map for database insertion
-  Map<String, dynamic> toMap() {
-    return {
-      'UserId': userId,
-      'PunchInTime': punchInTime.toIso8601String(),
-      'PunchInLatitude': punchInLatitude,
-      'PunchInLongitude': punchInLongitude,
-      'PunchInAddress': punchInAddress,
-      'PunchOutTime': punchOutTime?.toIso8601String(),
-      'PunchOutLatitude': punchOutLatitude,
-      'PunchOutLongitude': punchOutLongitude,
-      'PunchOutAddress': punchOutAddress,
-      'CreatedByUserId': createdByUserId,
-      'CreatedDate': createdDate.toIso8601String(),
-      'UpdatedByUserId': updatedByUserId,
-      'UpdatedDate': updatedDate.toIso8601String(),
-      'ServerUpdatedStatus': serverUpdatedStatus,
-    };
+  factory DailyPunch.fromJson(Map<String, dynamic> json) {
+    return DailyPunch(
+      userId: json['UserId'],
+      punchDate: DateTime.parse(json['PunchDate']),
+      isPunchIn: json['IsPunchIn'],
+      latitude: (json['Latitude'] as num).toDouble(),
+      longitude: (json['Longitude'] as num).toDouble(),
+      address: json['Address'],
+      remarks: json['Remarks'] ?? '',
+      punchMode: json['PunchMode'],
+      serverUpdateStatus: json['ServerUpdateStatus'],
+      createdByUserId: json['CreatedByUserId'],
+      createdDate: DateTime.parse(json['CreatedDate']),
+    );
   }
 
-  // Create a DailyPunch object from a database Map
-  factory DailyPunch.fromMap(Map<String, dynamic> map) {
-    return DailyPunch(
-      userId: map['UserId'],
-      punchInTime: DateTime.parse(map['PunchInTime']),
-      punchInLatitude: map['PunchInLatitude'],
-      punchInLongitude: map['PunchInLongitude'],
-      punchInAddress: map['PunchInAddress'],
-      punchOutTime:
-      map['PunchOutTime'] != null ? DateTime.parse(map['PunchOutTime']) : null,
-      punchOutLatitude: map['PunchOutLatitude'],
-      punchOutLongitude: map['PunchOutLongitude'],
-      punchOutAddress: map['PunchOutAddress'],
-      createdByUserId: map['CreatedByUserId'],
-      createdDate: DateTime.parse(map['CreatedDate']),
-      updatedByUserId: map['UpdatedByUserId'],
-      updatedDate: DateTime.parse(map['UpdatedDate']),
-      serverUpdatedStatus: map['ServerUpdatedStatus'] is bool
-          ? map['ServerUpdatedStatus']
-          : map['ServerUpdatedStatus'] == 1,
-    );
+  Map<String, dynamic> toJson() {
+    return {
+      'UserId': userId,
+      'PunchDate': punchDate.toIso8601String(),
+      'IsPunchIn': isPunchIn,
+      'Latitude': latitude,
+      'Longitude': longitude,
+      'Address': address,
+      'Remarks': remarks,
+      'PunchMode': punchMode,
+      'ServerUpdateStatus': serverUpdateStatus,
+      'CreatedByUserId': createdByUserId,
+      'CreatedDate': createdDate.toIso8601String(),
+    };
   }
 }

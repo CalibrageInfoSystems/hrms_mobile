@@ -1148,7 +1148,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         "SELECT COUNT(*) AS totalLeadsCount FROM Leads WHERE CreatedByUserId = '$userID'");
 
     _time = (await dataAccessHandler.getOnlyStringValueFromDb(
-        "SELECT PunchInTime FROM DailyPunchInAndOut  WHERE DATE(CreatedDate) ='$currentDate' AND CreatedByUserId = '$userID'"))!;
+        "SELECT PunchDate FROM DailyPunchInAndOutDetails  WHERE DATE(CreatedDate) ='$currentDate' AND CreatedByUserId = '$userID'"))!;
     print('_time == $_time');
 
     bool isPunchIn = _time != null && _time.isNotEmpty;
@@ -1533,7 +1533,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       final filePath = '${directory.path}/hrms_emp.png';
       File file = File(filePath);
       file.writeAsBytes(pngBytes);
-      // Insert into DailyPunchInAndOut table
+      // Insert into DailyPunchInAndOutDetails table
       await _insertPunchData(
         DateTime.now().toIso8601String(),
         _latitude,
@@ -2114,47 +2114,51 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
       int punchResult = 0;
 
-      if (!isCheckedIn) {
-        // **Punch In: Insert new record in DailyPunchInAndOut**
+      // if (!isCheckedIn) {
+        // **Punch In: Insert new record in DailyPunchInAndOutDetails**
         Map<String, dynamic> punchInData = {
           'UserId': userId,
-          'PunchInTime': punchTime,
-          'PunchInLatitude': latitude,
-          'PunchInLongitude': longitude,
-          'PunchInAddress': address,
+          'PunchDate': punchTime,
+          'IsPunchIn': isCheckedIn,
+          'Latitude': latitude,
+          'Longitude': longitude,
+          'Address': address,
+          'Remarks':"",
+          'PunchMode':"Mobile",
           'CreatedByUserId': userId,
           'CreatedDate': punchTime,
-          'UpdatedByUserId': userId,
-          'UpdatedDate': punchTime,
-          'ServerUpdatedStatus': false, // Unsynced data
+          'ServerUpdateStatus': false, // Unsynced data
         };
 
-        punchResult = await db.insert('DailyPunchInAndOut', punchInData);
-      } else {
-        // **Punch Out: Update last Punch In record**
-        punchResult = await db.rawUpdate(
-          '''
-        UPDATE DailyPunchInAndOut
-        SET PunchOutTime = ?, PunchOutLatitude = ?, PunchOutLongitude = ?, PunchOutAddress = ?, 
-            UpdatedByUserId = ?, UpdatedDate = ?, ServerUpdatedStatus = ?
-        WHERE UserId = ? AND PunchOutTime IS NULL
-        ''',
-          [
-            punchTime,
-            latitude,
-            longitude,
-            address,
-            userId,
-            punchTime,
-            false,
-            userId
-          ],
-        );
+        punchResult = await db.insert('DailyPunchInAndOutDetails', punchInData);
+      // }
 
-        print(punchResult > 0
-            ? "✅ Punch Out updated successfully!"
-            : "⚠️ No matching Punch In found!");
-      }
+
+      // else {
+      //   // **Punch Out: Update last Punch In record**
+      //   punchResult = await db.rawUpdate(
+      //     '''
+      //   UPDATE DailyPunchInAndOut
+      //   SET PunchOutTime = ?, PunchOutLatitude = ?, PunchOutLongitude = ?, PunchOutAddress = ?,
+      //       UpdatedByUserId = ?, UpdatedDate = ?, ServerUpdatedStatus = ?
+      //   WHERE UserId = ? AND PunchOutTime IS NULL
+      //   ''',
+      //     [
+      //       punchTime,
+      //       latitude,
+      //       longitude,
+      //       address,
+      //       userId,
+      //       punchTime,
+      //       false,
+      //       userId
+      //     ],
+      //   );
+      //
+      //   print(punchResult > 0
+      //       ? "✅ Punch Out updated successfully!"
+      //       : "⚠️ No matching Punch In found!");
+      // }
 
       if (punchResult > 0) {
         // **Check if File Already Exists Before Inserting**
@@ -2164,7 +2168,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           // **Prevent duplicate inserts**
           List<Map<String, dynamic>> existingFiles = await db.rawQuery(
               "SELECT * FROM FileRepository WHERE FileName = ? AND LookupType = ? AND ServerUpdatedStatus = 0",
-              [fileName, isCheckedIn ? 24 : 23]);
+              [fileName, isCheckedIn ?  376 : 377]);
 
           if (existingFiles.isEmpty) {
             Map<String, dynamic> fileData = {
@@ -2583,10 +2587,8 @@ void onStart(ServiceInstance service) async {
         DateTime now = DateTime.now();
 
         // Fetch shift timings and weekoffs from the database
-/*        final shiftFromTime =
-            await dataAccessHandler.getShiftFromTime(); // Example user ID 13
-        final shiftToTime =
-            await dataAccessHandler.getShiftToTime(); // Example user ID 13
+     final shiftFromTime = await dataAccessHandler.getShiftinTime(); // Example user ID 13
+        final shiftToTime = await dataAccessHandler.getShiftoutTime(); // Example user ID 13
         //  final weekoffs = await dataAccessHandler.getweekoffs();            // List of week-off days (e.g., [DateTime.monday, DateTime.friday])
 
         // Parse the shift times into DateTime objects for comparison
@@ -2605,9 +2607,9 @@ void onStart(ServiceInstance service) async {
         print('shiftStart==========>${shiftStart}');
         print('shiftEnd==========>${shiftEnd}');
         // Check if the current time is within the shift hours
-        bool isWithinTrackingHours =
-            now.isAfter(shiftStart) && now.isBefore(shiftEnd);
-        //  bool isWeekend = now.weekday == DateTime.sunday;
+        bool isWithinTrackingHours = now.isAfter(shiftStart) && now.isBefore(shiftEnd);
+        print("track condition for data insert: $isWithinTrackingHours ");
+    /*    //  bool isWeekend = now.weekday == DateTime.sunday;
         final String weekoffsString = await dataAccessHandler.getweekoffs();
         // Map weekday names to their corresponding integer values (1 = Monday, ..., 7 = Sunday)
         final Map<String, int> dayToIntMap = {
@@ -2633,25 +2635,28 @@ void onStart(ServiceInstance service) async {
         print('weekoffs==========>${weekoffs}');
         bool isWeekOff = weekoffs.contains(now.weekday);
         print("track condition for isWeekOff: $weekoffs");
-        print("Today==========> ${now.weekday}");
+        print("Today==========> ${now.weekday}");*/
         // Check if the current date is a holiday (excluded date)
         bool isExcludedDate = await dataAccessHandler.checkIfExcludedDate();
 
         appendLog("track condition for data insert: $isExcludedDate");
         print("track condition for data insert: $isExcludedDate");
 
-        appendLog(
-            "track condition for data insert: $isWithinTrackingHours   ====== $weekoffsString");
-        print(
-            "track condition for data insert: $isWithinTrackingHours   ====== $weekoffsString");*/
+        appendLog("track condition for data insert: $isWithinTrackingHours  ");
+
 
         // Check if tracking is allowed
         // if (isWithinTrackingHours && !isExcludedDate && !isWeekOff) {
         //   //   if ( !isExcludedDate ) {
         //   service.invoke('on_location_changed', position.toJson());
         //
+
+       bool  canTrackEmployee = await dataAccessHandler.canTrackEmployee();
+        print(" track condition for canTrackEmployee: $canTrackEmployee");
+   String trackCondition = await dataAccessHandler.gettracktype();
+        print(" track condition for tracktype: $trackCondition");
         bool hasPointToday = await dataAccessHandler.hasPointForToday();
-        //   bool hasleaveToday = await dataAccessHandler.hasleaveForToday();
+       bool hasleaveToday = await dataAccessHandler.hasleaveForToday();
         //
         //   print(
         //       "track condition hasleaveToday: $hasleaveToday  hasPointToday ======> $hasPointToday");

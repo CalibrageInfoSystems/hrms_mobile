@@ -594,7 +594,27 @@ class DataAccessHandler with ChangeNotifier {
   //       .toList();
   // }
   //
+  Future<bool> canTrackEmployee() async {
+    final db = await dbHelper.database;
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      'SELECT canTrackEmployee FROM TrackingInfo ',
+    );
 
+    return result.isNotEmpty ? (result.first['canTrackEmployee'] == 1) : false;
+  }
+
+  Future<String> gettracktype() async {
+    final db = await dbHelper.database;
+    // Assuming userID is retrieved from SharedPreferences or passed as an argument
+
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      'SELECT TrackType FROM TrackingInfo ',
+    );
+
+    return result.isNotEmpty
+        ? result.first['TrackType']
+        : ''; // Default to '09:00' if no result
+  }
 // Method to check if GeoBoundary has a point for the current date
   Future<bool> hasPointForToday() async {
     // Get a reference to the database
@@ -647,56 +667,52 @@ class DataAccessHandler with ChangeNotifier {
 
     // SQL query to check if the current date is a holiday and is active
     String query =
-        'SELECT * FROM HolidayConfiguration WHERE DATE(Date) = ? AND IsActive = 1';
+        ' SELECT * FROM Holidays WHERE $currentDate BETWEEN date(fromDate) AND date(toDate)';
 
     // Print the query and the parameter (currentDate)
-    print("Executing query: $query with parameter: $currentDate");
-    appendLog(
-        "Executing query _checkIfExcludedDate: $query with parameter: $currentDate");
+    print("Executing query: $query ");
+    appendLog("Executing query _checkIfExcludedDate: $query");
 
     // Query the HolidayConfiguration table for the current date
     final List<Map<String, dynamic>> result =
-        await db.rawQuery(query, [currentDate]);
+        await db.rawQuery(query);
 
     // If the result is not empty, the current date is a holiday (excluded)
     return result.isNotEmpty;
   }
 
 // Fetch the ShiftFromTime from the UserInfos table
-  Future<String> getShiftFromTime() async {
+  Future<String> getShiftinTime() async {
     final db = await dbHelper.database;
-    // Assuming userID is retrieved from SharedPreferences or passed as an argument
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? userID = prefs.getInt('userID');
+
     final List<Map<String, dynamic>> result = await db
-        .rawQuery('SELECT TrackFromTime FROM UserInfos WHERE id = ?', [userID]);
+        .rawQuery('SELECT ShiftIn FROM  ShiftDetails ');
     return result.isNotEmpty
-        ? result.first['TrackFromTime']
-        : '09:00'; // Default to '09:00' if no result
+        ? result.first['ShiftIn']
+        : ''; // Default to '09:00' if no result
   }
 
 // Fetch the ShiftToTime from the UserInfos table
-  Future<String> getShiftToTime() async {
+  Future<String> getShiftoutTime() async {
     final db = await dbHelper.database;
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? userID = prefs.getInt('userID');
+
     final List<Map<String, dynamic>> result = await db
-        .rawQuery('SELECT TrackToTime FROM UserInfos WHERE id = ?', [userID]);
+        .rawQuery('SELECT ShiftOut FROM  ShiftDetails ');
     return result.isNotEmpty
-        ? result.first['TrackToTime']
-        : '19:00'; // Default to '19:00' if no result
+        ? result.first['ShiftOut']
+        : ''; // Default to '09:00' if no result
   }
 
-  Future<String> getweekoffs() async {
-    final db = await dbHelper.database;
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? userID = prefs.getInt('userID');
-    final List<Map<String, dynamic>> result = await db
-        .rawQuery('SELECT weekOffs FROM UserInfos WHERE id = ?', [userID]);
-    return result.isNotEmpty
-        ? result.first['weekOffs']
-        : 'sunday'; // Default to 'sunday' if no result
-  }
+  // Future<String> getweekoffs() async {
+  //   final db = await dbHelper.database;
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   int? userID = prefs.getInt('userID');
+  //   final List<Map<String, dynamic>> result = await db
+  //       .rawQuery('SELECT weekOffs FROM UserInfos WHERE id = ?', [userID]);
+  //   return result.isNotEmpty
+  //       ? result.first['weekOffs']
+  //       : 'sunday'; // Default to 'sunday' if no result
+  // }
 
   Future<bool> hasleaveday(String weekOffDate) async {
     // Get a reference to the database

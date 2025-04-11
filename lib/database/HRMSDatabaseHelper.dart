@@ -732,13 +732,13 @@ class HRMSDatabaseHelper {
   Future<List<DailyPunch>> getDailyPunchDetails() async {
     final db = await database;
     final List<Map<String, dynamic>> result = await db.query(
-      'DailyPunchInAndOut',
-      where: 'ServerUpdatedStatus = ?',
+      'DailyPunchInAndOutDetails',
+      where: 'ServerUpdateStatus = ?',
       whereArgs: [0],
     );
     print('DailyPunchInAndOut fetched: $result');
 
-    return result.map((row) => DailyPunch.fromMap(row)).toList();
+    return result.map((row) => DailyPunch.fromJson(row)).toList();
   }
 
 }

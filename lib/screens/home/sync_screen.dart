@@ -59,7 +59,7 @@ class _SyncScreenState extends State<SyncScreen>
     pendingboundarycount = await dataAccessHandler.getOnlyOneIntValueFromDb(
         'SELECT Count(*) AS pendingboundaryCount FROM GeoBoundaries WHERE ServerUpdatedStatus = 0');
     pendingAttendencecount = await dataAccessHandler.getOnlyOneIntValueFromDb(
-        'SELECT Count(*) AS pendingboundaryCount FROM DailyPunchInAndOut WHERE ServerUpdatedStatus = 0');
+        'SELECT Count(*) AS pendingAttendencecount FROM DailyPunchInAndOutDetails WHERE ServerUpdateStatus = 0');
     print(
         'fetchPendinGrecordsCount: $pendingleadscount | $pendingfilerepocount | $pendingboundarycount | $pendingAttendencecount');
     return [pendingleadscount, pendingfilerepocount, pendingboundarycount,pendingAttendencecount];
