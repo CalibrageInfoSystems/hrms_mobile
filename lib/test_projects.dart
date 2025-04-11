@@ -50,7 +50,7 @@ class _ProjectsScreenState extends State<TestProjectsScreen> {
       final employeeId = prefs.getString(SharedKeys.employeeId) ?? "";
       final loginTime = prefs.getString('loginTime') ?? 'Unknown';
       final apiKey = prefs.getString(SharedKeys.APIKey) ?? "";
-print('apiKey=====$apiKey');
+      print('apiKey=====$apiKey');
       final currentTime = DateTime.now();
       final formattedLoginTime = DateTime.tryParse(loginTime);
       if (formattedLoginTime != null) {
@@ -60,9 +60,7 @@ print('apiKey=====$apiKey');
 
       final apiUrl = Uri.parse('$baseUrl$getselfempolyee$employeeId');
 
-      final jsonResponse = await http.get(apiUrl,
-          headers: {
-        'APIKey': apiKey});
+      final jsonResponse = await http.get(apiUrl, headers: {'APIKey': apiKey});
 
       print('jsonResponse.body: ${jsonResponse.body}');
 
@@ -180,10 +178,7 @@ print('apiKey=====$apiKey');
               height: MediaQuery.of(context).size.height,
             ),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10.0,
-                //  vertical: 40.0
-              ),
+              padding: const EdgeInsets.all(10),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -318,40 +313,41 @@ print('apiKey=====$apiKey');
                 ],
               ),
               child: SingleChildScrollView(
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  //SizedBox(height: 5.0),
-                  // Display project name and logo only once
-                  project.projectlogo.isNotEmpty
-                      ? CircleAvatar(
-                          radius: 40.0,
-                          backgroundColor: Colors.white,
-                          backgroundImage: MemoryImage(project.projectlogo),
-                        )
-                      : Image.asset(
-                          'assets/app_logo.png',
-                          width: 80.0,
-                          height: 80.0,
-                        ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    project.projectname,
-                    style: const TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.black,
+                  child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    //SizedBox(height: 5.0),
+                    // Display project name and logo only once
+                    project.projectlogo.isNotEmpty
+                        ? CircleAvatar(
+                            radius: 40.0,
+                            backgroundColor: Colors.white,
+                            backgroundImage: MemoryImage(project.projectlogo),
+                          )
+                        : Image.asset(
+                            'assets/app_logo.png',
+                            width: 80.0,
+                            height: 80.0,
+                          ),
+                    const SizedBox(height: 8.0),
+                    Text(
+                      project.projectname,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-                  //  SizedBox(height: 5.0),
-                  // Display from date and to date multiple times
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: buildRows(project.instances),
-                  ),
-                ],
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: buildRows(project.instances),
+                    ),
+                  ],
+                ),
               )),
             )));
       },

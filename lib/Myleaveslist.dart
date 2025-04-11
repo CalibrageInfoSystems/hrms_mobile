@@ -993,38 +993,7 @@ class _MyleaveslistState extends State<Myleaveslist> {
                               child: GestureDetector(
                                 onTap: () {
                                   Navigator.of(context).pop();
-                                  if (showYear != 'Select Year') {
-                                    // api call with status filter
-                                    setState(() {
-                                      employeeLeaves = fetchLeavesInYear(
-                                          empolyeid,
-                                          leaveTypeValue: widget.leaveType,
-                                          selectedYear: showYear,
-                                          selectedStatus: _selectedLeave == null
-                                              ? null
-                                              : leavesList[_selectedLeave!]);
-                                    });
-                                  }
-                                  if (_selectedLeave != null) {
-                                    // filter status
-                                    setState(() {
-                                      filteredLeaves
-                                          .where((leave) =>
-                                              leave.status ==
-                                              leavesList[_selectedLeave!])
-                                          .toList();
-                                    });
-                                  }
-                                  /*  filterLeaves(
-                                    empolyeid,
-                                    leaveTypeValue: widget.leaveType,
-                                    selectedYear: showYear == 'Select Year'
-                                        ? null
-                                        : showYear,
-                                    selectedStatus: _selectedLeave == null
-                                        ? null
-                                        : leavesList[_selectedLeave!],
-                                  ); */
+                                  filterLeaves();
                                 },
                                 //MARK: Apply Filter
                                 child: Container(
@@ -1150,6 +1119,48 @@ class _MyleaveslistState extends State<Myleaveslist> {
       employeeLeaves =
           fetchLeavesInYear(empolyeid, leaveTypeValue: widget.leaveType);
     });
+  }
+
+  void filterLeaves() {
+    print('Selected Year: ${showYear}');
+    print('Selected Leave: ${_selectedLeave}');
+    if (showYear == 'Select Year' && _selectedLeave == null) {
+      return;
+    } else if (showYear != 'Select Year') {
+      setState(() {
+        employeeLeaves = fetchLeavesInYear(empolyeid,
+            leaveTypeValue: widget.leaveType,
+            selectedYear: showYear,
+            selectedStatus:
+                _selectedLeave == null ? null : leavesList[_selectedLeave!]);
+      });
+    } else if (_selectedLeave != null) {
+      setState(() {
+        /*  allLeaves
+                                          .where((leave) =>
+                                              leave.status ==
+                                              leavesList[_selectedLeave!])
+                                          .toList(); */
+
+        employeeLeaves = Future(() {
+          final filteredList = allLeaves
+              .where((leave) => leave.status == leavesList[_selectedLeave!])
+              .toList();
+
+          filteredLeaves = filteredList;
+
+          return filteredList;
+        });
+
+        /*  Future.wait([
+                                        filteredLeaves
+                                          .where((leave) =>
+                                              leave.status ==
+                                              leavesList[_selectedLeave!])
+                                          .toList()
+                                      ]); */
+      });
+    }
   }
 }
 
