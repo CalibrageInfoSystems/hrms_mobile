@@ -1893,11 +1893,11 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         return false;
       }
 
-      if (countOfLeaves <= 6) {
+      /*  if (countOfLeaves <= 6) {
         Commonutils.showCustomToastMessageLong(
             'You have only $countOfLeaves PL\'s available', context, 1, 5);
         return false;
-      }
+      } */
     }
     return true;
   }

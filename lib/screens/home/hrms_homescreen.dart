@@ -846,7 +846,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         return Builder(
           builder: (BuildContext context) {
             return Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 color: Colors.white,
@@ -864,7 +864,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                             Text('${item.employeeName}',
                                 style: CommonStyles.txStyF20CbFcF5),
                             Text('${item.wish}',
-                                maxLines: 5,
+                                maxLines: 4,
                                 overflow: TextOverflow.ellipsis,
                                 style: CommonStyles.txStyF20CbFcF5
                                     .copyWith(fontSize: 14)),
@@ -2113,27 +2113,26 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       }
 
       int punchResult = 0;
-print('xxx6: $isCheckedIn');
+      print('xxx6: $isCheckedIn');
       print('xxx7: ${!isCheckedIn}');
       // if (!isCheckedIn) {
-        // **Punch In: Insert new record in DailyPunchInAndOutDetails**
-        Map<String, dynamic> punchInData = {
-          'UserId': userId,
-          'PunchDate': punchTime,
-          'IsPunchIn': !isCheckedIn,
-          'Latitude': latitude,
-          'Longitude': longitude,
-          'Address': address,
-          'Remarks':"",
-          'PunchMode':410,
-          'CreatedByUserId': userId,
-          'CreatedDate': punchTime,
-          'ServerUpdateStatus': false, // Unsynced data
-        };
+      // **Punch In: Insert new record in DailyPunchInAndOutDetails**
+      Map<String, dynamic> punchInData = {
+        'UserId': userId,
+        'PunchDate': punchTime,
+        'IsPunchIn': !isCheckedIn,
+        'Latitude': latitude,
+        'Longitude': longitude,
+        'Address': address,
+        'Remarks': "",
+        'PunchMode': 410,
+        'CreatedByUserId': userId,
+        'CreatedDate': punchTime,
+        'ServerUpdateStatus': false, // Unsynced data
+      };
 
-        punchResult = await db.insert('DailyPunchInAndOutDetails', punchInData);
+      punchResult = await db.insert('DailyPunchInAndOutDetails', punchInData);
       // }
-
 
       // else {
       //   // **Punch Out: Update last Punch In record**
@@ -2169,7 +2168,7 @@ print('xxx6: $isCheckedIn');
           // **Prevent duplicate inserts**
           List<Map<String, dynamic>> existingFiles = await db.rawQuery(
               "SELECT * FROM FileRepository WHERE FileName = ? AND LookupType = ? AND ServerUpdatedStatus = 0",
-              [fileName, isCheckedIn ?  376 : 377]);
+              [fileName, isCheckedIn ? 376 : 377]);
 
           if (existingFiles.isEmpty) {
             Map<String, dynamic> fileData = {
@@ -2592,7 +2591,7 @@ void onStart(ServiceInstance service) async {
         DateTime? shiftEnd;
         String trackCondition = await dataAccessHandler.gettracktype();
         print("track condition for tracktype: $trackCondition");
-      /*  if(trackCondition == 'Shift Timings') {
+        /*  if(trackCondition == 'Shift Timings') {
            shiftFromTime = await dataAccessHandler.getShiftinTime();
            shiftToTime = await dataAccessHandler.getShiftoutTime();
 
@@ -2631,8 +2630,8 @@ void onStart(ServiceInstance service) async {
           );
         }
         else{*/
-          // shiftFromTime = await dataAccessHandler.getpuchinTime();
-          // shiftToTime = await dataAccessHandler.getpunchoutTime();
+        // shiftFromTime = await dataAccessHandler.getpuchinTime();
+        // shiftToTime = await dataAccessHandler.getpunchoutTime();
         shiftFromTime = await dataAccessHandler.getpuchinTime();
         shiftToTime = await dataAccessHandler.getpunchoutTime();
 
@@ -2649,7 +2648,6 @@ void onStart(ServiceInstance service) async {
           now.day,
           fromDateTime.hour,
           fromDateTime.minute,
-
         );
 
         shiftEnd = DateTime(
@@ -2658,7 +2656,6 @@ void onStart(ServiceInstance service) async {
           now.day,
           toDateTime.hour,
           toDateTime.minute,
-
         );
         print("Formatted shiftStart: $shiftStart");
         print("Formatted shiftEnd: $shiftEnd");
@@ -2666,15 +2663,16 @@ void onStart(ServiceInstance service) async {
         final formatter = DateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         print("Formatted shiftStart: ${formatter.format(shiftStart)}");
         print("Formatted shiftEnd: ${formatter.format(shiftEnd)}");
-      //  }
+        //  }
         SharedPreferences prefs = await SharedPreferences.getInstance();
         bool isLeaveToday = prefs.getBool('isLeaveToday') ?? false;
         bool canTrackEmployee = await dataAccessHandler.canTrackEmployee();
         bool isExcludedDate = await dataAccessHandler.checkIfExcludedDate();
-        bool isWithinTrackingHours = now.isAfter(shiftStart!) && now.isBefore(shiftEnd!);
+        bool isWithinTrackingHours =
+            now.isAfter(shiftStart!) && now.isBefore(shiftEnd!);
         bool hasPointToday = await dataAccessHandler.hasPointForToday();
 
-    /*    canTrackEmployee == true
+        /*    canTrackEmployee == true
 
         isLeaveToday == false
 
@@ -2688,14 +2686,18 @@ void onStart(ServiceInstance service) async {
         print("isWithinTrackingHours: $isWithinTrackingHours");
 
         /// Final condition check
-        if (canTrackEmployee && !isLeaveToday && !isExcludedDate && isWithinTrackingHours) {
+        if (canTrackEmployee &&
+            !isLeaveToday &&
+            !isExcludedDate &&
+            isWithinTrackingHours) {
           if (!hasPointToday && _isPositionAccurate(position)) {
             if (!isFirstLocationLogged) {
               lastLatitude = position.latitude;
               lastLongitude = position.longitude;
               isFirstLocationLogged = true;
 
-              await insertLocationToDatabase(hrmsDatabase, position, userID, syncService);
+              await insertLocationToDatabase(
+                  hrmsDatabase, position, userID, syncService);
             }
           }
 
@@ -2711,7 +2713,8 @@ void onStart(ServiceInstance service) async {
               lastLatitude = position.latitude;
               lastLongitude = position.longitude;
 
-              await insertLocationToDatabase(hrmsDatabase, position, userID, syncService);
+              await insertLocationToDatabase(
+                  hrmsDatabase, position, userID, syncService);
             } else {
               appendLog("Skipping insert: Distance too short (${distance}m)");
             }
