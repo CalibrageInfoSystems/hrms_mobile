@@ -2833,6 +2833,7 @@ Future<Map<String, dynamic>> getEmployeeShiftDetails() async {
 }
 
 @pragma('vm:entry-point')
+@pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   appendLog('Service started...');
   Timer? locationTimer;
@@ -2897,125 +2898,153 @@ void onStart(ServiceInstance service) async {
 
       if (permission == LocationPermission.always) {
         DateTime now = DateTime.now();
+        String? shiftFromTime;
+        String? shiftToTime;
+        DateTime? shiftStart;
+        DateTime? shiftEnd;
+        String trackCondition = await dataAccessHandler.gettracktype();
+        print("track condition for tracktype: $trackCondition");
+        if(trackCondition == 'Shift Timings') {
+          shiftFromTime = await dataAccessHandler.getShiftinTime();
+          shiftToTime = await dataAccessHandler.getShiftoutTime();
 
-        // Fetch shift timings and weekoffs from the database
-        final shiftFromTime =
-            await dataAccessHandler.getShiftinTime(); // Example user ID 13
-        final shiftToTime =
-            await dataAccessHandler.getShiftoutTime(); // Example user ID 13
-        //  final weekoffs = await dataAccessHandler.getweekoffs();            // List of week-off days (e.g., [DateTime.monday, DateTime.friday])
-
-        // Parse the shift times into DateTime objects for comparison
-        DateTime shiftStart = DateTime(
+          shiftStart = DateTime(
             now.year,
             now.month,
             now.day,
             int.parse(shiftFromTime.split(":")[0]),
-            int.parse(shiftFromTime.split(":")[1]));
-        DateTime shiftEnd = DateTime(
+            int.parse(shiftFromTime.split(":")[1]),
+          );
+          shiftEnd = DateTime(
             now.year,
             now.month,
             now.day,
             int.parse(shiftToTime.split(":")[0]),
-            int.parse(shiftToTime.split(":")[1]));
-        print('shiftStart==========>${shiftStart}');
-        print('shiftEnd==========>${shiftEnd}');
-        // Check if the current time is within the shift hours
-        bool isWithinTrackingHours =
-            now.isAfter(shiftStart) && now.isBefore(shiftEnd);
-        print("track condition for data insert: $isWithinTrackingHours ");
-        /*    //  bool isWeekend = now.weekday == DateTime.sunday;
-        final String weekoffsString = await dataAccessHandler.getweekoffs();
-        // Map weekday names to their corresponding integer values (1 = Monday, ..., 7 = Sunday)
-        final Map<String, int> dayToIntMap = {
-          'Monday': 1,
-          'Tuesday': 2,
-          'Wednesday': 3,
-          'Thursday': 4,
-          'Friday': 5,
-          'Saturday': 6,
-          'Sunday': 7
-        };
+            int.parse(shiftToTime.split(":")[1]),
+          );
+        }
+        else if(trackCondition == 'Timings') {
+          shiftFromTime = await dataAccessHandler.getTrackinTime();
+          shiftToTime = await dataAccessHandler.getTrackoutTime();
 
-        // Convert the weekoffs string to a list of integers
-        final List<int> weekoffs = weekoffsString
-            .split(',')
-            .map((day) => day.trim())
-            .where((day) => day.isNotEmpty)
-            .map((day) => dayToIntMap[day]) // Map day names to integers
-            .where((day) =>
-                day != null && day >= 1 && day <= 7) // Only valid weekdays
-            .cast<int>()
-            .toList();
-        print('weekoffs==========>${weekoffs}');
-        bool isWeekOff = weekoffs.contains(now.weekday);
-        print("track condition for isWeekOff: $weekoffs");
-        print("Today==========> ${now.weekday}");*/
-        // Check if the current date is a holiday (excluded date)
-        bool isExcludedDate = await dataAccessHandler.checkIfExcludedDate();
+          shiftStart = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            int.parse(shiftFromTime.split(":")[0]),
+            int.parse(shiftFromTime.split(":")[1]),
+          );
+          shiftEnd = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            int.parse(shiftToTime.split(":")[0]),
+            int.parse(shiftToTime.split(":")[1]),
+          );
+        }
+        else{
+          // shiftFromTime = await dataAccessHandler.getpuchinTime();
+          // shiftToTime = await dataAccessHandler.getpunchoutTime();
+          shiftFromTime = await dataAccessHandler.getpuchinTime();
+          shiftToTime = await dataAccessHandler.getpunchoutTime();
 
-        appendLog("track condition for data insert: $isExcludedDate");
-        print("track condition for data insert: $isExcludedDate");
+          print("shiftFromTime: $shiftFromTime");
+          print("shiftToTime $shiftToTime");
+          // Parse full datetime
+          DateTime fromDateTime = DateTime.parse(shiftFromTime);
+          DateTime toDateTime = DateTime.parse(shiftToTime);
 
-        appendLog("track condition for data insert: $isWithinTrackingHours  ");
+          // Rebuild with today's date and extracted time
+          shiftStart = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            fromDateTime.hour,
+            fromDateTime.minute,
+          );
 
-        // Check if tracking is allowed
-        // if (isWithinTrackingHours && !isExcludedDate && !isWeekOff) {
-        //   //   if ( !isExcludedDate ) {
-        //   service.invoke('on_location_changed', position.toJson());
-        //
-
+          shiftEnd = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            toDateTime.hour,
+            toDateTime.minute,
+          );
+          print("Formatted shiftStart: $shiftStart");
+          print("Formatted shiftEnd: $shiftEnd");
+          // Format output
+          final formatter = DateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+          print("Formatted shiftStart: ${formatter.format(shiftStart)}");
+          print("Formatted shiftEnd: ${formatter.format(shiftEnd)}");
+        }
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        bool isLeaveToday = prefs.getBool('isLeaveToday') ?? false;
         bool canTrackEmployee = await dataAccessHandler.canTrackEmployee();
-        print(" track condition for canTrackEmployee: $canTrackEmployee");
-        String trackCondition = await dataAccessHandler.gettracktype();
-        print(" track condition for tracktype: $trackCondition");
+        bool isExcludedDate = await dataAccessHandler.checkIfExcludedDate();
+        bool isWithinTrackingHours =
+            now.isAfter(shiftStart!) && now.isBefore(shiftEnd!);
         bool hasPointToday = await dataAccessHandler.hasPointForToday();
-        // bool hasleaveToday = await dataAccessHandler.hasleaveForToday();
-        //
-        //   print(
-        //       "track condition hasleaveToday: $hasleaveToday  hasPointToday ======> $hasPointToday");
-        //
-        //   if (!hasleaveToday) {
-        if (!hasPointToday) {
-          if (_isPositionAccurate(position)) {
+
+        /*    canTrackEmployee == true
+
+        isLeaveToday == false
+
+        isExcludedDate == false (not a holiday)
+
+        isWithinTrackingHours == true*/
+
+        print("canTrackEmployee: $canTrackEmployee");
+        print("isLeaveToday: $isLeaveToday");
+        print("isExcludedDate: $isExcludedDate");
+        print("isWithinTrackingHours: $isWithinTrackingHours");
+
+        /// Final condition check TODO
+     /*   if (canTrackEmployee &&
+            !isLeaveToday &&
+            !isExcludedDate &&
+            isWithinTrackingHours) {*/
+          if (!hasPointToday && _isPositionAccurate(position)) {
             if (!isFirstLocationLogged) {
               lastLatitude = position.latitude;
               lastLongitude = position.longitude;
               isFirstLocationLogged = true;
 
-              // Insert the first location
               await insertLocationToDatabase(
                   hrmsDatabase, position, userID, syncService);
             }
           }
-        }
 
-        if (_isPositionAccurate(position)) {
-          final distance = Geolocator.distanceBetween(
-            lastLatitude,
-            lastLongitude,
-            position.latitude,
-            position.longitude,
-          );
+          if (_isPositionAccurate(position)) {
+            final distance = Geolocator.distanceBetween(
+              lastLatitude,
+              lastLongitude,
+              position.latitude,
+              position.longitude,
+            );
 
-          if (distance >= 20.0) {
-            lastLatitude = position.latitude;
-            lastLongitude = position.longitude;
+            if (distance >= 20.0) {
+              lastLatitude = position.latitude;
+              lastLongitude = position.longitude;
 
-            // Insert location points when the distance exceeds the threshold
-            await insertLocationToDatabase(
-                hrmsDatabase, position, userID, syncService);
+              await insertLocationToDatabase(
+                  hrmsDatabase, position, userID, syncService);
+            } else {
+              appendLog("Skipping insert: Distance too short (${distance}m)");
+            }
           } else {
-            appendLog("Skipping insert: Distance too short (${distance}m)");
+            appendLog("Skipping insert: Position inaccurate or speed is 0");
           }
-        } else {
-          appendLog("Skipping insert: Position inaccurate or speed is 0");
-        }
-      } else {
-        appendLog("Tracking not allowed: User has leave today");
-        print("Tracking not allowed: User has leave today");
-      }
-      //   }
+/*        } else {
+          appendLog("Tracking not allowed due to conditions not met.");
+          print("❌ Tracking not allowed due to one or more conditions:");
+          print("canTrackEmployee: $canTrackEmployee");
+          print("isLeaveToday: $isLeaveToday");
+          print("isExcludedDate: $isExcludedDate");
+          print("isWithinTrackingHours: $isWithinTrackingHours");}
+       */
+     }
+
+      //  }
       // else {
       //     appendLog(
       //         'Tracking not allowed: isWithinTrackingHours: $isWithinTrackingHours, isWeekend: $weekoffsString, isWeekOff: $isWeekOff');
