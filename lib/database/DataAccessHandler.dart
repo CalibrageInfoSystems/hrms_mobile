@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hrms/Database/HRMSDatabaseHelper.dart';
+import 'package:hrms/Model%20Class/DailyPunch.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
@@ -605,7 +606,6 @@ class DataAccessHandler with ChangeNotifier {
     return result.isNotEmpty ? (result.first['CanTrackEmployee'] == 1) : false;
   }
 
-
   Future<String> gettracktype() async {
     final db = await dbHelper.database;
     // Assuming userID is retrieved from SharedPreferences or passed as an argument
@@ -703,6 +703,87 @@ class DataAccessHandler with ChangeNotifier {
     return result.isNotEmpty ? result : [];
   }
 
+  Future<Map<String, dynamic>> fetchLatestPunchAndShift() async {
+    try {
+      final db = await dbHelper.database;
+
+      // Fetch latest DailyPunchInAndOutDetails record
+      final List<Map<String, dynamic>> dailyPunchResult = await db.rawQuery('''
+      SELECT *
+      FROM DailyPunchInAndOutDetails
+      ORDER BY Id DESC
+      LIMIT 1;
+    ''');
+
+      // Fetch latest ShiftDetails record
+      final List<Map<String, dynamic>> shiftDetailsResult =
+          await db.rawQuery('''
+      SELECT *
+      FROM ShiftDetails
+      ORDER BY ShiftId DESC
+      LIMIT 1;
+    ''');
+
+      final dailyPunch = dailyPunchResult.isNotEmpty
+          ? dailyPunchResult.first
+          : <String, dynamic>{};
+      final shiftDetail = shiftDetailsResult.isNotEmpty
+          ? shiftDetailsResult.first
+          : <String, dynamic>{};
+      print(
+          'fetchLatestPunchAndShift: ${dailyPunchResult.isNotEmpty ? jsonEncode(dailyPunchResult.first) : {}}');
+      print(
+          'fetchLatestPunchAndShift: ${shiftDetailsResult.isNotEmpty ? jsonEncode(shiftDetailsResult.first) : {}}');
+
+      return {
+        'dailyPunch': dailyPunch,
+        'shiftDetail': shiftDetail,
+      };
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /*  Future<Map<String, dynamic>> fetchLatestPunchAndShift() async {
+    try {
+      final db = await dbHelper.database;
+
+      // Fetch latest DailyPunchInAndOutDetails record
+      final List<Map<String, dynamic>> dailyPunchResult = await db.rawQuery('''
+      SELECT *
+      FROM DailyPunchInAndOutDetails
+      ORDER BY Id DESC
+      LIMIT 1;
+    ''');
+
+      // Fetch latest ShiftDetails record
+      final List<Map<String, dynamic>> shiftDetailsResult =
+          await db.rawQuery('''
+      SELECT *
+      FROM ShiftDetails
+      ORDER BY ShiftId DESC
+      LIMIT 1;
+    ''');
+
+      final dailyPunch =
+          dailyPunchResult.isNotEmpty ? dailyPunchResult.first : {};
+
+      final shiftDetail =
+          shiftDetailsResult.isNotEmpty ? shiftDetailsResult.first : {};
+      print(
+          'fetchLatestPunchAndShift: ${dailyPunchResult.isNotEmpty ? jsonEncode(dailyPunchResult.first) : {}}');
+      print(
+          'fetchLatestPunchAndShift: ${shiftDetailsResult.isNotEmpty ? jsonEncode(shiftDetailsResult.first) : {}}');
+
+      return {
+        'dailyPunch': dailyPunch,
+        'shiftDetail': shiftDetail,
+      };
+    } catch (e) {
+      rethrow;
+    }
+  }
+ */
   Future<List<Map<String, dynamic>>> getTrackingInfo() async {
     final db = await dbHelper.database;
 
@@ -721,11 +802,12 @@ class DataAccessHandler with ChangeNotifier {
         ? result.first['ShiftOut']
         : ''; // Default to '09:00' if no result
   }
+
   Future<String> getTrackinTime() async {
     final db = await dbHelper.database;
 
-    final List<Map<String, dynamic>> result = await db
-        .rawQuery('Select TrackInTime FROM TrackingInfo');
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery('Select TrackInTime FROM TrackingInfo');
     return result.isNotEmpty
         ? result.first['TrackInTime']
         : ''; // Default to '09:00' if no result
@@ -735,17 +817,18 @@ class DataAccessHandler with ChangeNotifier {
   Future<String> getTrackoutTime() async {
     final db = await dbHelper.database;
 
-    final List<Map<String, dynamic>> result = await db
-        .rawQuery('Select TrackOutTime FROM TrackingInfo');
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery('Select TrackOutTime FROM TrackingInfo');
     return result.isNotEmpty
         ? result.first['TrackOutTime']
         : ''; // Default to '09:00' if no result
   }
+
   Future<String> getpuchinTime() async {
     final db = await dbHelper.database;
 
-    final List<Map<String, dynamic>> result = await db
-        .rawQuery('Select PunchDate FROM DailyPunchInAndOutDetails WHERE IsPunchIn = 1');
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+        'Select PunchDate FROM DailyPunchInAndOutDetails WHERE IsPunchIn = 1');
     return result.isNotEmpty
         ? result.first['PunchDate']
         : ''; // Default to '09:00' if no result
@@ -756,8 +839,7 @@ class DataAccessHandler with ChangeNotifier {
     final db = await dbHelper.database;
 
     final List<Map<String, dynamic>> result = await db.rawQuery(
-        'SELECT PunchDate FROM DailyPunchInAndOutDetails WHERE IsPunchIn = 0'
-    );
+        'SELECT PunchDate FROM DailyPunchInAndOutDetails WHERE IsPunchIn = 0');
 
     if (result.isNotEmpty && result.first['PunchDate'] != null) {
       return result.first['PunchDate'];
@@ -801,8 +883,6 @@ class DataAccessHandler with ChangeNotifier {
     // If the result is not empty, a leave exists for that date
     return result.isNotEmpty;
   }
-
-
 
   // Method to execute update queries
   Future<void> updateData(String query, List<dynamic> arguments) async {

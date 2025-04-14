@@ -145,12 +145,14 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   late Future<Map<String, dynamic>> futureEmployeeShiftDetails;
 
   late Future<String> futureTrackingInfo;
+  late Future<Map<String, dynamic>> futureLatestPunchAndShift;
 
   @override
   void initState() {
     super.initState();
     futureCheckInOutStatus = fetchCheckInOutStatus();
     futureEmployeeShiftDetails = getEmployeeShiftDetails();
+    futureLatestPunchAndShift = getLatestPunchAndShift();
 
     // getLoginTime();
     loadCurrentLocation();
@@ -216,6 +218,18 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       setState(() {
         ismatchedlogin = true;
       });
+    }
+  }
+
+  Future<Map<String, dynamic>> getLatestPunchAndShift() async {
+    try {
+      final dataAccessHandler = DataAccessHandler();
+      Map<String, dynamic> results =
+          await dataAccessHandler.fetchLatestPunchAndShift();
+      return results
+          .cast<String, dynamic>(); // Explicitly cast to Map<String, dynamic>
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -322,6 +336,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 14.0),
                     child: Column(
                       children: [
+                        /* 
                         Container(
                           width: double.infinity,
                           padding: EdgeInsets.all(
@@ -365,6 +380,60 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                                   ],
                                 );
                               }),
+                        ),
+                         */
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(
+                              isTablet ? 20 : 12), // Adjust padding for tablets
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: Colors.white,
+                          ),
+                          child: FutureBuilder<Map<String, dynamic>>(
+                            future: futureLatestPunchAndShift,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Skeletonizer(
+                                  enabled: true,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      shiftTimingAndStatus({}),
+                                      const SizedBox(height: 5),
+                                      checkInNOut({}),
+                                    ],
+                                  ),
+                                );
+                              } else if (snapshot.hasError) {
+                                return Center(
+                                  child: Text(
+                                    snapshot.error.toString(),
+                                    style: const TextStyle(color: Colors.red),
+                                  ),
+                                );
+                              }
+
+                              // Safely access the data
+                              final Map<String, dynamic> result =
+                                  snapshot.data ?? {};
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  shiftTimingAndStatus(
+                                      result['shiftDetail'] ?? {}),
+                                  const SizedBox(height: 5),
+                                  checkInNOut(result),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                         const SizedBox(height: 10),
                         hrmsSection(size),
@@ -761,6 +830,82 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   }
 
   Widget checkInNOut(Map<String, dynamic> shiftDetails) {
+    return checkInNOutTemplate(shiftDetails);
+    /*  return FutureBuilder(
+      future: futureCheckInOutStatus,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Skeletonizer(
+            enabled: true,
+            child: checkInNOutTemplate(true, shiftDetails),
+          );
+        } else if (snapshot.hasError) {
+          return const SizedBox();
+        }
+        return checkInNOutTemplate(isPunchedIn, shiftDetails);
+      },
+    ); */
+  }
+
+  Row checkInNOutTemplate(Map<String, dynamic> result) {
+    final dailyPunch = result['dailyPunch'] ?? {};
+    final shiftDetail = result['shiftDetail'] ?? {};
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                result['IsPunchIn'] != null || result['IsPunchIn'] == true
+                    ? "Check In"
+                    : "Shift Timings",
+                style: CommonStyles.txStyF16CbFFb.copyWith(
+                  fontSize: 18,
+                ),
+              ),
+              Text(
+                result['IsPunchIn'] != null || result['IsPunchIn'] == true
+                    ? "at ${formatPunchTime(result['PunchDate'])}"
+                    : shiftDetail != null
+                        ? "${formatShiftTime(shiftDetail['ShiftIn'])} to ${formatShiftTime(shiftDetail['ShiftOut'])}"
+                        : "No Shift Timings",
+                // : "09:00 AM to 6:00 PM",
+                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+              ),
+            ],
+          ),
+        ),
+        result['IsPunchIn'] != null || result['IsPunchIn'] == true
+            ? CustomBtn(
+                icon: Icons.logout_outlined,
+                btnText: 'Check Out',
+                isLoading: isRequestProcessing,
+                backgroundColor: CommonStyles.whiteColor,
+                btnTextColor: CommonStyles.primaryColor,
+                onTap: checkInOut,
+                /* onTap: () async {
+                    setState(() {
+                      isRequestProcessing = true;
+                    });
+      
+                    await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => punchInOutDialog(context),
+                    );
+                  }, */
+              )
+            : CustomBtn(
+                btnText: 'Check In',
+                isLoading: isRequestProcessing,
+                onTap: checkInOut,
+              ),
+      ],
+    );
+  }
+
+/*   Widget checkInNOut(Map<String, dynamic> shiftDetails) {
     return FutureBuilder(
       future: futureCheckInOutStatus,
       builder: (context, snapshot) {
@@ -832,7 +977,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       ],
     );
   }
-
+ */
   String? formatShiftTime(String? timeString) {
     if (timeString == null || timeString.isEmpty) {
       return null; // Return null if the input is null or empty
@@ -1449,17 +1594,17 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     totalLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
         "SELECT COUNT(*) AS totalLeadsCount FROM Leads WHERE CreatedByUserId = '$userID'");
 
-    _time = (await dataAccessHandler.getOnlyStringValueFromDb(
-        "SELECT PunchDate FROM DailyPunchInAndOutDetails  WHERE DATE(CreatedDate) ='$currentDate' AND CreatedByUserId = '$userID'"))!;
-    print('_time == $_time');
+    // _time = (await dataAccessHandler.getOnlyStringValueFromDb(
+    //     "SELECT PunchDate FROM DailyPunchInAndOutDetails  WHERE DATE(CreatedDate) ='$currentDate' AND CreatedByUserId = '$userID'"))!;
+    // print('_time == $_time');
 
-    bool isPunchIn = _time != null && _time.isNotEmpty;
+    // bool isPunchIn = _time != null && _time.isNotEmpty;
 
-    await prefs.setBool(Constants.isPunchIn, isPunchIn);
+    // await prefs.setBool(Constants.isPunchIn, isPunchIn);
 
-    setState(() {
-      isPunchedIn = isPunchIn; // Local state variable that drives the UI
-    });
+    // setState(() {
+    //   isPunchedIn = isPunchIn; // Local state variable that drives the UI
+    // });
     double calculateDistance(lat1, lon1, lat2, lon2) {
       var p = 0.017453292519943295; // Pi/180 to convert degrees to radians
       var c = cos;
@@ -2418,6 +2563,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
       // if (!isCheckedIn) {
       // **Punch In: Insert new record in DailyPunchInAndOutDetails**
+      print('_insertPunchData: $isCheckedIn');
       Map<String, dynamic> punchInData = {
         'UserId': userId,
         'PunchDate': punchTime,
@@ -2904,7 +3050,7 @@ void onStart(ServiceInstance service) async {
         DateTime? shiftEnd;
         String trackCondition = await dataAccessHandler.gettracktype();
         print("track condition for tracktype: $trackCondition");
-        if(trackCondition == 'Shift Timings') {
+        if (trackCondition == 'Shift Timings') {
           shiftFromTime = await dataAccessHandler.getShiftinTime();
           shiftToTime = await dataAccessHandler.getShiftoutTime();
 
@@ -2922,8 +3068,7 @@ void onStart(ServiceInstance service) async {
             int.parse(shiftToTime.split(":")[0]),
             int.parse(shiftToTime.split(":")[1]),
           );
-        }
-        else if(trackCondition == 'Timings') {
+        } else if (trackCondition == 'Timings') {
           shiftFromTime = await dataAccessHandler.getTrackinTime();
           shiftToTime = await dataAccessHandler.getTrackoutTime();
 
@@ -2941,8 +3086,7 @@ void onStart(ServiceInstance service) async {
             int.parse(shiftToTime.split(":")[0]),
             int.parse(shiftToTime.split(":")[1]),
           );
-        }
-        else{
+        } else {
           // shiftFromTime = await dataAccessHandler.getpuchinTime();
           // shiftToTime = await dataAccessHandler.getpunchoutTime();
           shiftFromTime = await dataAccessHandler.getpuchinTime();
@@ -2999,41 +3143,41 @@ void onStart(ServiceInstance service) async {
         print("isWithinTrackingHours: $isWithinTrackingHours");
 
         /// Final condition check TODO
-     /*   if (canTrackEmployee &&
+        /*   if (canTrackEmployee &&
             !isLeaveToday &&
             !isExcludedDate &&
             isWithinTrackingHours) {*/
-          if (!hasPointToday && _isPositionAccurate(position)) {
-            if (!isFirstLocationLogged) {
-              lastLatitude = position.latitude;
-              lastLongitude = position.longitude;
-              isFirstLocationLogged = true;
+        if (!hasPointToday && _isPositionAccurate(position)) {
+          if (!isFirstLocationLogged) {
+            lastLatitude = position.latitude;
+            lastLongitude = position.longitude;
+            isFirstLocationLogged = true;
 
-              await insertLocationToDatabase(
-                  hrmsDatabase, position, userID, syncService);
-            }
+            await insertLocationToDatabase(
+                hrmsDatabase, position, userID, syncService);
           }
+        }
 
-          if (_isPositionAccurate(position)) {
-            final distance = Geolocator.distanceBetween(
-              lastLatitude,
-              lastLongitude,
-              position.latitude,
-              position.longitude,
-            );
+        if (_isPositionAccurate(position)) {
+          final distance = Geolocator.distanceBetween(
+            lastLatitude,
+            lastLongitude,
+            position.latitude,
+            position.longitude,
+          );
 
-            if (distance >= 20.0) {
-              lastLatitude = position.latitude;
-              lastLongitude = position.longitude;
+          if (distance >= 20.0) {
+            lastLatitude = position.latitude;
+            lastLongitude = position.longitude;
 
-              await insertLocationToDatabase(
-                  hrmsDatabase, position, userID, syncService);
-            } else {
-              appendLog("Skipping insert: Distance too short (${distance}m)");
-            }
+            await insertLocationToDatabase(
+                hrmsDatabase, position, userID, syncService);
           } else {
-            appendLog("Skipping insert: Position inaccurate or speed is 0");
+            appendLog("Skipping insert: Distance too short (${distance}m)");
           }
+        } else {
+          appendLog("Skipping insert: Position inaccurate or speed is 0");
+        }
 /*        } else {
           appendLog("Tracking not allowed due to conditions not met.");
           print("❌ Tracking not allowed due to one or more conditions:");
@@ -3042,7 +3186,7 @@ void onStart(ServiceInstance service) async {
           print("isExcludedDate: $isExcludedDate");
           print("isWithinTrackingHours: $isWithinTrackingHours");}
        */
-     }
+      }
 
       //  }
       // else {
