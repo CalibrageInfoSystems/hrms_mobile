@@ -8,6 +8,7 @@ class PermissionManager {
   static Future<void> loadPermissions() async {
     final prefs = await SharedPreferences.getInstance();
     final permissionsString = prefs.getString('permissions');
+    pragma('permissionsString ==$permissionsString');
     if (permissionsString != null) {
       _permissions = json.decode(permissionsString);
     }

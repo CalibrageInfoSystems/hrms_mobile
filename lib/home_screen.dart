@@ -15,6 +15,7 @@ import 'package:hrms/screens/AddLeads.dart';
 import 'package:hrms/screens/employee_profile.dart';
 import 'package:hrms/screens/home/hrms_homescreen.dart';
 import 'package:hrms/screens/home/sync_screen.dart';
+import 'package:hrms/shared_keys.dart';
 import 'package:hrms/test_apply_leave.dart';
 import 'package:hrms/test_projects.dart';
 import 'package:hrms/screens/test_hrms.dart';
@@ -483,8 +484,11 @@ class _home_screenState extends State<home_screen>
   }
 
   Future<void> _initializeData() async {
+    String currentDate = getCurrentDate();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String userID = prefs.getString(SharedKeys.userId) ?? "";
     final db = await dbHelper.database; // Replace with your database initialization
-    final employeeInfos = await fetchEmployeeInfo();
+    final employeeInfos = await fetchEmployeeInfo(userID,currentDate);
     await clearAllTables(db);
     for (var info in employeeInfos) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -494,8 +498,8 @@ class _home_screenState extends State<home_screen>
     }
   }
 
-  Future<List<EmployeeInfo>> fetchEmployeeInfo() async {
-    final response = await http.get(Uri.parse('http://182.18.157.215/HRMS/API/hrmsapi/Employee/GetEmployeeInfoForMobile/a3080ac2-a823-4850-8333-cad6881abdc6/2025-04-11'));
+  Future<List<EmployeeInfo>> fetchEmployeeInfo(String userID, String currentDate,) async {
+    final response = await http.get(Uri.parse('http://182.18.157.215/HRMS/API/hrmsapi/Employee/GetEmployeeInfoForMobile/$userID/$currentDate'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);

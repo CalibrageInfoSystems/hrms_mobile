@@ -139,7 +139,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   double usedCasualLeavesInMonth = 0.0;
   late Future<void> futureCheckInOutStatus;
   bool ismatchedlogin = false;
-
+  bool? showAddClient; // Toggle visibility for Add Client
   late Future<List<BirthdayBanner>> futureBirthdayBanners;
 
   late Future<Map<String, dynamic>> futureEmployeeShiftDetails;
@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     futureCheckInOutStatus = fetchCheckInOutStatus();
     futureEmployeeShiftDetails = getEmployeeShiftDetails();
     futureLatestPunchAndShift = getLatestPunchAndShift();
-
+   // ✅ Initialize only once
     // getLoginTime();
     loadCurrentLocation();
     getuserdata();
@@ -221,7 +221,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     }
   }
 
-  Future<Map<String, dynamic>> getLatestPunchAndShift() async {
+ Future<Map<String, dynamic>> getLatestPunchAndShift() async {
     try {
       final dataAccessHandler = DataAccessHandler();
       Map<String, dynamic> results =
@@ -232,6 +232,37 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       rethrow;
     }
   }
+  // Future<Map<String, dynamic>> getLatestPunchAndShift() async {
+  //   final dataAccessHandler = DataAccessHandler();
+  //
+  //   Map<String, dynamic> shiftDetails = {};
+  //   Map<String, dynamic> punchDetails = {};
+  //
+  //   try {
+  //     // Always fetch shift details
+  //     List<Map<String, dynamic>> shiftResult = await dataAccessHandler.getEmployeeShiftDetails();
+  //     if (shiftResult.isNotEmpty) {
+  //       shiftDetails = shiftResult.first;
+  //     }
+  //
+  //     // Try fetching punch details (optional)
+  //     Map<String, dynamic> punchResult = await dataAccessHandler.fetchLatestPunchAndShift();
+  //     if (punchResult.isNotEmpty) {
+  //       punchDetails = punchResult;
+  //     }
+  //
+  //     return {
+  //       'shiftDetail': shiftDetails,
+  //       ...punchDetails, // Flatten punch data for UI
+  //     };
+  //   } catch (e) {
+  //     // Still return shift details if available
+  //     return {
+  //       'shiftDetail': shiftDetails,
+  //       'error': e.toString(),
+  //     };
+  //   }
+  // }
 
   Future<String> getTrackingInfo() async {
     try {
@@ -314,11 +345,15 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isTablet = size.width > 600;
-
+    showAddClient = PermissionManager.hasPermission("CanManageClientVisits");
+    print('showAddClient: $showAddClient');
+    futureLatestPunchAndShift = getLatestPunchAndShift();
     return RefreshIndicator(
       onRefresh: () async {
         fetchpendingrecordscount();
-        setState(() {});
+        setState(() {
+          futureLatestPunchAndShift = getLatestPunchAndShift();
+        });
       },
       child: WillPopScope(
         onWillPop: () async {
@@ -336,7 +371,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 14.0),
                     child: Column(
                       children: [
-                        /* 
+                        /*
                         Container(
                           width: double.infinity,
                           padding: EdgeInsets.all(
@@ -382,10 +417,10 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                               }),
                         ),
                          */
+
                         Container(
                           width: double.infinity,
-                          padding: EdgeInsets.all(
-                              isTablet ? 20 : 12), // Adjust padding for tablets
+                          padding: EdgeInsets.all(isTablet ? 20 : 12),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             color: Colors.white,
@@ -393,19 +428,16 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                           child: FutureBuilder<Map<String, dynamic>>(
                             future: futureLatestPunchAndShift,
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
                                 return Skeletonizer(
                                   enabled: true,
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      shiftTimingAndStatus({}),
+                                      shiftTimingAndStatus({}), // placeholder
                                       const SizedBox(height: 5),
-                                      checkInNOut({}),
+                                      checkInNOut({}), // placeholder
                                     ],
                                   ),
                                 );
@@ -418,23 +450,24 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                                 );
                               }
 
-                              // Safely access the data
-                              final Map<String, dynamic> result =
-                                  snapshot.data ?? {};
+                              final result = snapshot.data ?? {};
+                              print('result===$result');
+                              final shiftDetail = result['shiftDetail'] ?? {};
+                              print('shiftDetail===$shiftDetail');
+
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  shiftTimingAndStatus(
-                                      result['shiftDetail'] ?? {}),
+                                  shiftTimingAndStatus(shiftDetail),
                                   const SizedBox(height: 5),
-                                  checkInNOut(result),
+                                  checkInNOut(result), // May include punch details or not
                                 ],
                               );
                             },
                           ),
                         ),
+
                         const SizedBox(height: 10),
                         hrmsSection(size),
                         const SizedBox(height: 10),
@@ -457,7 +490,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-/* 
+/*
   Row hrmsSection(Size size) {
     final isTablet = size.width > 600;
     return Row(
@@ -620,7 +653,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                   ],
                 ),
               ),
-             
+
             ],
           ),
         ),
@@ -692,6 +725,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
           iconBgColor: CommonStyles.travelledBgColor,
           hasToolTipRequired: true,
         ),
+        if (showAddClient!)
         SizedBox(width: isTablet ? 20 : 12), // Adjust spacing for tablets
         customLeaveTypeBox(
           leaveType: 'Today Visits',
@@ -709,6 +743,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             );
           },
         ),
+        if (showAddClient!)
         SizedBox(width: isTablet ? 20 : 12), // Adjust spacing for tablets
         customLeaveTypeBox(
           leaveType: 'Total Visits',
@@ -829,9 +864,9 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-  Widget checkInNOut(Map<String, dynamic> shiftDetails) {
+/*  Widget checkInNOut(Map<String, dynamic> shiftDetails) {
     return checkInNOutTemplate(shiftDetails);
-    /*  return FutureBuilder(
+    *//*  return FutureBuilder(
       future: futureCheckInOutStatus,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -844,12 +879,13 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
         }
         return checkInNOutTemplate(isPunchedIn, shiftDetails);
       },
-    ); */
+    ); *//*
   }
 
   Row checkInNOutTemplate(Map<String, dynamic> result) {
     final dailyPunch = result['dailyPunch'] ?? {};
     final shiftDetail = result['shiftDetail'] ?? {};
+    print('shiftDetail==$shiftDetail');
     return Row(
       children: [
         Expanded(
@@ -884,17 +920,17 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                 backgroundColor: CommonStyles.whiteColor,
                 btnTextColor: CommonStyles.primaryColor,
                 onTap: checkInOut,
-                /* onTap: () async {
+                *//* onTap: () async {
                     setState(() {
                       isRequestProcessing = true;
                     });
-      
+
                     await showDialog(
                       context: context,
                       barrierDismissible: false,
                       builder: (context) => punchInOutDialog(context),
                     );
-                  }, */
+                  }, *//*
               )
             : CustomBtn(
                 btnText: 'Check In',
@@ -903,9 +939,60 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               ),
       ],
     );
-  }
+  }*/
 
-/*   Widget checkInNOut(Map<String, dynamic> shiftDetails) {
+/*
+  Row checkInNOutTemplate(bool isCheckIn) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isCheckIn ? "Check In" : "Shift Timings",
+                style: CommonStyles.txStyF16CbFFb.copyWith(
+                  fontSize: 18,
+                ),
+              ),
+              Text(
+                isCheckIn
+                    ? "at ${formatPunchTime(_time)}"
+                    : "09:00 AM to 6:00 PM",
+                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+              ),
+            ],
+          ),
+        ),
+        isCheckIn
+            ? CustomBtn(
+          icon: Icons.logout_outlined,
+          btnText: 'Check Out',
+          isLoading: isRequestProcessing,
+          backgroundColor: CommonStyles.whiteColor,
+          btnTextColor: CommonStyles.primaryColor,
+          onTap: checkInOut,
+          *//* onTap: () async {
+                    setState(() {
+                      isRequestProcessing = true;
+                    });
+
+                    await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => punchInOutDialog(context),
+                    );
+                  }, *//*
+        )
+            : CustomBtn(
+          btnText: 'Check In',
+          isLoading: isRequestProcessing,
+          onTap: checkInOut,
+        ),
+      ],
+    );
+  }*/
+   Widget checkInNOut(Map<String, dynamic> shiftDetails) {
     return FutureBuilder(
       future: futureCheckInOutStatus,
       builder: (context, snapshot) {
@@ -922,8 +1009,9 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     );
   }
 
-  Row checkInNOutTemplate(bool isCheckIn, Map<String, dynamic> shiftDetails) {
-    print('ddd: ${shiftDetails['ShiftIn']}');
+  Row checkInNOutTemplate(bool isCheckIn, Map<String, dynamic> result) {
+    final dailyPunch = result['dailyPunch'] ?? {};
+    final shiftDetail = result['shiftDetail'] ?? {};
     return Row(
       children: [
         Expanded(
@@ -938,10 +1026,10 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
               ),
               Text(
                 isCheckIn
-                    ? "at ${formatPunchTime(_time)}"
-                    : shiftDetails['ShiftIn'] != null &&
-                            shiftDetails['ShiftOut'] != null
-                        ? "${formatShiftTime(shiftDetails['ShiftIn'])} to ${formatShiftTime(shiftDetails['ShiftOut'])}"
+                    ? "at ${formatPunchTime(dailyPunch['PunchDate'])}"
+                    : shiftDetail['ShiftIn'] != null &&
+                    shiftDetail['ShiftOut'] != null
+                        ? "${formatShiftTime(shiftDetail['ShiftIn'])} to ${formatShiftTime(shiftDetail['ShiftOut'])}"
                         : "No Shift Timings",
                 // : "09:00 AM to 6:00 PM",
                 style: TextStyle(fontSize: 14, color: Colors.grey[700]),
@@ -949,35 +1037,62 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
             ],
           ),
         ),
-        isCheckIn
+
+        dailyPunch['IsPunchIn'] != null || dailyPunch['IsPunchIn'] == true
             ? CustomBtn(
-                icon: Icons.logout_outlined,
-                btnText: 'Check Out',
-                isLoading: isRequestProcessing,
-                backgroundColor: CommonStyles.whiteColor,
-                btnTextColor: CommonStyles.primaryColor,
-                onTap: checkInOut,
-                /* onTap: () async {
+          icon: Icons.logout_outlined,
+          btnText: 'Check Out',
+          isLoading: isRequestProcessing,
+          backgroundColor: CommonStyles.whiteColor,
+          btnTextColor: CommonStyles.primaryColor,
+          onTap: checkInOut,
+          /* onTap: () async {
                     setState(() {
                       isRequestProcessing = true;
                     });
-      
+
                     await showDialog(
                       context: context,
                       barrierDismissible: false,
                       builder: (context) => punchInOutDialog(context),
                     );
                   }, */
-              )
+        )
             : CustomBtn(
-                btnText: 'Check In',
-                isLoading: isRequestProcessing,
-                onTap: checkInOut,
-              ),
+          btnText: 'Check In',
+          isLoading: isRequestProcessing,
+          onTap: checkInOut,
+        ),
       ],
     );
   }
- */
+        // isCheckIn
+        //     ? CustomBtn(
+        //         icon: Icons.logout_outlined,
+        //         btnText: 'Check Out',
+        //         isLoading: isRequestProcessing,
+        //         backgroundColor: CommonStyles.whiteColor,
+        //         btnTextColor: CommonStyles.primaryColor,
+        //         onTap: checkInOut,
+        //         /* onTap: () async {
+        //             setState(() {
+        //               isRequestProcessing = true;
+        //             });
+        //
+        //             await showDialog(
+        //               context: context,
+        //               barrierDismissible: false,
+        //               builder: (context) => punchInOutDialog(context),
+        //             );
+        //           }, */
+        //       )
+        //     : CustomBtn(
+        //         btnText: 'Check In',
+        //         isLoading: isRequestProcessing,
+        //         onTap: checkInOut,
+        //       ),
+
+
   String? formatShiftTime(String? timeString) {
     if (timeString == null || timeString.isEmpty) {
       return null; // Return null if the input is null or empty
@@ -1511,6 +1626,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     //  calenderDate = formattedDate;
     futureLeads = loadleads();
     print(' formattedDate==$formattedDate'); // Example output: "25th Sep 2024"
+    showAddClient = PermissionManager.hasPermission("CanManageClientVisits");
+    print('showAddClient: $showAddClient');
   }
 
   String formatDate(DateTime date) {
@@ -1581,8 +1698,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       isLoading = true; // Start loading
     });
 
-    String currentDate =
-        getCurrentDate(); // Assuming this returns a string in 'YYYY-MM-DD' format
+    String currentDate = getCurrentDate(); // Assuming this returns a string in 'YYYY-MM-DD' format
     SharedPreferences prefs = await SharedPreferences.getInstance();
     //   userID = prefs.getInt('userID'); //TODO
     RoleId = prefs.getInt('roleID');
@@ -1594,17 +1710,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     totalLeadsCount = await dataAccessHandler.getOnlyOneIntValueFromDb(
         "SELECT COUNT(*) AS totalLeadsCount FROM Leads WHERE CreatedByUserId = '$userID'");
 
-    // _time = (await dataAccessHandler.getOnlyStringValueFromDb(
-    //     "SELECT PunchDate FROM DailyPunchInAndOutDetails  WHERE DATE(CreatedDate) ='$currentDate' AND CreatedByUserId = '$userID'"))!;
-    // print('_time == $_time');
 
-    // bool isPunchIn = _time != null && _time.isNotEmpty;
-
-    // await prefs.setBool(Constants.isPunchIn, isPunchIn);
-
-    // setState(() {
-    //   isPunchedIn = isPunchIn; // Local state variable that drives the UI
-    // });
     double calculateDistance(lat1, lon1, lat2, lon2) {
       var p = 0.017453292519943295; // Pi/180 to convert degrees to radians
       var c = cos;
@@ -1629,6 +1735,18 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
 
     setState(() {
       isLoading = false; // Stop loading
+    });
+
+    _time = (await dataAccessHandler.getOnlyStringValueFromDb(
+        "SELECT PunchDate FROM DailyPunchInAndOutDetails  WHERE DATE(CreatedDate) ='$currentDate' AND CreatedByUserId = '$userID'"))!;
+    print('_time == $_time');
+
+    bool isPunchIn = _time != null && _time.isNotEmpty;
+
+    await prefs.setBool(Constants.isPunchIn, isPunchIn);
+
+    setState(() {
+      isPunchedIn = isPunchIn; // Local state variable that drives the UI
     });
   }
 
@@ -2567,7 +2685,7 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       Map<String, dynamic> punchInData = {
         'UserId': userId,
         'PunchDate': punchTime,
-        'IsPunchIn': isCheckedIn,
+        'IsPunchIn':   isCheckedIn ? 0 : 1,
         'Latitude': latitude,
         'Longitude': longitude,
         'Address': address,
@@ -2978,7 +3096,7 @@ Future<Map<String, dynamic>> getEmployeeShiftDetails() async {
   }
 }
 
-@pragma('vm:entry-point')
+
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   appendLog('Service started...');
@@ -3143,10 +3261,10 @@ void onStart(ServiceInstance service) async {
         print("isWithinTrackingHours: $isWithinTrackingHours");
 
         /// Final condition check TODO
-        /*   if (canTrackEmployee &&
+          if (canTrackEmployee &&
             !isLeaveToday &&
             !isExcludedDate &&
-            isWithinTrackingHours) {*/
+            isWithinTrackingHours) {
         if (!hasPointToday && _isPositionAccurate(position)) {
           if (!isFirstLocationLogged) {
             lastLatitude = position.latitude;
@@ -3178,14 +3296,14 @@ void onStart(ServiceInstance service) async {
         } else {
           appendLog("Skipping insert: Position inaccurate or speed is 0");
         }
-/*        } else {
+        } else {
           appendLog("Tracking not allowed due to conditions not met.");
           print("❌ Tracking not allowed due to one or more conditions:");
           print("canTrackEmployee: $canTrackEmployee");
           print("isLeaveToday: $isLeaveToday");
           print("isExcludedDate: $isExcludedDate");
           print("isWithinTrackingHours: $isWithinTrackingHours");}
-       */
+
       }
 
       //  }
