@@ -70,19 +70,10 @@ class _leaves_screen_screenState extends State<leaves_screen> {
         loadAccessToken();
         _loademployeleaves();
         getDayWorkStatus();
-        getLoginTime();
       } else {
         print('The Internet Is not  Connected');
       }
     });
-  }
-
-  Future<String?> getLoginTime() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    logintime = prefs.getString('loginTime') ?? 'Unknown';
-    print('Login Time: $logintime');
-    login(logintime!);
-    return logintime;
   }
 
   Future<void> deleteLoginTime() async {
@@ -99,32 +90,6 @@ class _leaves_screen_screenState extends State<leaves_screen> {
       MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
-  }
-
-  void login(String logintime) {
-    DateTime currentTime = DateTime.now();
-    DateTime formattedlogintime = DateTime.parse(logintime!);
-    DateTime loginTime = formattedlogintime /* Replace with your login time */;
-
-    // Calculate the time difference
-    Duration timeDifference = currentTime.difference(loginTime);
-
-    // Check if the time difference is less than or equal to 1 hour (3600 seconds)
-    if (timeDifference.inSeconds <= 3600) {
-      // Login is within the allowed window
-
-      setState(() {
-        ismatchedlogin = false;
-      });
-      print("Login is within 1 hour of current time.");
-    } else {
-      // Login is outside the allowed window
-      // _showtimeoutdialog(context);
-      setState(() {
-        ismatchedlogin = true;
-      });
-      print("Login is more than 1 hour from current time.");
-    }
   }
 
   void _loademployeleaves() async {
@@ -188,6 +153,104 @@ class _leaves_screen_screenState extends State<leaves_screen> {
     // availablecls = allotcausalleaves - usedCasualLeavesInYear;
   }
 
+  Future<void> getLoginTime() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final logintime = prefs.getString('loginTime') ?? 'Unknown';
+      DateTime currentTime = DateTime.now();
+      DateTime formattedlogintime = DateTime.parse(logintime);
+      DateTime loginTime = formattedlogintime;
+
+      Duration timeDifference = currentTime.difference(loginTime);
+      print(
+          'getLoginTime: ${(timeDifference.inSeconds > 3600)} : ${timeDifference.inSeconds}');
+      if (timeDifference.inSeconds > 3600) {
+        print('getLoginTime: ${(timeDifference.inSeconds > 3600)}');
+      } else {
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) {
+              return const TestApplyLeave();
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      print('catch: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> checkSessionTimeOut(BuildContext context) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final logintime = prefs.getString('loginTime') ?? 'Unknown';
+
+      if (logintime == 'Unknown') {
+        // Handle missing loginTime gracefully
+        return;
+      }
+
+      DateTime currentTime = DateTime.now();
+      DateTime loginTime = DateTime.parse(logintime);
+
+      Duration timeDifference = currentTime.difference(loginTime);
+
+      print(
+          'checkSessionTimeOut: ${(timeDifference.inSeconds > 3600)} : ${timeDifference.inSeconds}');
+
+      if (timeDifference.inSeconds > 3600) {
+        // Show session expired dialog
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Session Expired'),
+                content: const Text(
+                    'Your session has expired. Please login again to apply leave.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('CANCEL'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      prefs.remove('loginTime');
+                      SharedPreferencesHelper.putBool(
+                          Constants.IS_LOGIN, false);
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (context) => const LoginScreen()),
+                        (route) => false,
+                      );
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } else {
+        if (context.mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const TestApplyLeave(),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('checkSessionTimeOut catch: $e');
+      rethrow;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width / 3.5;
@@ -221,87 +284,23 @@ class _leaves_screen_screenState extends State<leaves_screen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Padding(
-                          //   padding:
-                          //       EdgeInsets.only(top: 0.0, left: 0.0, right: 0.0),
-                          //   child: Container(
-                          //     width: double.infinity,
-                          //     decoration: BoxDecoration(
-                          //       color: Color(0xFFf15f22),
-                          //       borderRadius: BorderRadius.circular(6.0),
-                          //     ),
-                          //     child:
-                          // ElevatedButton(
-                          //   onPressed: () async {
-                          //     Navigator.of(context).pushReplacement(
-                          //       MaterialPageRoute(
-                          //         builder: (context) => apply_leave(
-                          //           buttonName: "test", // Example button name
-                          //           lookupDetailId: -3, // Pass the lookupDetailId
-                          //         ),
-                          //       ),
-                          //     );
-                          //   },
-                          //   child: Text(
-                          //     'Apply',
-                          //     style: TextStyle(
-                          //       color: Colors.white,
-                          //       fontSize: 16,
-                          //       fontFamily: 'hind_semibold',
-                          //     ),
-                          //   ),
-                          //   style: ElevatedButton.styleFrom(
-                          //     primary: Colors.transparent,
-                          //     elevation: 0,
-                          //     shape: RoundedRectangleBorder(
-                          //       borderRadius: BorderRadius.circular(4.0),
-                          //     ),
-                          //   ),
-                          // ),
-                          //   ),
-                          //  ),
                           Spacer(),
                           ElevatedButton(
                             onPressed: () {
-                              DateTime currentTime = DateTime.now();
+                              checkSessionTimeOut(context);
+                              /* DateTime currentTime = DateTime.now();
                               DateTime formattedlogintime =
                                   DateTime.parse(logintime!);
-                              DateTime loginTime =
-                                  formattedlogintime /* Replace with your login time */;
-
-                              // Calculate the time difference
+                              DateTime loginTime = formattedlogintime;
                               Duration timeDifference =
                                   currentTime.difference(loginTime);
-
-                              // Check if the time difference is less than or equal to 1 hour (3600 seconds)
-                              //  if (timeDifference.inSeconds <= 3600) {
-                              // Login is within the allowed window
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
                                   builder: (context) {
-                                    return
-                                        /* apply_leave(
-                                            buttonName:
-                                                "test", // Example button name
-                                            lookupDetailId: -3,
-                                            employename:
-                                                '${EmployeName}', // Pass the lookupDetailId 
-                                          ); */
-                                        const TestApplyLeave();
+                                    return const TestApplyLeave();
                                   },
                                 ),
-                              );
-
-                              //    print(
-                              //        "Login is within 1 hour of current time.");
-                              //  } else {
-                              //    // Login is outside the allowed window
-                              // //   _showtimeoutdialog(context);
-                              //    print(
-                              //        "Login is more than 1 hour from current time.");
-                              //  }
-
-                              // Handle the apply button click event
+                              ); */
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFFf15f22),

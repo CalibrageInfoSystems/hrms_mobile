@@ -1220,6 +1220,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       final apiUrl = Uri.parse(baseUrl + applyleaveapi);
       final loadedData = await SharedPreferencesHelper.getCategories();
       final employeeName = loadedData?['employeeName'];
+      final accessToken = prefs.getString("accessToken") ?? "";
 
       final requestBody =
 
@@ -1245,7 +1246,8 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       "isFromAttendance": false,
     }); */
           jsonEncode({
-        "employeeId": employeeId,
+        "employeeId": convertStrToInt(employeeId),
+        // "employeeId": employeeId,
         "sFromDate": Commonutils.formatApiDate(selectedFromDate),
         "sToDate": isHalfDayLeave == true
             ? null
@@ -1266,6 +1268,7 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         "url": leaveApplyURL,
         // "employeeName": employeeName,
         // "getLeaveType": getLeaveType(selectedDropdownLookupDetailId!),
+        // "checked": false,
         "isHalfDayLeave": isHalfDayLeave,
         "leaveReasonId": selectedDropdownLookupDetailId,
         "isFromAttendance": false,
@@ -1277,14 +1280,13 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
         "wfhId": wfhId,
       });
 
-      print('createLeave: $requestBody');
-
       final jsonResponse = await http.post(
         apiUrl,
         body: requestBody,
         headers: {
           'Content-Type': 'application/json',
-          'APIKey': APIKey,
+          'Authorization': accessToken,
+          // 'APIKey': APIKey,
         },
       );
       setState(() {
@@ -1322,6 +1324,15 @@ class _TestApplyLeaveState extends State<TestApplyLeave> {
       });
       Commonutils.showCustomToastMessageLong(e.toString(), context, 1, 5);
       rethrow;
+    }
+  }
+
+  int? convertStrToInt(String? value) {
+    if (value == null) return null;
+    try {
+      return int.parse(value);
+    } catch (e) {
+      return null;
     }
   }
 
