@@ -16,6 +16,8 @@ import 'package:hrms/shared_keys.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:skeletonizer/skeletonizer.dart';
@@ -549,19 +551,23 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
     );
   }
 
-  Container employeeImageTemplate(
-      BuildContext context, Uint8List employeeImage) {
-    return Container(
-      width: MediaQuery.of(context).size.width / 3.5,
-      height: MediaQuery.of(context).size.height / 8.0,
-      padding: const EdgeInsets.all(3.0),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        image: DecorationImage(
-          image: MemoryImage(employeeImage),
-          fit: BoxFit.fill,
+  Widget employeeImageTemplate(BuildContext context, Uint8List employeeImage) {
+    return GestureDetector(
+      onTap: () {
+        showZoomedPhoto(context, employeeImage);
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width / 3.5,
+        height: MediaQuery.of(context).size.height / 8.0,
+        padding: const EdgeInsets.all(3.0),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: MemoryImage(employeeImage),
+            fit: BoxFit.fill,
+          ),
+          border: Border.all(color: CommonStyles.primaryColor, width: 2.0),
         ),
-        border: Border.all(color: CommonStyles.primaryColor, width: 2.0),
       ),
     );
   }
@@ -702,5 +708,63 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
     } catch (e) {
       rethrow;
     }
+  }
+
+  void showZoomedPhoto(BuildContext context, Uint8List? imageBytes) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: SizedBox(
+            width: double.infinity,
+            height: 500,
+            child: Stack(
+              children: [
+                Center(
+                  child: PhotoViewGallery.builder(
+                    itemCount: 1,
+                    builder: (context, index) {
+                      return PhotoViewGalleryPageOptions(
+                        imageProvider: imageBytes != null
+                            ? MemoryImage(imageBytes)
+                            : const AssetImage('assets/men_emp.jpg')
+                                as ImageProvider<Object>,
+                        minScale: PhotoViewComputedScale.covered,
+                        maxScale: PhotoViewComputedScale.covered,
+                      );
+                    },
+                    scrollDirection: Axis.vertical,
+                    scrollPhysics: const PageScrollPhysics(),
+                    allowImplicitScrolling: true,
+                    backgroundDecoration: const BoxDecoration(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.red,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
