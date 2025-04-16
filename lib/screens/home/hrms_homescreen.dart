@@ -286,14 +286,19 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       final data = results.cast<String, dynamic>();
       final dailyPunch = data['dailyPunch'] ?? {};
       final shiftDetail = data['shiftDetail'] ?? {};
-      final shiftIn = shiftDetail['ShiftIn'] ??= '08:00:00';
-      final shiftOut = shiftDetail['ShiftOut'] ??= '17:00:00';
+      // final shiftIn = shiftDetail['ShiftIn'] ??= '08:00:00';
+      // final shiftOut = shiftDetail['ShiftOut'] ??= '17:00:00';
+      final shiftIn = shiftDetail['ShiftIn'];
+      final shiftOut = shiftDetail['ShiftOut'];
       final isPunchedIn = dailyPunch['IsPunchIn'] == 1;
 
       final now = DateTime.now();
       final int currentHour = now.hour;
-      print('fetchCheckInOutStatus:1 ${int.parse(shiftIn.split(":")[0])}');
-      print('fetchCheckInOutStatus:2 ${int.parse(shiftOut.split(":")[0])}');
+      // print('fetchCheckInOutStatus:1 ${int.parse(shiftIn.split(":")[0])}');
+      // print('fetchCheckInOutStatus:2 ${int.parse(shiftOut.split(":")[0])}');
+      if (shiftIn == null && shiftOut == null) {
+        return;
+      }
       if (currentHour >= int.parse(shiftIn.split(":")[0]) &&
           currentHour < int.parse(shiftIn.split(":")[0]) + 1) {
         if (!isPunchedIn) {
@@ -395,53 +400,6 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 14.0),
                     child: Column(
                       children: [
-                        /*
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(
-                              isTablet ? 20 : 12), // Adjust padding for tablets
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            color: Colors.white,
-                          ),
-                          child: FutureBuilder(
-                              future: futureEmployeeShiftDetails,
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Skeletonizer(
-                                    enabled: true,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        shiftTimingAndStatus({}),
-                                        const SizedBox(height: 5),
-                                        checkInNOut({}),
-                                      ],
-                                    ),
-                                  );
-                                } else if (snapshot.hasError) {
-                                  return const SizedBox();
-                                }
-                                final Map<String, dynamic> shiftDetails =
-                                    snapshot.data!;
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    shiftTimingAndStatus(shiftDetails),
-                                    const SizedBox(height: 5),
-                                    checkInNOut(shiftDetails),
-                                  ],
-                                );
-                              }),
-                        ),
-                         */
-
                         Container(
                           width: double.infinity,
                           padding: EdgeInsets.all(isTablet ? 20 : 12),
@@ -1060,8 +1018,8 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
       ],
     );
   }*/
-  Widget checkInNOut(Map<String, dynamic> shiftDetails) {
-    return checkInNOutTemplate(shiftDetails);
+  Widget checkInNOut(Map<String, dynamic> result) {
+    return checkInNOutTemplate(result);
     /* return FutureBuilder(
       future: futureCheckInOutStatus,
       builder: (context, snapshot) {
@@ -1083,6 +1041,11 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
     final shiftDetail = result['shiftDetail'] ?? {};
     final isCheckIn =
         (dailyPunch['IsPunchIn'] != null && dailyPunch['IsPunchIn'] == 1);
+    print('wqwq: ${shiftDetail['ShiftIn']} | ${shiftDetail['ShiftOut']}');
+
+    print(
+        'checkInNOutTemplate: ${shiftDetail.isNotEmpty ? jsonEncode(shiftDetail) : {}}');
+
     return Row(
       children: [
         Expanded(

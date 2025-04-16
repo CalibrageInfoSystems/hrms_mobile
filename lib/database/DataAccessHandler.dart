@@ -724,16 +724,25 @@ class DataAccessHandler with ChangeNotifier {
       LIMIT 1;
     ''');
 
-      final dailyPunch = dailyPunchResult.isNotEmpty
+      var dailyPunch = dailyPunchResult.isNotEmpty
           ? dailyPunchResult.first
           : <String, dynamic>{};
+
       final shiftDetail = shiftDetailsResult.isNotEmpty
           ? shiftDetailsResult.first
           : <String, dynamic>{};
+
+      if (dailyPunchResult.isNotEmpty) {
+        final dailyPunchData = dailyPunchResult.first;
+        final punchDate = dailyPunchData['PunchDate'];
+        if (checkPunchDate(punchDate) && dailyPunchData['IsPunchIn'] == 1) {
+          dailyPunch = {};
+        }
+      }
       print(
-          'fetchLatestPunchAndShift: ${dailyPunchResult.isNotEmpty ? jsonEncode(dailyPunchResult.first) : {}}');
+          'fetchLatestPunchAndShift dailyPunch: ${dailyPunchResult.isNotEmpty ? jsonEncode(dailyPunchResult.first) : {}}');
       print(
-          'fetchLatestPunchAndShift: ${shiftDetailsResult.isNotEmpty ? jsonEncode(shiftDetailsResult.first) : {}}');
+          'fetchLatestPunchAndShift shiftDetail: ${shiftDetailsResult.isNotEmpty ? jsonEncode(shiftDetailsResult.first) : {}}');
 
       return {
         'dailyPunch': dailyPunch,
@@ -741,6 +750,29 @@ class DataAccessHandler with ChangeNotifier {
       };
     } catch (e) {
       rethrow;
+    }
+  }
+
+  bool checkPunchDate(String? punchDate) {
+    try {
+      if (punchDate == null || punchDate.isEmpty) {
+        throw Exception('Punch date is null or empty');
+      }
+
+      DateTime parsedPunchDate = DateTime.parse(punchDate);
+      DateTime now = DateTime.now();
+
+      // Compare only the date parts
+      if (parsedPunchDate.year != now.year ||
+          parsedPunchDate.month != now.month ||
+          parsedPunchDate.day != now.day) {
+        return true;
+      } else {
+        print('Punch date is today');
+        return false;
+      }
+    } catch (e) {
+      return false;
     }
   }
 
