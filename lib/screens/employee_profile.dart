@@ -154,7 +154,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
       signDate = loadedData['signDate'];
 
       // photo = loadedData['photo'];
-/*       print('loadEmployeeInfo employeeName: ${loadedData['employeeName']}');
+      print('loadEmployeeInfo employeeName: ${loadedData['employeeName']}');
       print('loadEmployeeInfo designation: ${loadedData['designation']}');
       print('loadEmployeeInfo code: ${loadedData['code']}');
       print('loadEmployeeInfo gender: ${loadedData["gender"]}');
@@ -167,7 +167,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
           'loadEmployeeInfo experienceInCompany: ${loadedData['experienceInCompany']}');
       print('loadEmployeeInfo bloodGroup: ${loadedData['bloodGroup']}');
       print('loadEmployeeInfo dateofJoin: ${loadedData['dateofJoin']}');
-      print('loadEmployeeInfo nationality: ${loadedData['nationality']}'); */
+      print('loadEmployeeInfo nationality: ${loadedData['nationality']}');
       return {
         'employeeName': loadedData['employeeName'],
         'designation': loadedData['designation'],
@@ -175,14 +175,18 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
         'gender': loadedData["gender"],
         'emailId': loadedData['emailId'],
         'officeEmailId': loadedData['officeEmailId'],
-        'originalDOB': DateFormat('dd MMM yyyy')
-            .format(DateTime.parse(loadedData['originalDOB'])),
+        'originalDOB': loadedData['originalDOB'] == null
+            ? null
+            : DateFormat('dd MMM yyyy')
+                .format(DateTime.parse(loadedData['originalDOB'])),
         'mobileNumber': loadedData['mobileNumber'],
         'reportingTo': loadedData['reportingTo'],
         'experienceInCompany': loadedData['experienceInCompany'],
         'bloodGroup': loadedData['bloodGroup'],
-        'dateofJoin': DateFormat('dd MMM yyyy')
-            .format(DateTime.parse(loadedData['dateofJoin'])),
+        'dateofJoin': loadedData['dateofJoin'] == null
+            ? null
+            : DateFormat('dd MMM yyyy')
+                .format(DateTime.parse(loadedData['dateofJoin'])),
         'nationality': loadedData['nationality'],
       };
     } else {
@@ -529,24 +533,28 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
   Column employeeNameNdDesignation(Map<String, dynamic> employeeInfo) {
     return Column(
       children: [
-        Text(
-          '${employeeInfo['employeeName']}',
-          softWrap: true,
-          textAlign: TextAlign.center,
-          style: CommonStyles.txStyF20CpFF5.copyWith(
-            fontSize: 20,
-            color: CommonStyles.blackColor,
-            fontWeight: FontWeight.w600,
+        if (employeeInfo['employeeName'] != null &&
+            employeeInfo['employeeName'] != '')
+          Text(
+            '${employeeInfo['employeeName']}',
+            softWrap: true,
+            textAlign: TextAlign.center,
+            style: CommonStyles.txStyF20CpFF5.copyWith(
+              fontSize: 20,
+              color: CommonStyles.blackColor,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        Text(
-          '${employeeInfo['designation']}',
-          style: const TextStyle(
-            fontSize: 15,
-            color: CommonStyles.blackColor,
-            fontFamily: 'Calibri',
+        if (employeeInfo['designation'] != null &&
+            employeeInfo['designation'] != '')
+          Text(
+            '${employeeInfo['designation']}',
+            style: const TextStyle(
+              fontSize: 15,
+              color: CommonStyles.blackColor,
+              fontFamily: 'Calibri',
+            ),
           ),
-        ),
       ],
     );
   }

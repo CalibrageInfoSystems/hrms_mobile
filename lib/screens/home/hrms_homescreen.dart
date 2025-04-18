@@ -454,17 +454,20 @@ class _HomeScreenState extends State<HrmsHomeSreen> {
                         hrmsSection(size),
                         const SizedBox(height: 10),
                         sgtSection(size),
+                        const SizedBox(height: 10),
+                        bannersCarosuel(context, size),
+                        const SizedBox(height: 10),
                       ],
                     ),
                   ),
                 ),
-              ),
+              ), /* 
               const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14.0),
                 child: bannersCarosuel(context, size),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 10), */
             ],
           ),
         ),
